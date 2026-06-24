@@ -1,0 +1,22 @@
+<Application x:Class="SevenDaysManager.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             StartupUri="Views/MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <materialDesign:BundledTheme BaseTheme="Dark"
+                                             PrimaryColor="Teal"
+                                             SecondaryColor="LightGreen" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <Style TargetType="materialDesign:Card"
+                   BasedOn="{StaticResource {x:Type materialDesign:Card}}">
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesign.Brush.Secondary}"/>
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
