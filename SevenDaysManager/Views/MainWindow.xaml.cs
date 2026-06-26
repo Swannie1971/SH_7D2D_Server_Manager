@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Media.Imaging;
 using SevenDaysManager.Services;
 using SevenDaysManager.ViewModels;
@@ -8,6 +9,8 @@ namespace SevenDaysManager.Views;
 public partial class MainWindow : Window
 {
     private readonly MainViewModel _vm;
+    private readonly NotifyIcon _trayIcon;
+    private bool _hasShownTrayBalloon;
 
     public MainWindow()
     {
@@ -16,15 +19,91 @@ public partial class MainWindow : Window
         _vm = new MainViewModel();
         DataContext = _vm;
 
+        _trayIcon = BuildTrayIcon();
+
         if (App.DataStore.GetAppSettings().StartMinimized)
-            WindowState = WindowState.Minimized;
+            Hide();
+    }
+
+    private NotifyIcon BuildTrayIcon()
+    {
+        System.Drawing.Icon? appIcon = null;
+        try
+        {
+            var stream = System.Windows.Application.GetResourceStream(
+                new Uri("pack://application:,,,/Assets/logo.ico"))?.Stream;
+            if (stream != null)
+                appIcon = new System.Drawing.Icon(stream);
+        }
+        catch { /* fall back to default */ }
+
+        var menu = new ContextMenuStrip();
+
+        var openItem = new ToolStripMenuItem("Open 7D2D Manager");
+        openItem.Font = new System.Drawing.Font(openItem.Font, System.Drawing.FontStyle.Bold);
+        openItem.Click += (_, _) => ShowMainWindow();
+
+        var exitItem = new ToolStripMenuItem("Exit");
+        exitItem.Click += (_, _) => ExitApp();
+
+        menu.Items.Add(openItem);
+        menu.Items.Add(new ToolStripSeparator());
+        menu.Items.Add(exitItem);
+
+        var icon = new NotifyIcon
+        {
+            Icon = appIcon ?? System.Drawing.SystemIcons.Application,
+            Text = "7D2D Server Manager",
+            Visible = true,
+            ContextMenuStrip = menu
+        };
+        icon.DoubleClick += (_, _) => ShowMainWindow();
+
+        return icon;
+    }
+
+    private void ShowMainWindow()
+    {
+        Show();
+        WindowState = WindowState.Normal;
+        Activate();
+    }
+
+    private void ExitApp()
+    {
+        _trayIcon.Visible = false;
+        _trayIcon.Dispose();
+        System.Windows.Application.Current.Shutdown();
+    }
+
+    protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+    {
+        e.Cancel = true;
+        Hide();
+        if (!_hasShownTrayBalloon)
+        {
+            _hasShownTrayBalloon = true;
+            _trayIcon.ShowBalloonTip(
+                3000,
+                "Still running",
+                "7D2D Server Manager is minimised to the tray.\nRight-click the icon to exit.",
+                ToolTipIcon.Info);
+        }
     }
 
     protected override void OnSourceInitialized(EventArgs e)
     {
         base.OnSourceInitialized(e);
-        // Palette already applied in App.OnStartup — just sync the title bar colour here
         ThemeService.ApplyTitleBar(this);
+        _ = CheckForUpdatesAsync();
+    }
+
+    private async Task CheckForUpdatesAsync()
+    {
+        var update = await UpdateService.CheckAsync();
+        if (update is null) return;
+        await Dispatcher.InvokeAsync(() =>
+            new UpdateAvailableWindow(update) { Owner = this }.ShowDialog());
     }
 
     private void AddServerButton_Click(object sender, RoutedEventArgs e)
@@ -72,9 +151,7 @@ public partial class MainWindow : Window
     private void InstallCard_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
         if (_vm.SelectedServer is not { } server) return;
-        var before = _vm.InstallBuildLabel;
         new InstallProgressWindow(server) { Owner = this }.ShowDialog();
-        // OnServerUpdatedAsync calls RefreshInstallInfoAsync internally
         _ = _vm.OnServerUpdatedAsync(server);
     }
 

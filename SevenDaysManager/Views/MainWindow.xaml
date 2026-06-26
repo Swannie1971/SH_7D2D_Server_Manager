@@ -193,14 +193,20 @@
                     BorderThickness="0,1,0,0"
                     BorderBrush="#33FFFFFF"
                     Padding="12,8">
-                <Button Style="{StaticResource MaterialDesignFlatButton}"
-                        HorizontalAlignment="Left" Padding="4"
-                        Click="AppSettingsButton_Click">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="Cog" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <TextBlock Text="App Settings" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </Button>
+                <Grid>
+                    <Button Style="{StaticResource MaterialDesignFlatButton}"
+                            HorizontalAlignment="Left" Padding="4"
+                            Click="AppSettingsButton_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Cog" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="App Settings" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                    <TextBlock Text="v0.2.0"
+                               HorizontalAlignment="Right" VerticalAlignment="Center"
+                               FontSize="11" Opacity="0.8"
+                               Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"/>
+                </Grid>
             </Border>
         </Grid>
 
