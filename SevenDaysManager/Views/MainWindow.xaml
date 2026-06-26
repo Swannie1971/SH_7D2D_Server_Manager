@@ -202,7 +202,7 @@
                             <TextBlock Text="App Settings" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
-                    <TextBlock Text="v0.2.0"
+                    <TextBlock Text="v0.2.2"
                                HorizontalAlignment="Right" VerticalAlignment="Center"
                                FontSize="11" Opacity="0.8"
                                Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"/>

@@ -7,7 +7,7 @@ namespace SevenDaysManager.Services;
 public static class UpdateService
 {
     // Bump this constant with every release and tag on GitHub as "v{CurrentVersion}"
-    public const string CurrentVersion = "0.2.1";
+    public const string CurrentVersion = "0.2.2";
 
     private static readonly HttpClient _http = new()
     {
@@ -21,7 +21,7 @@ public static class UpdateService
         try
         {
             var release = await _http.GetFromJsonAsync<GithubRelease>(
-                "https://api.github.com/repos/Swannie1971/SH_7D2D_Server_Manager/releases/latest");
+                "https://api.github.com/repos/Swannie1971/SH_7D2D_Manager-releases/releases/latest");
 
             if (release?.TagName is not { } tag) return null;
 
