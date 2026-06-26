@@ -14,9 +14,10 @@
 
             <!-- Banner -->
             <TextBlock Text="SERVER BANNER" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
-            <materialDesign:Card UniformCornerRadius="10" Margin="0,0,0,16" Height="140">
+            <materialDesign:Card UniformCornerRadius="10" Margin="0,0,0,16" Height="140"
+                                 Background="Transparent"
+                                 materialDesign:ElevationAssist.Elevation="Dp0">
                 <Grid>
-                    <Image Source="pack://application:,,,/Assets/bg.jpg" Stretch="UniformToFill"/>
                     <Image Source="{Binding LogoPath, Converter={StaticResource PathToImage}}"
                            Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="12"/>
                     <Button Style="{StaticResource MaterialDesignRaisedButton}"
@@ -58,6 +59,26 @@
                     Command="{Binding SaveCommand}"
                     HorizontalAlignment="Left"
                     Width="140" Margin="0,0,0,24"/>
+
+            <!-- Behaviour -->
+            <TextBlock Text="BEHAVIOUR" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
+            <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,24">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Auto-start on App Launch" FontWeight="SemiBold"/>
+                        <TextBlock Text="Start this server automatically when the app opens"
+                                   FontSize="12" Opacity="0.6" Margin="0,2,0,0"/>
+                    </StackPanel>
+                    <ToggleButton Grid.Column="1"
+                                  Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                                  IsChecked="{Binding AutoStart}"
+                                  VerticalAlignment="Center"/>
+                </Grid>
+            </materialDesign:Card>
 
             <!-- Danger zone -->
             <TextBlock Text="DANGER ZONE" FontSize="11" FontWeight="Bold"

@@ -5,7 +5,7 @@
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-        <SolidColorBrush x:Key="GlassBrush" Color="#801E1E1E"/>
+
     </UserControl.Resources>
 
     <Grid>
@@ -60,7 +60,7 @@
 
         <!-- ══ Broadcast bar ══ -->
         <materialDesign:Card Grid.Row="1" UniformCornerRadius="0" Padding="16,10"
-                             Background="{StaticResource GlassBrush}">
+                             Background="{DynamicResource GlassBrush}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>

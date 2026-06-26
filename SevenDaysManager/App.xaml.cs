@@ -12,6 +12,10 @@ public partial class App : Application
         base.OnStartup(e);
         DataStore = new DataStore();
 
+        // Restore saved theme — without this the app always resets to the default on restart
+        Services.ThemeService.Apply(Services.ThemeService.Load());
+        Services.CardBrushService.Apply(DataStore.GetAppSettings());
+
         DispatcherUnhandledException += (_, ex) =>
         {
             System.Windows.MessageBox.Show(

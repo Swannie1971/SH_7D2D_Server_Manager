@@ -1,4 +1,6 @@
 using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -28,9 +30,26 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private string _installBuildLabel  = "Not installed";
     [ObservableProperty] private string _installStatusLabel = "";
     [ObservableProperty] private bool   _installIsUpToDate;
+    [ObservableProperty] private bool   _installCheckBusy;
 
     // Action feedback
     [ObservableProperty] private string _actionError = "";
+
+    // Live stats (left panel mini dashboard)
+    [ObservableProperty] private int    _livePlayers;
+    [ObservableProperty] private float  _liveFps;
+    [ObservableProperty] private int    _liveEntities;
+    [ObservableProperty] private string _liveGameTime  = "—";
+    [ObservableProperty] private string _liveUptime    = "—";
+    [ObservableProperty] private string _liveServerPid = "—";
+    [ObservableProperty] private double _liveCpuPct;
+    [ObservableProperty] private double _liveRamPct;
+    [ObservableProperty] private string _liveRamGbStr  = "—";
+
+    private MetricsPoller?    _miniPoller;
+    private Process?          _serverProcess;
+    private readonly PerformanceCounter _cpuCounter =
+        new("Processor", "% Processor Time", "_Total");
 
     // Inline detail navigation
     [ObservableProperty]
@@ -44,9 +63,11 @@ public partial class MainViewModel : ObservableObject
         BackupsViewModel        => "Backups",
         ScheduleViewModel       => "Schedule",
         DiscordViewModel        => "Discord",
+        ModsViewModel           => "Mod Management",
         ConsoleViewModel        => "Console",
         ConfigViewModel         => "Config",
         ServerSettingsViewModel => "Server Settings",
+        GameSettingsViewModel   => "Game Settings",
         _                      => ""
     };
 
@@ -56,6 +77,8 @@ public partial class MainViewModel : ObservableObject
         _statusTimer.Tick += async (_, _) => await PollStatusAsync();
         _statusTimer.Start();
         LoadServers();
+        _ = RefreshInstallInfoAsync(SelectedServer);
+        _ = AutoStartServersAsync();
     }
 
     // ── Selection ────────────────────────────────────────────────────────────
@@ -69,8 +92,13 @@ public partial class MainViewModel : ObservableObject
             _ = GoHomeAsync();
             ActionError = "";
         }
-        RefreshInstallInfo(value);
+        _ = RefreshInstallInfoAsync(value);
         _previousSelected = value;
+
+        if (value is { Status: ServerStatus.Running })
+            StartLiveStats(value);
+        else
+            StopLiveStats();
     }
 
     // ── Server list ──────────────────────────────────────────────────────────
@@ -156,6 +184,14 @@ public partial class MainViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task OpenGameSettingsAsync()
+    {
+        if (SelectedServer is not { } server) return;
+        await GoHomeAsync();
+        ActiveDetail = new GameSettingsViewModel(server);
+    }
+
+    [RelayCommand]
     private async Task OpenScheduleAsync()
     {
         if (SelectedServer is not { } server) return;
@@ -164,6 +200,14 @@ public partial class MainViewModel : ObservableObject
             stopServer:  () => _process.StopAsync(server, new Progress<string>()),
             startServer: () => Task.Run(() => _process.Start(server, out _)));
         ActiveDetail = vm;
+    }
+
+    [RelayCommand]
+    private async Task OpenModsAsync()
+    {
+        if (SelectedServer is not { } server) return;
+        await GoHomeAsync();
+        ActiveDetail = new ModsViewModel(server);
     }
 
     [RelayCommand]
@@ -193,6 +237,21 @@ public partial class MainViewModel : ObservableObject
     {
         // Install still uses a dialog (progress stream) — opened from code-behind for now.
         return Task.CompletedTask;
+    }
+
+    // ── Auto-start ───────────────────────────────────────────────────────────
+
+    private async Task AutoStartServersAsync()
+    {
+        // Brief pause so the UI is fully rendered before servers start
+        await Task.Delay(1000);
+        foreach (var server in Servers.Where(s => s.AutoStart))
+        {
+            // Reconcile actual process state — don't blindly start if already running
+            var (status, _) = await _process.ReconcileStatusAsync(server);
+            if (status != ServerStatus.Running && status != ServerStatus.Starting)
+                _process.Start(server, out _);
+        }
     }
 
     // ── Process commands ─────────────────────────────────────────────────────
@@ -256,7 +315,7 @@ public partial class MainViewModel : ObservableObject
 
     // ── Install info ─────────────────────────────────────────────────────────
 
-    public void RefreshInstallInfo(Server? server)
+    public async Task RefreshInstallInfoAsync(Server? server)
     {
         if (server is null || string.IsNullOrWhiteSpace(server.InstallDir))
         {
@@ -266,20 +325,48 @@ public partial class MainViewModel : ObservableObject
             return;
         }
 
-        var isInstalled = _process.IsInstalled(server.InstallDir);
-        var info        = isInstalled ? _steamCmd.GetInstallInfo(server.InstallDir) : null;
-
-        if (!isInstalled || info is null)
+        if (!_process.IsInstalled(server.InstallDir))
         {
             InstallBuildLabel  = "Not installed";
             InstallStatusLabel = "Click to install via SteamCMD";
             InstallIsUpToDate  = false;
+            return;
         }
-        else
+
+        var local = _steamCmd.GetInstallInfo(server.InstallDir);
+        if (local is null)
         {
-            InstallBuildLabel  = $"Build {info.BuildId}";
-            InstallStatusLabel = info.IsUpToDate ? "Up to date" : "Update available";
-            InstallIsUpToDate  = info.IsUpToDate;
+            InstallBuildLabel  = "Not installed";
+            InstallStatusLabel = "Click to install via SteamCMD";
+            InstallIsUpToDate  = false;
+            return;
+        }
+
+        // Show local build immediately while the network check runs
+        InstallBuildLabel  = $"Build {local.BuildId}";
+        InstallStatusLabel = "Checking…";
+        InstallIsUpToDate  = false;
+        InstallCheckBusy   = true;
+
+        try
+        {
+            var latest = await _steamCmd.GetLatestBuildIdAsync();
+            if (latest is null)
+            {
+                // Can't reach Steam — assume up to date rather than showing a false warning
+                InstallStatusLabel = "Up to date";
+                InstallIsUpToDate  = true;
+                return;
+            }
+
+            InstallIsUpToDate  = local.BuildId == latest;
+            InstallStatusLabel = InstallIsUpToDate
+                ? "Up to date"
+                : $"Update available ({latest})";
+        }
+        finally
+        {
+            InstallCheckBusy = false;
         }
     }
 
@@ -333,7 +420,19 @@ public partial class MainViewModel : ObservableObject
 
             if (pendingError is not null)
                 ActionError = pendingError;
+
+            // Live stats transitions (selected server only)
+            if (wasSelected)
+            {
+                if (status == ServerStatus.Running)
+                    StartLiveStats(server);
+                else if (status == ServerStatus.Stopped)
+                    StopLiveStats();
+            }
         }
+
+        // Refresh process-level metrics every tick
+        UpdateProcessMetrics();
     }
 
     // Called from MainWindow after install/update completes
@@ -341,6 +440,7 @@ public partial class MainViewModel : ObservableObject
     {
         var disc = server.Discord ??= new Models.DiscordConfig();
         await SendDiscordEventAsync(server, disc.EventServerUpdated, "updated");
+        await RefreshInstallInfoAsync(server);
     }
 
     private async Task SendDiscordEventAsync(Server server, Models.DiscordEventConfig evt, string key)
@@ -360,5 +460,100 @@ public partial class MainViewModel : ObservableObject
         Servers.Insert(idx, server);
         if (wasSelected)
             SelectedServer = server;
+    }
+
+    // ── Live stats ───────────────────────────────────────────────────────────
+
+    private void StartLiveStats(Server server)
+    {
+        StopLiveStats();
+
+        if (server.LastPid is int pid)
+        {
+            try
+            {
+                _serverProcess = Process.GetProcessById(pid);
+                LiveServerPid  = pid.ToString();
+            }
+            catch { _serverProcess = null; LiveServerPid = "—"; }
+        }
+
+        _miniPoller = new MetricsPoller(server);
+        _miniPoller.Updated += snap => Application.Current.Dispatcher.Invoke(() =>
+        {
+            LivePlayers  = snap.Players;
+            LiveFps      = snap.Fps;
+            LiveEntities = snap.Entities;
+            LiveGameTime = snap.GameTime;
+        });
+        _ = _miniPoller.StartAsync();
+    }
+
+    private void StopLiveStats()
+    {
+        if (_miniPoller is not null)
+        {
+            _ = _miniPoller.DisposeAsync().AsTask();
+            _miniPoller = null;
+        }
+        _serverProcess   = null;
+        LivePlayers      = 0;
+        LiveFps          = 0;
+        LiveEntities     = 0;
+        LiveGameTime     = "—";
+        LiveUptime       = "—";
+        LiveServerPid    = "—";
+        LiveCpuPct       = 0;
+        LiveRamPct       = 0;
+        LiveRamGbStr     = "—";
+    }
+
+    private void UpdateProcessMetrics()
+    {
+        // System-wide CPU (first call returns 0 — acceptable on cold start)
+        try { LiveCpuPct = Math.Round(_cpuCounter.NextValue(), 1); }
+        catch { LiveCpuPct = 0; }
+
+        // System-wide RAM via GlobalMemoryStatusEx
+        var mem = new MemStatus { Length = (uint)Marshal.SizeOf<MemStatus>() };
+        if (GlobalMemoryStatusEx(ref mem))
+        {
+            LiveRamPct   = mem.MemoryLoad;
+            var usedGb   = (mem.TotalPhys - mem.AvailPhys) / 1_073_741_824.0;
+            LiveRamGbStr = $"{usedGb:F1} GB";
+        }
+
+        // Server process uptime (only while running)
+        if (_serverProcess is not null)
+        {
+            try
+            {
+                _serverProcess.Refresh();
+                var up     = DateTime.Now - _serverProcess.StartTime;
+                LiveUptime = up.TotalDays >= 1
+                    ? $"{(int)up.TotalDays}d {up.Hours:D2}h {up.Minutes:D2}m"
+                    : $"{up.Hours:D2}:{up.Minutes:D2}:{up.Seconds:D2}";
+            }
+            catch { _serverProcess = null; LiveUptime = "—"; }
+        }
+    }
+
+    // ── PInvoke: total system RAM ────────────────────────────────────────────
+
+    [DllImport("kernel32.dll")]
+    private static extern bool GlobalMemoryStatusEx(ref MemStatus stat);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct MemStatus
+    {
+        public uint  Length;
+        public uint  MemoryLoad;
+        public ulong TotalPhys;
+        public ulong AvailPhys;
+        public ulong TotalPageFile;
+        public ulong AvailPageFile;
+        public ulong TotalVirtual;
+        public ulong AvailVirtual;
+        public ulong AvailExtendedVirtual;
     }
 }

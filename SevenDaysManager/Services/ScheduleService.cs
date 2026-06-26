@@ -144,11 +144,15 @@ public class ScheduleService : IDisposable
             var tel = new TelnetClient();
             var host = string.IsNullOrWhiteSpace(_server.ServerIp) ? "127.0.0.1" : _server.ServerIp;
             await tel.ConnectAsync(host, _server.TelnetPort, _server.TelnetPassword);
-            await tel.SendAsync($"say \"{message}\"");
+            await tel.SendAsync($"say \"{SanitizeTelnet(message)}\"");
         }
         catch { }
     }
 
+
+    // Strip characters that would break or inject extra Telnet commands
+    private static string SanitizeTelnet(string s) =>
+        s.Replace("\"", "'").Replace("\r", "").Replace("\n", " ");
 
     // ── Helpers ──────────────────────────────────────────────────────────────
 

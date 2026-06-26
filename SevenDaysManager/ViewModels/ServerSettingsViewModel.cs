@@ -13,6 +13,7 @@ public partial class ServerSettingsViewModel : ObservableObject
 
     [ObservableProperty] private string _name = "";
     [ObservableProperty] private string _logoPath = "";
+    [ObservableProperty] private bool   _autoStart;
     [ObservableProperty] private string _saveError = "";
     [ObservableProperty] private bool _hasSaveError;
     [ObservableProperty] private bool _confirmDelete;
@@ -22,10 +23,11 @@ public partial class ServerSettingsViewModel : ObservableObject
 
     public ServerSettingsViewModel(Server server, Action<Server> onDelete)
     {
-        _server   = server;
-        _onDelete = onDelete;
-        _name     = server.Name;
-        _logoPath = server.LogoPath;
+        _server    = server;
+        _onDelete  = onDelete;
+        _name      = server.Name;
+        _logoPath  = server.LogoPath;
+        _autoStart = server.AutoStart;
     }
 
     [RelayCommand]
@@ -49,8 +51,9 @@ public partial class ServerSettingsViewModel : ObservableObject
             HasSaveError = true;
             return;
         }
-        _server.Name     = name;
-        _server.LogoPath = LogoPath?.Trim() ?? "";
+        _server.Name      = name;
+        _server.LogoPath  = LogoPath?.Trim() ?? "";
+        _server.AutoStart = AutoStart;
         App.DataStore.SaveServer(_server);
         HasSaveError = false;
         SaveError    = "";

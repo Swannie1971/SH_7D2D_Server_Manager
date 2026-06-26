@@ -45,6 +45,36 @@ public class Server
     // Backup settings
     public string SaveDir { get; set; } = "";   // empty = auto-detect
 
+    // Behaviour
+    public bool AutoStart { get; set; } = false;
+
+    // Game settings
+    public int GameDifficulty      { get; set; } = 2;   // Warrior
+    public int XPMultiplier        { get; set; } = 100;
+    public int DayNightLength      { get; set; } = 60;  // minutes per game day
+    public int DayLightLength      { get; set; } = 18;  // daylight hours
+    public int DropOnDeath         { get; set; } = 1;   // Everything
+    public int DropOnQuit          { get; set; } = 0;   // Nothing
+    public int BloodMoonFrequency  { get; set; } = 7;
+    public int BloodMoonEnemyCount { get; set; } = 8;
+    public int ZombieMove          { get; set; } = 0;   // Walk
+    public int ZombieMoveNight     { get; set; } = 3;   // Sprint
+    public int ZombieFeralMove     { get; set; } = 3;   // Sprint
+    public int LootAbundance       { get; set; } = 100;
+    public int LootRespawnDays     { get; set; } = 7;
+    public int PlayerKillingMode   { get; set; } = 0;   // No killing
+    public int AirDropFrequency    { get; set; } = 72;
+    public int ZombieBMMove                    { get; set; } = 3;   // Blood Moon zombie speed
+    public int BloodMoonRange                  { get; set; } = 0;   // ± day variance
+    public int MaxSpawnedZombies               { get; set; } = 64;
+    public int MaxSpawnedAnimals               { get; set; } = 50;
+    public int ServerMaxAllowedViewDistance    { get; set; } = 12;  // chunks
+    public int LandClaimSize                   { get; set; } = 41;  // blocks radius
+    public int LandClaimExpiryTime             { get; set; } = 7;   // days
+    public int LandClaimOfflineDurabilityModifier { get; set; } = 0; // 0 = indestructible
+    public int PlayerSafeZoneLevel             { get; set; } = 5;
+    public int PlayerSafeZoneHours             { get; set; } = 5;
+
     // Schedule
     public ScheduleConfig Schedule { get; set; } = new();
 

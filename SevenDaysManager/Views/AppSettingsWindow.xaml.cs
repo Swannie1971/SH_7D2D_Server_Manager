@@ -18,7 +18,7 @@ public partial class AppSettingsWindow : Window
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)
     {
-        ((ViewModels.AppSettingsViewModel)DataContext).SavePaths();
+        ((ViewModels.AppSettingsViewModel)DataContext).Save();
         Close();
     }
 }

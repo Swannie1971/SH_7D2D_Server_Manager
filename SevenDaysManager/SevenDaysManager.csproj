@@ -17,8 +17,8 @@
 
   <ItemGroup>
     <Resource Include="Assets\logo.png"/>
-    <Resource Include="Assets\logo.ico"/>
     <Resource Include="Assets\bg.jpg"/>
+    <None Include="Assets\logo.ico"/>
   </ItemGroup>
 
 </Project>

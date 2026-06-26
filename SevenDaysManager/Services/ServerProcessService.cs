@@ -42,11 +42,17 @@ public class ServerProcessService
         var psi = new ProcessStartInfo
         {
             FileName         = exe,
-            Arguments        = $"-batchmode -nographics -dedicated -nosteam -configfile=serverconfig.xml -logfile \"{logPath}\"",
             WorkingDirectory = server.InstallDir,
             UseShellExecute  = false,
             CreateNoWindow   = true
         };
+        psi.ArgumentList.Add("-batchmode");
+        psi.ArgumentList.Add("-nographics");
+        psi.ArgumentList.Add("-dedicated");
+        psi.ArgumentList.Add("-nosteam");
+        psi.ArgumentList.Add("-configfile=serverconfig.xml");
+        psi.ArgumentList.Add("-logfile");
+        psi.ArgumentList.Add(logPath);
 
         try
         {

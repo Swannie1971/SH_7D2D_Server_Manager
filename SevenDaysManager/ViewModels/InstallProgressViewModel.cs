@@ -76,9 +76,7 @@ public partial class InstallProgressViewModel : ObservableObject
                 {
                     LogLines.Add($"  Build ID    : {info.BuildId}");
                     LogLines.Add($"  Install dir : {InstallDir}");
-                    LogLines.Add(info.IsUpToDate
-                        ? "  Status      : Up to date ✓"
-                        : $"  Status      : Target build {info.TargetBuildId} — re-run to update");
+                    LogLines.Add("  Status      : Install complete ✓");
                 }
                 else
                 {

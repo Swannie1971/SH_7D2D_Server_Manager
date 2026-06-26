@@ -15,12 +15,16 @@ public partial class MainWindow : Window
         Icon = BitmapFrame.Create(new Uri("pack://application:,,,/Assets/logo.png"));
         _vm = new MainViewModel();
         DataContext = _vm;
+
+        if (App.DataStore.GetAppSettings().StartMinimized)
+            WindowState = WindowState.Minimized;
     }
 
     protected override void OnSourceInitialized(EventArgs e)
     {
         base.OnSourceInitialized(e);
-        ThemeService.Apply(ThemeService.Load());
+        // Palette already applied in App.OnStartup — just sync the title bar colour here
+        ThemeService.ApplyTitleBar(this);
     }
 
     private void AddServerButton_Click(object sender, RoutedEventArgs e)
@@ -50,6 +54,9 @@ public partial class MainWindow : Window
     private void DiscordCard_Click(object sender, System.Windows.Input.MouseButtonEventArgs e) =>
         _vm.OpenDiscordCommand.Execute(null);
 
+    private void ModsCard_Click(object sender, System.Windows.Input.MouseButtonEventArgs e) =>
+        _vm.OpenModsCommand.Execute(null);
+
     private void ServerSettingsCard_Click(object sender, System.Windows.Input.MouseButtonEventArgs e) =>
         _vm.OpenServerSettingsCommand.Execute(null);
 
@@ -59,14 +66,16 @@ public partial class MainWindow : Window
     private void ConfigCard_Click(object sender, System.Windows.Input.MouseButtonEventArgs e) =>
         _vm.OpenConfigCommand.Execute(null);
 
+    private void GameSettingsCard_Click(object sender, System.Windows.Input.MouseButtonEventArgs e) =>
+        _vm.OpenGameSettingsCommand.Execute(null);
+
     private void InstallCard_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
         if (_vm.SelectedServer is not { } server) return;
         var before = _vm.InstallBuildLabel;
         new InstallProgressWindow(server) { Owner = this }.ShowDialog();
-        _vm.RefreshInstallInfo(server);
-        if (_vm.InstallBuildLabel != before)
-            _ = _vm.OnServerUpdatedAsync(server);
+        // OnServerUpdatedAsync calls RefreshInstallInfoAsync internally
+        _ = _vm.OnServerUpdatedAsync(server);
     }
 
     private void CopyErrorLog_Click(object sender, RoutedEventArgs e)

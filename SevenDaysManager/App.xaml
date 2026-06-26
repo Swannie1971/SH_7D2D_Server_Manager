@@ -12,6 +12,8 @@
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
+            <SolidColorBrush x:Key="GlassBrush" Color="#801E1E1E"/>
+
             <Style TargetType="materialDesign:Card"
                    BasedOn="{StaticResource {x:Type materialDesign:Card}}">
                 <Setter Property="BorderThickness" Value="1"/>

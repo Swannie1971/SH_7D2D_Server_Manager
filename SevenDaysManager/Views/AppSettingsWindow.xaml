@@ -4,9 +4,9 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:vm="clr-namespace:SevenDaysManager.ViewModels"
         Title="App Settings"
-        Width="520" SizeToContent="Height"
+        Width="940" Height="580"
         ResizeMode="NoResize"
-        WindowStartupLocation="CenterOwner"
+        WindowStartupLocation="CenterScreen"
         Background="{DynamicResource MaterialDesign.Brush.Background}"
         TextElement.Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
         TextElement.FontFamily="{materialDesign:MaterialDesignFont}"
@@ -20,10 +20,16 @@
         <vm:AppSettingsViewModel/>
     </Window.DataContext>
 
-    <StackPanel>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
         <!-- Header -->
-        <Border Background="{DynamicResource MaterialDesign.Brush.Primary}" Padding="20,16" Margin="0,0,0,24">
+        <Border Grid.Row="0"
+                Background="{DynamicResource MaterialDesign.Brush.Primary}"
+                Padding="24,16">
             <StackPanel>
                 <TextBlock Text="App Settings" FontSize="18" FontWeight="Bold"
                            Foreground="{DynamicResource MaterialDesign.Brush.Primary.Foreground}"/>
@@ -33,149 +39,262 @@
             </StackPanel>
         </Border>
 
-        <StackPanel Margin="24,0,24,24">
+        <!-- Two-column body -->
+        <Grid Grid.Row="1" Margin="24,20,24,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-        <!-- Dark / Light toggle -->
-        <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,20">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="Dark Mode" FontWeight="SemiBold"/>
-                    <TextBlock Text="Toggle between dark and light theme"
-                               FontSize="12" Opacity="0.6" Margin="0,2,0,0"/>
+            <!-- ── LEFT: Theme ── -->
+            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+
+                    <TextBlock Text="THEME" FontSize="11" FontWeight="Bold"
+                               Opacity="0.5" Margin="0,0,0,8"/>
+
+                    <!-- Dark / Light toggle -->
+                    <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,16">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="Dark Mode" FontWeight="SemiBold"/>
+                                <TextBlock Text="Toggle between dark and light theme"
+                                           FontSize="12" Opacity="0.6" Margin="0,2,0,0"/>
+                            </StackPanel>
+                            <ToggleButton Grid.Column="1"
+                                          Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                                          IsChecked="{Binding IsDark}"
+                                          VerticalAlignment="Center"/>
+                        </Grid>
+                    </materialDesign:Card>
+
+                    <!-- Primary color -->
+                    <TextBlock Text="PRIMARY COLOR" FontSize="11" FontWeight="Bold"
+                               Opacity="0.5" Margin="0,0,0,8"/>
+                    <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="{Binding SelectedPrimary.Name, StringFormat='Selected: {0}', FallbackValue='Selected: none'}"
+                                       FontSize="12" Opacity="0.7" Margin="0,0,0,10"/>
+                            <ItemsControl ItemsSource="{Binding Swatches}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Command="{Binding DataContext.SelectPrimaryCommand,
+                                                    RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                CommandParameter="{Binding}"
+                                                Width="32" Height="32" Margin="3" Padding="0"
+                                                ToolTip="{Binding Name}"
+                                                Style="{StaticResource MaterialDesignIconButton}">
+                                            <Grid Width="32" Height="32">
+                                                <Ellipse Fill="{Binding Brush}" Width="28" Height="28"/>
+                                                <materialDesign:PackIcon Kind="Check" Width="16" Height="16"
+                                                                         Foreground="White"
+                                                                         HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                         Visibility="{Binding IsSelectedPrimary, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                            </Grid>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </materialDesign:Card>
+
+                    <!-- Secondary color -->
+                    <TextBlock Text="SECONDARY / ACCENT COLOR" FontSize="11" FontWeight="Bold"
+                               Opacity="0.5" Margin="0,0,0,8"/>
+                    <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,16">
+                        <StackPanel>
+                            <TextBlock Text="{Binding SelectedSecondary.Name, StringFormat='Selected: {0}', FallbackValue='Selected: none'}"
+                                       FontSize="12" Opacity="0.7" Margin="0,0,0,10"/>
+                            <ItemsControl ItemsSource="{Binding Swatches}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Command="{Binding DataContext.SelectSecondaryCommand,
+                                                    RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                CommandParameter="{Binding}"
+                                                Width="32" Height="32" Margin="3" Padding="0"
+                                                ToolTip="{Binding Name}"
+                                                Style="{StaticResource MaterialDesignIconButton}">
+                                            <Grid Width="32" Height="32">
+                                                <Ellipse Fill="{Binding Brush}" Width="28" Height="28"/>
+                                                <materialDesign:PackIcon Kind="CheckCircle" Width="16" Height="16"
+                                                                         Foreground="White"
+                                                                         HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                         Visibility="{Binding IsSelectedSecondary, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                            </Grid>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </materialDesign:Card>
+
+                    <!-- Card background -->
+                    <TextBlock Text="CARD BACKGROUND" FontSize="11" FontWeight="Bold"
+                               Opacity="0.5" Margin="0,0,0,8"/>
+                    <materialDesign:Card UniformCornerRadius="10" Padding="16">
+                        <StackPanel>
+                            <!-- Color swatches -->
+                            <TextBlock Text="{Binding SelectedCardColor.Name, StringFormat='Color: {0}', FallbackValue='Color: Charcoal'}"
+                                       FontSize="12" Opacity="0.7" Margin="0,0,0,10"/>
+                            <ItemsControl ItemsSource="{Binding CardSwatches}" Margin="0,0,0,16">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Command="{Binding DataContext.SelectCardColorCommand,
+                                                    RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                CommandParameter="{Binding}"
+                                                Width="36" Height="36" Margin="3" Padding="0"
+                                                ToolTip="{Binding Name}"
+                                                Style="{StaticResource MaterialDesignIconButton}">
+                                            <Grid Width="36" Height="36">
+                                                <Ellipse Fill="{Binding Brush}" Width="30" Height="30"/>
+                                                <materialDesign:PackIcon Kind="Check" Width="16" Height="16"
+                                                                         Foreground="White"
+                                                                         HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                                         Visibility="{Binding IsSelected, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                            </Grid>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <!-- Opacity slider -->
+                            <TextBlock Text="{Binding CardOpacity, StringFormat='Opacity: {0}%'}"
+                                       FontSize="12" Opacity="0.7" Margin="0,0,0,6"/>
+                            <Slider Minimum="0" Maximum="95" TickFrequency="5" IsSnapToTickEnabled="True"
+                                    Value="{Binding CardOpacity}"/>
+                        </StackPanel>
+                    </materialDesign:Card>
+
                 </StackPanel>
-                <ToggleButton Grid.Column="1"
-                              Style="{StaticResource MaterialDesignSwitchToggleButton}"
-                              IsChecked="{Binding IsDark}"
-                              VerticalAlignment="Center"/>
+            </ScrollViewer>
+
+            <!-- ── RIGHT: Paths + Behaviour + Save ── -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+
+                        <!-- Paths -->
+                        <TextBlock Text="PATHS" FontSize="11" FontWeight="Bold"
+                                   Opacity="0.5" Margin="0,0,0,8"/>
+                        <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,16">
+                            <StackPanel>
+                                <TextBlock Text="Default Server Install Root" FontWeight="SemiBold" Margin="0,0,0,4"/>
+                                <TextBlock Text="New servers are created as sub-folders here"
+                                           FontSize="11" Opacity="0.55" Margin="0,0,0,10"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="8"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                             materialDesign:HintAssist.Hint="e.g. C:\GameServers\7DaysToDie"
+                                             Text="{Binding DefaultInstallRoot, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <Button Grid.Column="2"
+                                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                                            Command="{Binding BrowseInstallRootCommand}"
+                                            Height="56" Padding="12,0">
+                                        <materialDesign:PackIcon Kind="FolderOpen"/>
+                                    </Button>
+                                </Grid>
+                                <TextBlock Text="SteamCMD Location" FontWeight="SemiBold" Margin="0,16,0,4"/>
+                                <TextBlock Text="Managed automatically inside the install root."
+                                           FontSize="11" Opacity="0.55" Margin="0,0,0,8"/>
+                                <Border Background="#1AFFFFFF" CornerRadius="4" Padding="12,10">
+                                    <TextBlock Text="{Binding SteamCmdExePreview}"
+                                               FontSize="12" Opacity="0.7" FontFamily="Consolas"
+                                               TextWrapping="Wrap"/>
+                                </Border>
+                            </StackPanel>
+                        </materialDesign:Card>
+
+                        <!-- Behaviour -->
+                        <TextBlock Text="BEHAVIOUR" FontSize="11" FontWeight="Bold"
+                                   Opacity="0.5" Margin="0,0,0,8"/>
+                        <materialDesign:Card UniformCornerRadius="10" Padding="16">
+                            <StackPanel>
+
+                                <!-- Start Minimized -->
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="Start Minimized" FontWeight="SemiBold"/>
+                                        <TextBlock Text="Minimizes to taskbar on launch — useful when starting on boot"
+                                                   FontSize="12" Opacity="0.6" Margin="0,2,0,0"/>
+                                    </StackPanel>
+                                    <ToggleButton Grid.Column="1"
+                                                  Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                                                  IsChecked="{Binding StartMinimized}"
+                                                  VerticalAlignment="Center"/>
+                                </Grid>
+
+                                <Separator Margin="0,12" Opacity="0.2"/>
+
+                                <!-- Auto-start on login -->
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel VerticalAlignment="Center">
+                                        <TextBlock Text="Auto-start on Login" FontWeight="SemiBold"/>
+                                        <TextBlock Text="Registers with Windows to launch when you log in"
+                                                   FontSize="12" Opacity="0.6" Margin="0,2,0,0"/>
+                                        <TextBlock Text="⚠ Requires a published build (not dotnet run)"
+                                                   FontSize="11" Foreground="#FFFFA726" Margin="0,4,0,0"
+                                                   Visibility="{Binding IsDevBuild, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                    </StackPanel>
+                                    <ToggleButton Grid.Column="1"
+                                                  IsChecked="{Binding AutoStartOnLogin}"
+                                                  VerticalAlignment="Center">
+                                        <ToggleButton.Style>
+                                            <Style TargetType="ToggleButton" BasedOn="{StaticResource MaterialDesignSwitchToggleButton}">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsDevBuild}" Value="True">
+                                                        <Setter Property="IsEnabled" Value="False"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </ToggleButton.Style>
+                                    </ToggleButton>
+                                </Grid>
+
+                            </StackPanel>
+                        </materialDesign:Card>
+
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- Save & Close pinned to bottom-right -->
+                <Button Grid.Row="1"
+                        Content="Save &amp; Close"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        HorizontalAlignment="Right"
+                        Width="140" Margin="0,16,0,0"
+                        Click="CloseButton_Click"/>
             </Grid>
-        </materialDesign:Card>
 
-        <!-- Primary color -->
-        <TextBlock Text="PRIMARY COLOR" FontSize="11" FontWeight="Bold"
-                   Opacity="0.5" Margin="0,0,0,10"/>
-        <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,20">
-            <StackPanel>
-                <TextBlock Text="{Binding SelectedPrimary.Name, StringFormat='Selected: {0}', FallbackValue='Selected: none'}"
-                           FontSize="12" Opacity="0.7" Margin="0,0,0,12"/>
-                <ItemsControl ItemsSource="{Binding Swatches}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Button Command="{Binding DataContext.SelectPrimaryCommand,
-                                        RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                    CommandParameter="{Binding}"
-                                    Width="32" Height="32" Margin="3"
-                                    Padding="0"
-                                    ToolTip="{Binding Name}"
-                                    Style="{StaticResource MaterialDesignIconButton}">
-                                <Grid Width="32" Height="32">
-                                    <Ellipse Fill="{Binding Brush}" Width="28" Height="28"/>
-                                    <!-- checkmark when selected as primary -->
-                                    <materialDesign:PackIcon Kind="Check"
-                                                             Width="16" Height="16"
-                                                             Foreground="White"
-                                                             HorizontalAlignment="Center"
-                                                             VerticalAlignment="Center"
-                                                             Visibility="{Binding IsSelectedPrimary,
-                                                                Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                                </Grid>
-                            </Button>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </StackPanel>
-        </materialDesign:Card>
-
-        <!-- Secondary color -->
-        <TextBlock Text="SECONDARY / ACCENT COLOR" FontSize="11" FontWeight="Bold"
-                   Opacity="0.5" Margin="0,0,0,10"/>
-        <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,24">
-            <StackPanel>
-                <TextBlock Text="{Binding SelectedSecondary.Name, StringFormat='Selected: {0}', FallbackValue='Selected: none'}"
-                           FontSize="12" Opacity="0.7" Margin="0,0,0,12"/>
-                <ItemsControl ItemsSource="{Binding Swatches}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <WrapPanel/>
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Button Command="{Binding DataContext.SelectSecondaryCommand,
-                                        RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                    CommandParameter="{Binding}"
-                                    Width="32" Height="32" Margin="3"
-                                    Padding="0"
-                                    ToolTip="{Binding Name}"
-                                    Style="{StaticResource MaterialDesignIconButton}">
-                                <Grid Width="32" Height="32">
-                                    <Ellipse Fill="{Binding Brush}" Width="28" Height="28"/>
-                                    <materialDesign:PackIcon Kind="CheckCircle"
-                                                             Width="16" Height="16"
-                                                             Foreground="White"
-                                                             HorizontalAlignment="Center"
-                                                             VerticalAlignment="Center"
-                                                             Visibility="{Binding IsSelectedSecondary,
-                                                                Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                                </Grid>
-                            </Button>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </StackPanel>
-        </materialDesign:Card>
-
-        <!-- Paths -->
-        <TextBlock Text="PATHS" FontSize="11" FontWeight="Bold"
-                   Opacity="0.5" Margin="0,0,0,10"/>
-        <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,20">
-            <StackPanel>
-                <!-- Default install root -->
-                <TextBlock Text="Default Server Install Root" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                <TextBlock Text="New servers are created as sub-folders here"
-                           FontSize="11" Opacity="0.55" Margin="0,0,0,10"/>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="8"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBox Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                             materialDesign:HintAssist.Hint="e.g. C:\GameServers\7DaysToDie"
-                             Text="{Binding DefaultInstallRoot, UpdateSourceTrigger=PropertyChanged}"/>
-                    <Button Grid.Column="2"
-                            Style="{StaticResource MaterialDesignOutlinedButton}"
-                            Command="{Binding BrowseInstallRootCommand}"
-                            Height="56" Padding="12,0">
-                        <materialDesign:PackIcon Kind="FolderOpen"/>
-                    </Button>
-                </Grid>
-
-                <!-- SteamCMD (auto-derived) -->
-                <TextBlock Text="SteamCMD Location" FontWeight="SemiBold" Margin="0,20,0,4"/>
-                <TextBlock Text="Managed automatically inside the install root — no configuration needed."
-                           FontSize="11" Opacity="0.55" Margin="0,0,0,8"/>
-                <Border Background="#1AFFFFFF" CornerRadius="4" Padding="12,10">
-                    <TextBlock Text="{Binding SteamCmdExePreview}"
-                               FontSize="12" Opacity="0.7" FontFamily="Consolas"
-                               TextWrapping="Wrap"/></Border>
-            </StackPanel>
-        </materialDesign:Card>
-
-        <!-- Close -->
-        <Button Content="Save &amp; Close"
-                Style="{StaticResource MaterialDesignRaisedButton}"
-                HorizontalAlignment="Right"
-                Width="130"
-                Click="CloseButton_Click"/>
-        </StackPanel>
-    </StackPanel>
+        </Grid>
+    </Grid>
 </Window>

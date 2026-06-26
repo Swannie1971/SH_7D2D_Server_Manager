@@ -284,22 +284,31 @@ public class SteamCmdService
         return string.IsNullOrWhiteSpace(shortPath) ? longPath : shortPath;
     }
 
-    public record InstallInfo(string BuildId, string TargetBuildId, bool IsUpToDate);
+    public record InstallInfo(string BuildId, bool IsUpToDate);
 
-    // Read install state from the appmanifest SteamCMD writes after install/update
+    // Read locally-installed build ID from the appmanifest SteamCMD writes after install/update
     public InstallInfo? GetInstallInfo(string installDir)
     {
         var manifest = Path.Combine(installDir, "steamapps", $"appmanifest_{AppId}.acf");
         if (!File.Exists(manifest)) return null;
 
         var content = File.ReadAllText(manifest);
-        var build  = Regex.Match(content, @"""buildid""\s+""(\d+)""");
-        var target = Regex.Match(content, @"""TargetBuildID""\s+""(\d+)""");
+        var build   = Regex.Match(content, @"""buildid""\s+""(\d+)""");
         if (!build.Success) return null;
 
-        var buildId  = build.Groups[1].Value;
-        var targetId = target.Success ? target.Groups[1].Value : buildId;
-        return new InstallInfo(buildId, targetId, buildId == targetId);
+        return new InstallInfo(build.Groups[1].Value, IsUpToDate: false); // IsUpToDate resolved by async check
+    }
+
+    // Fetch the latest published build ID for the 7D2D dedicated server from Steam
+    public async Task<string?> GetLatestBuildIdAsync()
+    {
+        try
+        {
+            var json  = await Http.GetStringAsync(LatestBuildUrl);
+            var match = Regex.Match(json, @"""required_version""\s*:\s*(\d+)");
+            return match.Success ? match.Groups[1].Value : null;
+        }
+        catch { return null; }
     }
 
     // Kept for backwards compat — returns just the build ID string

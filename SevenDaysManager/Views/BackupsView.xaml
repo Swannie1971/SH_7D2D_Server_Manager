@@ -7,7 +7,7 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <conv:InverseBoolToVisibilityConverter x:Key="InvBoolToVis"/>
-        <SolidColorBrush x:Key="GlassBrush" Color="#801E1E1E"/>
+
     </UserControl.Resources>
 
     <Grid>
@@ -75,7 +75,7 @@
 
         <!-- ══ Path info + missing save warning ══ -->
         <materialDesign:Card Grid.Row="2" UniformCornerRadius="0" Padding="16,12"
-                             Background="{StaticResource GlassBrush}">
+                             Background="{DynamicResource GlassBrush}">
             <StackPanel>
                 <Grid Margin="0,0,0,6">
                     <Grid.ColumnDefinitions>

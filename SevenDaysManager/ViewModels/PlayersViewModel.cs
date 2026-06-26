@@ -20,10 +20,11 @@ public partial class PlayersViewModel : ObservableObject, IAsyncDisposable
     private int            _expectedCount;
     private readonly List<PlayerInfo> _buffer = new();
 
-    private static readonly Regex TotalRx  = new(@"Total of (\d+) in the game", RegexOptions.Compiled);
-    private static readonly Regex PlayerRx = new(
-        @"\d+\.\s*id=(\d+),\s*(.+?),\s*pos=\([^)]+\).*?health=(\d+).*?deaths=(\d+).*?zombies=(\d+).*?score=(-?\d+).*?level=(\d+).*?steamid=(\S+).*?ip=([^,\s]+).*?ping=(\d+)",
-        RegexOptions.Compiled);
+    private static readonly Regex TotalRx    = new(@"Total of (\d+) in the game", RegexOptions.Compiled);
+    // Matches the start of a player line: "1. id=171, PlayerName, pos="
+    private static readonly Regex PlayerLineRx = new(@"\d+\.\s*id=(\d+),\s*(.+?),\s*pos=", RegexOptions.Compiled);
+    private static readonly Regex SteamIdRx  = new(@"steamid=(\S+)",      RegexOptions.Compiled);
+    private static readonly Regex IpRx       = new(@"\bip=([^,\s]+)",     RegexOptions.Compiled);
 
     public ObservableCollection<PlayerInfo> Players { get; } = new();
 
@@ -55,7 +56,8 @@ public partial class PlayersViewModel : ObservableObject, IAsyncDisposable
 
     public async Task StartAsync(CancellationToken ct = default)
     {
-        var ok = await _telnet.ConnectAsync("127.0.0.1", _server.TelnetPort, _server.TelnetPassword, ct);
+        var host = string.IsNullOrWhiteSpace(_server.ServerIp) ? "127.0.0.1" : _server.ServerIp;
+        var ok = await _telnet.ConnectAsync(host, _server.TelnetPort, _server.TelnetPassword, ct);
         if (ok)
         {
             IsConnected = true;
@@ -77,7 +79,7 @@ public partial class PlayersViewModel : ObservableObject, IAsyncDisposable
     {
         var msg = BroadcastMessage.Trim();
         if (string.IsNullOrEmpty(msg)) return;
-        await _telnet.SendAsync($"say {msg}");
+        await _telnet.SendAsync($"say \"{SanitizeTelnet(msg)}\"");
         BroadcastMessage = "";
     }
     private bool CanBroadcast() => IsConnected && !string.IsNullOrWhiteSpace(BroadcastMessage);
@@ -94,7 +96,7 @@ public partial class PlayersViewModel : ObservableObject, IAsyncDisposable
     private async Task KickAsync()
     {
         if (SelectedPlayer is not { } p) return;
-        var reason = string.IsNullOrWhiteSpace(ActionReason) ? "Kicked by admin" : ActionReason.Trim();
+        var reason = SanitizeTelnet(string.IsNullOrWhiteSpace(ActionReason) ? "Kicked by admin" : ActionReason.Trim());
         await _telnet.SendAsync($"kick {p.EntityId} \"{reason}\"");
         ActionReason = "";
         await Task.Delay(500);
@@ -105,7 +107,7 @@ public partial class PlayersViewModel : ObservableObject, IAsyncDisposable
     private async Task BanAsync()
     {
         if (SelectedPlayer is not { } p) return;
-        var reason = string.IsNullOrWhiteSpace(ActionReason) ? "Banned by admin" : ActionReason.Trim();
+        var reason = SanitizeTelnet(string.IsNullOrWhiteSpace(ActionReason) ? "Banned by admin" : ActionReason.Trim());
         await _telnet.SendAsync($"ban add {p.SteamId} years 1 \"{reason}\"");
         await _telnet.SendAsync($"kick {p.EntityId} \"{reason}\"");
         ActionReason = "";
@@ -151,21 +153,24 @@ public partial class PlayersViewModel : ObservableObject, IAsyncDisposable
 
         if (!_collectingLp) return;
 
-        var m = PlayerRx.Match(line);
-        if (!m.Success) return;
+        var header = PlayerLineRx.Match(line);
+        if (!header.Success) return;
+
+        var steamM = SteamIdRx.Match(line);
+        var ipM    = IpRx.Match(line);
 
         _buffer.Add(new PlayerInfo
         {
-            EntityId = int.Parse(m.Groups[1].Value),
-            Name     = m.Groups[2].Value.Trim(),
-            Health   = int.Parse(m.Groups[3].Value),
-            Deaths   = int.Parse(m.Groups[4].Value),
-            Zombies  = int.Parse(m.Groups[5].Value),
-            Score    = int.Parse(m.Groups[6].Value),
-            Level    = int.Parse(m.Groups[7].Value),
-            SteamId  = m.Groups[8].Value.Trim(),
-            Ip       = m.Groups[9].Value.Trim(),
-            Ping     = int.Parse(m.Groups[10].Value),
+            EntityId = int.Parse(header.Groups[1].Value),
+            Name     = header.Groups[2].Value.Trim(),
+            Health   = ParseIntField(line, "health"),
+            Deaths   = ParseIntField(line, "deaths"),
+            Zombies  = ParseIntField(line, "zombies"),
+            Score    = ParseIntField(line, "score"),
+            Level    = ParseIntField(line, "level"),
+            Ping     = ParseIntField(line, "ping"),
+            SteamId  = steamM.Success ? steamM.Groups[1].Value.Trim() : "",
+            Ip       = ipM.Success    ? ipM.Groups[1].Value.Trim()    : "",
         });
 
         if (_buffer.Count < _expectedCount) return;
@@ -192,5 +197,15 @@ public partial class PlayersViewModel : ObservableObject, IAsyncDisposable
     {
         _refreshTimer.Stop();
         await _telnet.DisposeAsync();
+    }
+
+    private static string SanitizeTelnet(string s) =>
+        s.Replace("\"", "'").Replace("\r", "").Replace("\n", " ");
+
+    // Extract a numeric field by name regardless of its position in the lp line
+    private static int ParseIntField(string line, string key)
+    {
+        var m = Regex.Match(line, $@"\b{key}=(-?\d+)");
+        return m.Success ? int.Parse(m.Groups[1].Value) : 0;
     }
 }

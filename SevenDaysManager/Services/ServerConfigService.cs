@@ -45,6 +45,33 @@ public class ServerConfigService
         Set(root, "TelnetPort",            server.TelnetPort);
         Set(root, "TelnetPassword",        server.TelnetPassword);
 
+        // Game settings
+        Set(root, "GameDifficulty",      server.GameDifficulty);
+        Set(root, "XPMultiplier",        server.XPMultiplier);
+        Set(root, "DayNightLength",      server.DayNightLength);
+        Set(root, "DayLightLength",      server.DayLightLength);
+        Set(root, "DropOnDeath",         server.DropOnDeath);
+        Set(root, "DropOnQuit",          server.DropOnQuit);
+        Set(root, "BloodMoonFrequency",  server.BloodMoonFrequency);
+        Set(root, "BloodMoonEnemyCount", server.BloodMoonEnemyCount);
+        Set(root, "ZombieMove",          server.ZombieMove);
+        Set(root, "ZombieMoveNight",     server.ZombieMoveNight);
+        Set(root, "ZombieFeralMove",     server.ZombieFeralMove);
+        Set(root, "LootAbundance",       server.LootAbundance);
+        Set(root, "LootRespawnDays",     server.LootRespawnDays);
+        Set(root, "PlayerKillingMode",   server.PlayerKillingMode);
+        Set(root, "AirDropFrequency",    server.AirDropFrequency);
+        Set(root, "ZombieBMMove",        server.ZombieBMMove);
+        Set(root, "BloodMoonRange",      server.BloodMoonRange);
+        Set(root, "MaxSpawnedZombies",   server.MaxSpawnedZombies);
+        Set(root, "MaxSpawnedAnimals",   server.MaxSpawnedAnimals);
+        Set(root, "ServerMaxAllowedViewDistance", server.ServerMaxAllowedViewDistance);
+        Set(root, "LandClaimSize",       server.LandClaimSize);
+        Set(root, "LandClaimExpiryTime", server.LandClaimExpiryTime);
+        Set(root, "LandClaimOfflineDurabilityModifier", server.LandClaimOfflineDurabilityModifier);
+        Set(root, "PlayerSafeZoneLevel", server.PlayerSafeZoneLevel);
+        Set(root, "PlayerSafeZoneHours", server.PlayerSafeZoneHours);
+
         // Extra overrides from the Config tab
         foreach (var kv in server.ExtraConfig ?? Enumerable.Empty<ConfigProperty>())
             Set(root, kv.Name, kv.Value);
@@ -81,6 +108,31 @@ public class ServerConfigService
             TelnetPort       = GetInt(root, "TelnetPort",           8081),
             TelnetPassword   = Get(root,  "TelnetPassword"),
             WebDashboardPort = GetInt(root, "WebDashboardPort",     8080),
+            GameDifficulty      = GetInt(root, "GameDifficulty",      2),
+            XPMultiplier        = GetInt(root, "XPMultiplier",        100),
+            DayNightLength      = GetInt(root, "DayNightLength",      60),
+            DayLightLength      = GetInt(root, "DayLightLength",      18),
+            DropOnDeath         = GetInt(root, "DropOnDeath",         1),
+            DropOnQuit          = GetInt(root, "DropOnQuit",          0),
+            BloodMoonFrequency  = GetInt(root, "BloodMoonFrequency",  7),
+            BloodMoonEnemyCount = GetInt(root, "BloodMoonEnemyCount", 8),
+            ZombieMove          = GetInt(root, "ZombieMove",          0),
+            ZombieMoveNight     = GetInt(root, "ZombieMoveNight",     3),
+            ZombieFeralMove     = GetInt(root, "ZombieFeralMove",     3),
+            LootAbundance       = GetInt(root, "LootAbundance",       100),
+            LootRespawnDays     = GetInt(root, "LootRespawnDays",     7),
+            PlayerKillingMode   = GetInt(root, "PlayerKillingMode",   0),
+            AirDropFrequency    = GetInt(root, "AirDropFrequency",    72),
+            ZombieBMMove        = GetInt(root, "ZombieBMMove",        3),
+            BloodMoonRange      = GetInt(root, "BloodMoonRange",      0),
+            MaxSpawnedZombies   = GetInt(root, "MaxSpawnedZombies",   64),
+            MaxSpawnedAnimals   = GetInt(root, "MaxSpawnedAnimals",   50),
+            ServerMaxAllowedViewDistance = GetInt(root, "ServerMaxAllowedViewDistance", 12),
+            LandClaimSize       = GetInt(root, "LandClaimSize",       41),
+            LandClaimExpiryTime = GetInt(root, "LandClaimExpiryTime", 7),
+            LandClaimOfflineDurabilityModifier = GetInt(root, "LandClaimOfflineDurabilityModifier", 0),
+            PlayerSafeZoneLevel = GetInt(root, "PlayerSafeZoneLevel", 5),
+            PlayerSafeZoneHours = GetInt(root, "PlayerSafeZoneHours", 5),
         };
     }
 

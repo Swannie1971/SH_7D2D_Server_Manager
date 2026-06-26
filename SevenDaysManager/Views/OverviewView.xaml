@@ -4,7 +4,7 @@
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
 
     <UserControl.Resources>
-        <SolidColorBrush x:Key="GlassBrush" Color="#801E1E1E"/>
+
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
         <!-- Reusable label/value stack used in info grids -->
@@ -57,7 +57,7 @@
 
                 <!-- Overview info card -->
                 <materialDesign:Card Grid.Column="0" UniformCornerRadius="10"
-                                     Padding="18" Background="{StaticResource GlassBrush}">
+                                     Padding="18" Background="{DynamicResource GlassBrush}">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
                             <Border Width="4" CornerRadius="2" Margin="0,0,8,0"
@@ -115,7 +115,7 @@
 
                 <!-- System Information card -->
                 <materialDesign:Card Grid.Column="2" UniformCornerRadius="10"
-                                     Padding="18" Background="{StaticResource GlassBrush}">
+                                     Padding="18" Background="{DynamicResource GlassBrush}">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
                             <Border Width="4" CornerRadius="2" Margin="0,0,8,0"
@@ -294,7 +294,7 @@
 
                 <!-- FPS -->
                 <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,8,0"
-                                     Background="{StaticResource GlassBrush}">
+                                     Background="{DynamicResource GlassBrush}">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <Border Width="3" CornerRadius="2" Margin="0,0,6,0"
@@ -310,7 +310,7 @@
 
                 <!-- Entities -->
                 <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,8,0"
-                                     Background="{StaticResource GlassBrush}">
+                                     Background="{DynamicResource GlassBrush}">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <Border Width="3" CornerRadius="2" Margin="0,0,6,0"
@@ -326,7 +326,7 @@
 
                 <!-- RSS -->
                 <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,8,0"
-                                     Background="{StaticResource GlassBrush}">
+                                     Background="{DynamicResource GlassBrush}">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <Border Width="3" CornerRadius="2" Margin="0,0,6,0"
@@ -343,7 +343,7 @@
 
                 <!-- Chunks -->
                 <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,8,0"
-                                     Background="{StaticResource GlassBrush}">
+                                     Background="{DynamicResource GlassBrush}">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <Border Width="3" CornerRadius="2" Margin="0,0,6,0"
@@ -359,7 +359,7 @@
 
                 <!-- CGO -->
                 <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,8,0"
-                                     Background="{StaticResource GlassBrush}">
+                                     Background="{DynamicResource GlassBrush}">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <Border Width="3" CornerRadius="2" Margin="0,0,6,0"
@@ -375,7 +375,7 @@
 
                 <!-- Items -->
                 <materialDesign:Card UniformCornerRadius="10" Padding="16"
-                                     Background="{StaticResource GlassBrush}">
+                                     Background="{DynamicResource GlassBrush}">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <Border Width="3" CornerRadius="2" Margin="0,0,6,0"
