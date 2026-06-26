@@ -113,7 +113,7 @@ dotnet run
 
 Requires the [.NET 9 SDK](https://dotnet.microsoft.com/download/dotnet/9.0).
 
-### Publishing (single-file self-contained exe)
+### Publishing exe (single-file self-contained exe)
 
 ```
 dotnet publish SevenDaysManager/SevenDaysManager.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:PublishReadyToRun=true
