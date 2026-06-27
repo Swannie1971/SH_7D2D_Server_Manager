@@ -31,7 +31,7 @@
         <!-- Body -->
         <StackPanel Margin="24,20,24,8">
             <TextBlock TextWrapping="Wrap" Opacity="0.85" LineHeight="22">
-                A new version of 7D2D Server Manager is available. Download the latest release from GitHub — it only takes a minute.
+                A new version of 7D2D Server Manager is available. Click Update Now and the app will download, replace itself, and restart automatically.
             </TextBlock>
 
             <!-- Release notes snippet -->
@@ -43,12 +43,20 @@
                                TextWrapping="Wrap" FontFamily="Consolas"/>
                 </ScrollViewer>
             </Border>
+
+            <!-- Download progress (hidden until download starts) -->
+            <StackPanel x:Name="ProgressPanel" Visibility="Collapsed" Margin="0,16,0,0">
+                <ProgressBar x:Name="ProgressBar" Height="6" Minimum="0" Maximum="100"
+                             Style="{StaticResource MaterialDesignLinearProgressBar}"/>
+                <TextBlock x:Name="StatusText" FontSize="12" Opacity="0.7"
+                           Margin="0,6,0,0" HorizontalAlignment="Center"/>
+            </StackPanel>
         </StackPanel>
 
         <!-- Buttons -->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
                     Margin="24,12,24,24">
-            <Button Content="Not Now"
+            <Button x:Name="NotNowButton" Content="Not Now"
                     Style="{StaticResource MaterialDesignOutlinedButton}"
                     Width="110" Margin="0,0,12,0"
                     Click="NotNow_Click"/>
@@ -56,8 +64,8 @@
                     Style="{StaticResource MaterialDesignRaisedButton}"
                     Width="160" Click="Download_Click">
                 <StackPanel Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="Download" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                    <TextBlock Text="Download" VerticalAlignment="Center"/>
+                    <materialDesign:PackIcon Kind="CloudDownload" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                    <TextBlock x:Name="DownloadButtonText" Text="Update Now" VerticalAlignment="Center"/>
                 </StackPanel>
             </Button>
         </StackPanel>

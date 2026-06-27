@@ -20,9 +20,10 @@ public partial class PlayersViewModel : ObservableObject, IAsyncDisposable
     private int            _expectedCount;
     private readonly List<PlayerInfo> _buffer = new();
 
-    private static readonly Regex TotalRx    = new(@"Total of (\d+) in the game", RegexOptions.Compiled);
-    // Matches the start of a player line: "1. id=171, PlayerName, pos="
-    private static readonly Regex PlayerLineRx = new(@"\d+\.\s*id=(\d+),\s*(.+?),\s*pos=", RegexOptions.Compiled);
+    // "Total of 1 in the game" or "Total of 1 player(s) in the game" etc.
+    private static readonly Regex TotalRx     = new(@"Total of (\d+)",                       RegexOptions.Compiled);
+    // "1. id=171, PlayerName, pos=" — leading space/digits vary by version
+    private static readonly Regex PlayerLineRx = new(@"\d+\.\s*id=(\d+),\s*(.+?),\s*pos=",  RegexOptions.Compiled);
     private static readonly Regex SteamIdRx  = new(@"steamid=(\S+)",      RegexOptions.Compiled);
     private static readonly Regex IpRx       = new(@"\bip=([^,\s]+)",     RegexOptions.Compiled);
 
@@ -135,6 +136,10 @@ public partial class PlayersViewModel : ObservableObject, IAsyncDisposable
         var total = TotalRx.Match(line);
         if (total.Success)
         {
+            // Commit any partial buffer from a previous lp before starting fresh
+            if (_buffer.Count > 0)
+                CommitBuffer();
+
             _buffer.Clear();
             _expectedCount = int.Parse(total.Groups[1].Value);
             _collectingLp  = _expectedCount > 0;
@@ -176,6 +181,11 @@ public partial class PlayersViewModel : ObservableObject, IAsyncDisposable
         if (_buffer.Count < _expectedCount) return;
 
         _collectingLp = false;
+        CommitBuffer();
+    }
+
+    private void CommitBuffer()
+    {
         var captured = _buffer.ToList();
         Application.Current.Dispatcher.Invoke(() =>
         {
