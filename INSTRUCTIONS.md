@@ -7,6 +7,21 @@ machine (e.g. the gaming PC), compile it, run it, and publish a new release.
 
 ---
 
+## 0. Quick start (clone, build, run)
+
+Make sure the prerequisites in section 2 are installed first, then:
+
+```powershell
+git clone https://github.com/Swannie1971/SH_7D2D_Server_Manager.git "C:\Users\swann\Documents\PVT\Devtest\SH_7D2D_Manager"
+cd "C:\Users\swann\Documents\PVT\Devtest\SH_7D2D_Manager"
+dotnet build
+dotnet run --project SevenDaysManager/SevenDaysManager.csproj
+```
+
+The rest of this document covers each step in detail plus the release process.
+
+---
+
 ## 1. What this project is
 
 A native Windows desktop app to manage a 7 Days to Die dedicated server.
