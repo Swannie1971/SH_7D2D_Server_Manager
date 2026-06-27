@@ -31,6 +31,32 @@ A native Windows desktop app to manage a 7 Days to Die dedicated server.
 > so the auto-updater (which calls the GitHub API anonymously) can see them — the
 > API returns 404 for private repos without authentication.
 
+### Version control quick reference
+
+| Setting | Value |
+|---------|-------|
+| Source remote (`origin`) | `https://github.com/Swannie1971/SH_7D2D_Server_Manager.git` |
+| Default branch | `main` |
+| Releases repo (exe uploads) | `Swannie1971/SH_7D2D_Manager-releases` |
+| Git user | `Swannie` |
+
+Verify the remote is correct on any machine:
+```powershell
+git remote -v          # both fetch + push should point at SH_7D2D_Server_Manager.git
+git branch --show-current   # should print: main
+```
+
+If `origin` is missing or wrong (e.g. fresh folder), set it:
+```powershell
+git remote add origin https://github.com/Swannie1971/SH_7D2D_Server_Manager.git
+# or, to change an existing one:
+git remote set-url origin https://github.com/Swannie1971/SH_7D2D_Server_Manager.git
+```
+
+GitHub will prompt for credentials on first push/pull. Use a **Personal Access Token**
+as the password (classic token with `repo` scope), or sign in once with
+`gh auth login` and Git will reuse that auth.
+
 ---
 
 ## 2. Prerequisites on the gaming PC (one time)
