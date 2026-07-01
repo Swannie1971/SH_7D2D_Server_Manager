@@ -2,14 +2,20 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using SevenDaysManager.Models;
+using SevenDaysManager.ViewModels;
 
 namespace SevenDaysManager.Views;
 
 public partial class PlayerDetailsWindow : Window
 {
-    public PlayerDetailsWindow(PlayerInfo player)
+    private readonly PlayerInfo         _player;
+    private readonly PlayersViewModel   _playersVm;
+
+    public PlayerDetailsWindow(PlayerInfo player, PlayersViewModel playersVm)
     {
         InitializeComponent();
+        _player    = player;
+        _playersVm = playersVm;
 
         TitleText.Text = $"Player: {player.Name}";
 
@@ -52,6 +58,38 @@ public partial class PlayerDetailsWindow : Window
             Padding       = new Thickness(14, 10, 14, 10),
             Child         = panel
         });
+    }
+
+    private async void GrantAdmin_Click(object sender, RoutedEventArgs e)
+    {
+        if (!int.TryParse(AdminLevelBox.Text.Trim(), out var level) || level < 0)
+        {
+            AdminStatusText.Text = "Enter a valid admin level (0 or higher).";
+            return;
+        }
+
+        SetButtonsEnabled(false);
+        var ok = await _playersVm.SetAdminLevelAsync(_player.EntityId, level);
+        AdminStatusText.Text = ok
+            ? $"Sent: admin add {_player.EntityId} {level}"
+            : "Not connected to server telnet.";
+        SetButtonsEnabled(true);
+    }
+
+    private async void RevokeAdmin_Click(object sender, RoutedEventArgs e)
+    {
+        SetButtonsEnabled(false);
+        var ok = await _playersVm.RemoveAdminAsync(_player.EntityId);
+        AdminStatusText.Text = ok
+            ? $"Sent: admin remove {_player.EntityId}"
+            : "Not connected to server telnet.";
+        SetButtonsEnabled(true);
+    }
+
+    private void SetButtonsEnabled(bool enabled)
+    {
+        GrantAdminButton.IsEnabled  = enabled;
+        RevokeAdminButton.IsEnabled = enabled;
     }
 
     private void Close_Click(object sender, RoutedEventArgs e) => Close();

@@ -18,9 +18,9 @@ public partial class PlayersView : UserControl
 
     private void PlayerInfo_Click(object sender, RoutedEventArgs e)
     {
-        if ((DataContext as PlayersViewModel)?.SelectedPlayer is not PlayerInfo player) return;
+        if (DataContext is not PlayersViewModel vm || vm.SelectedPlayer is not PlayerInfo player) return;
 
-        new PlayerDetailsWindow(player)
+        new PlayerDetailsWindow(player, vm)
         {
             Owner = Window.GetWindow(this)
         }.ShowDialog();

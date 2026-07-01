@@ -126,6 +126,22 @@ public partial class PlayersViewModel : ObservableObject, IAsyncDisposable
         ActionReason = "";
     }
 
+    // Level 0 = full admin/owner in 7D2D; higher numbers map to narrower permission tiers
+    // defined in the server's permission_admin.xml (or config panel for managed hosts).
+    public async Task<bool> SetAdminLevelAsync(int entityId, int level)
+    {
+        if (!_telnet.IsConnected) return false;
+        await _telnet.SendAsync($"admin add {entityId} {level}");
+        return true;
+    }
+
+    public async Task<bool> RemoveAdminAsync(int entityId)
+    {
+        if (!_telnet.IsConnected) return false;
+        await _telnet.SendAsync($"admin remove {entityId}");
+        return true;
+    }
+
     private async Task RequestPlayersAsync()
     {
         if (!_telnet.IsConnected) return;
