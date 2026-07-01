@@ -17,7 +17,8 @@
             <StackPanel Margin="16">
 
                 <TextBlock Text="SERVER IDENTITY" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
-                <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,16">
+                <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,16"
+                                     Background="{DynamicResource GlassBrush}">
                     <StackPanel>
                         <TextBox materialDesign:HintAssist.Hint="Server Name"
                                  Style="{StaticResource MaterialDesignOutlinedTextBox}"
@@ -51,7 +52,8 @@
                 </materialDesign:Card>
 
                 <TextBlock Text="WORLD" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
-                <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,16">
+                <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,16"
+                                     Background="{DynamicResource GlassBrush}">
                     <StackPanel>
                         <Grid Margin="0,0,0,14">
                             <Grid.ColumnDefinitions>
@@ -85,7 +87,8 @@
                 </materialDesign:Card>
 
                 <TextBlock Text="NETWORK" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
-                <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,16">
+                <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,16"
+                                     Background="{DynamicResource GlassBrush}">
                     <StackPanel>
                         <Grid Margin="0,0,0,14">
                             <Grid.ColumnDefinitions>
@@ -112,7 +115,8 @@
                 </materialDesign:Card>
 
                 <TextBlock Text="OPTIONS" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
-                <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,16">
+                <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,16"
+                                     Background="{DynamicResource GlassBrush}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>

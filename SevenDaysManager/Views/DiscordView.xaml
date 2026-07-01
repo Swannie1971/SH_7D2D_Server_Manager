@@ -68,7 +68,8 @@
             <StackPanel Margin="16" IsEnabled="{Binding Enabled}">
 
                 <!-- Default webhook -->
-                <materialDesign:Card Padding="16" Margin="0,0,0,12">
+                <materialDesign:Card Padding="16" Margin="0,0,0,12"
+                                     Background="{DynamicResource GlassBrush}">
                     <StackPanel>
                         <TextBlock Text="DEFAULT WEBHOOK URL" FontSize="10" FontWeight="SemiBold"
                                    Opacity="0.5" Margin="0,0,0,6"/>

@@ -18,7 +18,7 @@
     <Border Margin="0,0,0,10">
         <Border.Style>
             <Style TargetType="Border">
-                <Setter Property="Background" Value="#1A1A1A"/>
+                <Setter Property="Background" Value="{DynamicResource GlassBrush}"/>
                 <Setter Property="CornerRadius" Value="6"/>
                 <Setter Property="BorderThickness" Value="3,0,0,0"/>
                 <Setter Property="BorderBrush" Value="#57F287"/>

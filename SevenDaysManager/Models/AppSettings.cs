@@ -16,4 +16,7 @@ public class AppSettings
     // Card appearance
     public string CardColor   { get; set; } = "1E1E1E";  // hex RGB, no #
     public int    CardOpacity { get; set; } = 50;         // 0–100 %
+
+    // Empty = use the bundled default background
+    public string BackgroundImagePath { get; set; } = "";
 }

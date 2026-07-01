@@ -146,7 +146,8 @@
                 <ItemsControl ItemsSource="{Binding Mods}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="{x:Type models:ModInfo}">
-                            <materialDesign:Card Margin="0,0,0,8" Padding="0">
+                            <materialDesign:Card Margin="0,0,0,8" Padding="0"
+                                                 Background="{DynamicResource GlassBrush}">
                                 <Grid>
                                     <!-- Enabled/disabled colour stripe on left -->
                                     <Border Width="4" HorizontalAlignment="Left" CornerRadius="4,0,0,4">

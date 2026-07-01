@@ -14,6 +14,7 @@
             </ResourceDictionary.MergedDictionaries>
 
             <SolidColorBrush x:Key="GlassBrush" Color="#801E1E1E"/>
+            <BitmapImage x:Key="AppBackgroundSource" UriSource="pack://application:,,,/Assets/bg.jpg"/>
 
             <Style TargetType="materialDesign:Card"
                    BasedOn="{StaticResource {x:Type materialDesign:Card}}">

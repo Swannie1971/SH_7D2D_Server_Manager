@@ -165,7 +165,7 @@
 
             <!-- ══════════════════════════════════════════ ROW 2: Status gauges ══ -->
             <materialDesign:Card UniformCornerRadius="10" Padding="18"
-                                 Background="#CC1A1A1A" Margin="0,0,0,10">
+                                 Background="{DynamicResource GlassBrush}" Margin="0,0,0,10">
                 <StackPanel>
                     <Grid Margin="0,0,0,16">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">

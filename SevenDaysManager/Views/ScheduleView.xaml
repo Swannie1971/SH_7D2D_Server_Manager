@@ -89,7 +89,8 @@
 
                 <!-- ── Left: Schedule + Log ── -->
                 <StackPanel Grid.Column="0">
-                    <materialDesign:Card Padding="16" Margin="0,0,0,12">
+                    <materialDesign:Card Padding="16" Margin="0,0,0,12"
+                                         Background="{DynamicResource GlassBrush}">
                         <StackPanel>
                             <TextBlock Text="RESTART SCHEDULE" Style="{StaticResource SectionHeader}"/>
 
@@ -155,7 +156,7 @@
                     </materialDesign:Card>
 
                     <!-- Activity log -->
-                    <materialDesign:Card Padding="16">
+                    <materialDesign:Card Padding="16" Background="{DynamicResource GlassBrush}">
                         <StackPanel>
                             <TextBlock Text="ACTIVITY LOG" Style="{StaticResource SectionHeader}"/>
                             <Border Background="#CC0D0D0D" CornerRadius="4" Padding="10" Height="200">
@@ -175,7 +176,7 @@
                 </StackPanel>
 
                 <!-- ── Right: Warnings ── -->
-                <materialDesign:Card Grid.Column="2" Padding="16">
+                <materialDesign:Card Grid.Column="2" Padding="16" Background="{DynamicResource GlassBrush}">
                     <StackPanel>
                         <TextBlock Text="IN-GAME WARNINGS" Style="{StaticResource SectionHeader}"/>
                         <TextBlock Text="Send in-game messages before restart:"

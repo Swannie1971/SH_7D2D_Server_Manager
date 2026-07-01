@@ -51,6 +51,10 @@ public partial class AppSettingsViewModel : ObservableObject
     [ObservableProperty] private CardColorSwatchVm? _selectedCardColor;
     [ObservableProperty] private int _cardOpacity;
 
+    // ── Background image ─────────────────────────────────────────────────────
+    [ObservableProperty] private string _backgroundImagePath = "";
+    public bool HasCustomBackground => !string.IsNullOrWhiteSpace(BackgroundImagePath);
+
     // True when not running as a published exe — shows an explanatory note in the UI
     public bool IsDevBuild => AutoStartService.GetExePath() is null;
 
@@ -67,6 +71,7 @@ public partial class AppSettingsViewModel : ObservableObject
         _startMinimized     = _appSettings.StartMinimized;
         _autoStartOnLogin   = AutoStartService.IsEnabled();
         _cardOpacity = _appSettings.CardOpacity;
+        _backgroundImagePath = _appSettings.BackgroundImagePath;
         foreach (var s in CardBrushService.Swatches)
             CardSwatches.Add(new CardColorSwatchVm(s));
         _selectedCardColor = CardSwatches
@@ -142,6 +147,30 @@ public partial class AppSettingsViewModel : ObservableObject
     partial void OnCardOpacityChanged(int value) =>
         CardBrushService.Apply(SelectedCardColor?.Hex ?? "1E1E1E", value);
 
+    [RelayCommand]
+    private void BrowseBackgroundImage()
+    {
+        var dlg = new OpenFileDialog
+        {
+            Title  = "Choose a background image",
+            Filter = "Image files (*.jpg;*.jpeg;*.png;*.bmp)|*.jpg;*.jpeg;*.png;*.bmp|All files (*.*)|*.*"
+        };
+        if (dlg.ShowDialog() != true) return;
+
+        BackgroundImagePath = dlg.FileName;
+        BackgroundImageService.Apply(BackgroundImagePath);
+    }
+
+    [RelayCommand]
+    private void ResetBackgroundImage()
+    {
+        BackgroundImagePath = "";
+        BackgroundImageService.Apply(BackgroundImagePath);
+    }
+
+    partial void OnBackgroundImagePathChanged(string value) =>
+        OnPropertyChanged(nameof(HasCustomBackground));
+
     private void UpdateCardSelectionMarkers()
     {
         foreach (var s in CardSwatches)
@@ -154,6 +183,7 @@ public partial class AppSettingsViewModel : ObservableObject
         _appSettings.StartMinimized     = StartMinimized;
         _appSettings.CardColor          = SelectedCardColor?.Hex ?? "1E1E1E";
         _appSettings.CardOpacity        = CardOpacity;
+        _appSettings.BackgroundImagePath = BackgroundImagePath?.Trim() ?? "";
         App.DataStore.SaveAppSettings(_appSettings);
     }
 

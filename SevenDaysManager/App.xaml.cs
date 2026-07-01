@@ -15,6 +15,7 @@ public partial class App : Application
         // Restore saved theme — without this the app always resets to the default on restart
         Services.ThemeService.Apply(Services.ThemeService.Load());
         Services.CardBrushService.Apply(DataStore.GetAppSettings());
+        Services.BackgroundImageService.Apply(DataStore.GetAppSettings());
 
         DispatcherUnhandledException += (_, ex) =>
         {

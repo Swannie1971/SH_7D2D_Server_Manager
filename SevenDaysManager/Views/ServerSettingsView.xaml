@@ -36,7 +36,8 @@
 
             <!-- Name -->
             <TextBlock Text="GENERAL" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
-            <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,16">
+            <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,16"
+                                 Background="{DynamicResource GlassBrush}">
                 <StackPanel>
                     <TextBox materialDesign:HintAssist.Hint="Server Name"
                              Style="{StaticResource MaterialDesignOutlinedTextBox}"
@@ -62,7 +63,8 @@
 
             <!-- Behaviour -->
             <TextBlock Text="BEHAVIOUR" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
-            <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,24">
+            <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,24"
+                                 Background="{DynamicResource GlassBrush}">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -84,6 +86,7 @@
             <TextBlock Text="DANGER ZONE" FontSize="11" FontWeight="Bold"
                        Foreground="#F44336" Opacity="0.8" Margin="0,0,0,10"/>
             <materialDesign:Card UniformCornerRadius="10" Padding="16"
+                                 Background="{DynamicResource GlassBrush}"
                                  BorderThickness="1" BorderBrush="#44F44336">
                 <StackPanel>
                     <!-- Normal state (hide when ConfirmDelete=true) -->

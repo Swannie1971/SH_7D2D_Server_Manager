@@ -178,6 +178,37 @@
                         </StackPanel>
                     </materialDesign:Card>
 
+                    <!-- App background image -->
+                    <TextBlock Text="APP BACKGROUND" FontSize="11" FontWeight="Bold"
+                               Opacity="0.5" Margin="0,16,0,8"/>
+                    <materialDesign:Card UniformCornerRadius="10" Padding="16">
+                        <StackPanel>
+                            <TextBlock FontSize="12" Opacity="0.7" Margin="0,0,0,10" TextWrapping="Wrap">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="Using the default background"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasCustomBackground}" Value="True">
+                                                <Setter Property="Text" Value="{Binding BackgroundImagePath}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Content="Choose Image…"
+                                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                                        Command="{Binding BrowseBackgroundImageCommand}"
+                                        Height="36" Padding="14,0" Margin="0,0,10,0"/>
+                                <Button Content="Reset to Default"
+                                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                                        Command="{Binding ResetBackgroundImageCommand}"
+                                        Height="36" Padding="14,0"
+                                        Visibility="{Binding HasCustomBackground, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </materialDesign:Card>
+
                 </StackPanel>
             </ScrollViewer>
 

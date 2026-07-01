@@ -7,7 +7,7 @@ namespace SevenDaysManager.Services;
 public static class UpdateService
 {
     // Bump this constant with every release and tag on GitHub as "v{CurrentVersion}"
-    public const string CurrentVersion = "0.2.7";
+    public const string CurrentVersion = "0.2.8";
 
     private static readonly HttpClient _http = new()
     {

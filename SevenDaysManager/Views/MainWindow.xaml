@@ -35,7 +35,7 @@
 
         <!-- Background image — full opacity, sits behind everything -->
         <Image Grid.ColumnSpan="3"
-               Source="pack://application:,,,/Assets/bg.jpg"
+               Source="{DynamicResource AppBackgroundSource}"
                Stretch="UniformToFill"
                RenderOptions.BitmapScalingMode="HighQuality"/>
 
@@ -202,7 +202,7 @@
                             <TextBlock Text="App Settings" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
-                    <TextBlock Text="v0.2.7"
+                    <TextBlock Text="v0.2.8"
                                HorizontalAlignment="Right" VerticalAlignment="Center"
                                FontSize="11" Opacity="0.8"
                                Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"/>
