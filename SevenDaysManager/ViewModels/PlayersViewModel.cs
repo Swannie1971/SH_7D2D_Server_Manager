@@ -15,17 +15,20 @@ public partial class PlayersViewModel : ObservableObject, IAsyncDisposable
     private readonly TelnetClient  _telnet = new();
     private readonly DispatcherTimer _refreshTimer;
 
-    // lp parse state
-    private bool           _collectingLp;
-    private int            _expectedCount;
+    // lp parse state — player rows stream in BEFORE the "Total of N" footer,
+    // so we collect every row as it arrives and commit when the footer lands.
     private readonly List<PlayerInfo> _buffer = new();
 
-    // "Total of 1 in the game" or "Total of 1 player(s) in the game" etc.
-    private static readonly Regex TotalRx     = new(@"Total of (\d+)",                       RegexOptions.Compiled);
-    // "1. id=171, PlayerName, pos=" — leading space/digits vary by version
+    // Footer line that ends the list: "Total of 1 in the game" (wording varies by version)
+    private static readonly Regex TotalRx      = new(@"Total of (\d+)",                      RegexOptions.Compiled);
+    // A player row: "0. id=171, PlayerName, pos=" — leading index/spacing varies by version
     private static readonly Regex PlayerLineRx = new(@"\d+\.\s*id=(\d+),\s*(.+?),\s*pos=",  RegexOptions.Compiled);
-    private static readonly Regex SteamIdRx  = new(@"steamid=(\S+)",      RegexOptions.Compiled);
-    private static readonly Regex IpRx       = new(@"\bip=([^,\s]+)",     RegexOptions.Compiled);
+    // Newer builds use "pltfmid=Steam_7656..."; older builds used "steamid=7656..."
+    private static readonly Regex SteamIdRx     = new(@"(?:pltfmid|steamid)=([^,\s]+)",      RegexOptions.Compiled);
+    private static readonly Regex CrossIdRx     = new(@"crossid=([^,\s]+)",                  RegexOptions.Compiled);
+    private static readonly Regex IpRx          = new(@"\bip=([^,\s]+)",                     RegexOptions.Compiled);
+    private static readonly Regex PosRx         = new(@"pos=\(([^)]*)\)",                    RegexOptions.Compiled);
+    private static readonly Regex RemoteRx      = new(@"remote=(True|False)",                RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     public ObservableCollection<PlayerInfo> Players { get; } = new();
 
@@ -127,61 +130,46 @@ public partial class PlayersViewModel : ObservableObject, IAsyncDisposable
     {
         if (!_telnet.IsConnected) return;
         _buffer.Clear();
-        _collectingLp = false;
         await _telnet.SendAsync("lp");
     }
 
     private void OnLine(string line)
     {
-        var total = TotalRx.Match(line);
-        if (total.Success)
+        // Player rows arrive first, one per line, then a "Total of N" footer ends the list.
+        var header = PlayerLineRx.Match(line);
+        if (header.Success)
         {
-            // Commit any partial buffer from a previous lp before starting fresh
-            if (_buffer.Count > 0)
-                CommitBuffer();
+            var steamM = SteamIdRx.Match(line);
+            var crossM = CrossIdRx.Match(line);
+            var ipM    = IpRx.Match(line);
+            var remoteM = RemoteRx.Match(line);
 
-            _buffer.Clear();
-            _expectedCount = int.Parse(total.Groups[1].Value);
-            _collectingLp  = _expectedCount > 0;
-
-            if (_expectedCount == 0)
+            _buffer.Add(new PlayerInfo
             {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    Players.Clear();
-                    PlayerCount   = 0;
-                    LastRefreshed = DateTime.Now.ToString("HH:mm:ss");
-                });
-            }
+                EntityId    = int.Parse(header.Groups[1].Value),
+                Name        = header.Groups[2].Value.Trim(),
+                Health      = ParseIntField(line, "health"),
+                Deaths      = ParseIntField(line, "deaths"),
+                Zombies     = ParseIntField(line, "zombies"),
+                PlayerKills = ParseIntField(line, "players"),
+                Score       = ParseIntField(line, "score"),
+                Level       = ParseIntField(line, "level"),
+                Ping        = ParseIntField(line, "ping"),
+                SteamId     = steamM.Success  ? steamM.Groups[1].Value.Trim()  : "",
+                CrossId     = crossM.Success  ? crossM.Groups[1].Value.Trim()  : "",
+                Ip          = ipM.Success     ? ipM.Groups[1].Value.Trim()     : "",
+                Position    = FormatPos(PosRx.Match(line)),
+                Remote      = remoteM.Success && remoteM.Groups[1].Value.Equals("True", StringComparison.OrdinalIgnoreCase),
+            });
             return;
         }
 
-        if (!_collectingLp) return;
-
-        var header = PlayerLineRx.Match(line);
-        if (!header.Success) return;
-
-        var steamM = SteamIdRx.Match(line);
-        var ipM    = IpRx.Match(line);
-
-        _buffer.Add(new PlayerInfo
+        // Footer: commit whatever rows we collected (handles 0 players too).
+        if (TotalRx.IsMatch(line))
         {
-            EntityId = int.Parse(header.Groups[1].Value),
-            Name     = header.Groups[2].Value.Trim(),
-            Health   = ParseIntField(line, "health"),
-            Deaths   = ParseIntField(line, "deaths"),
-            Zombies  = ParseIntField(line, "zombies"),
-            Score    = ParseIntField(line, "score"),
-            Level    = ParseIntField(line, "level"),
-            Ping     = ParseIntField(line, "ping"),
-            SteamId  = steamM.Success ? steamM.Groups[1].Value.Trim() : "",
-            Ip       = ipM.Success    ? ipM.Groups[1].Value.Trim()    : "",
-        });
-
-        if (_buffer.Count < _expectedCount) return;
-
-        _collectingLp = false;
-        CommitBuffer();
+            CommitBuffer();
+            _buffer.Clear();
+        }
     }
 
     private void CommitBuffer()
@@ -189,10 +177,17 @@ public partial class PlayersViewModel : ObservableObject, IAsyncDisposable
         var captured = _buffer.ToList();
         Application.Current.Dispatcher.Invoke(() =>
         {
+            // Remember the current selection so the action panel stays open across refreshes
+            var selectedId = SelectedPlayer?.EntityId;
+
             Players.Clear();
             foreach (var p in captured) Players.Add(p);
             PlayerCount   = Players.Count;
             LastRefreshed = DateTime.Now.ToString("HH:mm:ss");
+
+            // Re-select the same player (by entity id) if they're still online
+            if (selectedId is int id)
+                SelectedPlayer = Players.FirstOrDefault(p => p.EntityId == id);
         });
     }
 
@@ -217,5 +212,18 @@ public partial class PlayersViewModel : ObservableObject, IAsyncDisposable
     {
         var m = Regex.Match(line, $@"\b{key}=(-?\d+)");
         return m.Success ? int.Parse(m.Groups[1].Value) : 0;
+    }
+
+    // "pos=(-101.3, 48.8, -285.6)" -> "-101 49 -286" (rounded whole coords)
+    private static string FormatPos(Match posMatch)
+    {
+        if (!posMatch.Success) return "";
+        var parts = posMatch.Groups[1].Value.Split(',');
+        var coords = parts.Select(s =>
+            float.TryParse(s.Trim(), System.Globalization.NumberStyles.Float,
+                           System.Globalization.CultureInfo.InvariantCulture, out var f)
+                ? ((int)Math.Round(f)).ToString()
+                : s.Trim());
+        return string.Join(" ", coords);
     }
 }

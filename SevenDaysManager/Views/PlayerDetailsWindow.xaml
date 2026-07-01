@@ -1,0 +1,73 @@
+<Window x:Class="SevenDaysManager.Views.PlayerDetailsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="Player Details"
+        Width="640" Height="560"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource MaterialDesign.Brush.Background}"
+        TextElement.Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
+        TextElement.FontFamily="{materialDesign:MaterialDesignFont}"
+        FontSize="14">
+
+    <Window.Resources>
+        <Style x:Key="InfoLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Opacity" Value="0.55"/>
+            <Setter Property="Margin" Value="0,0,0,3"/>
+        </Style>
+        <Style x:Key="InfoValue" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="{DynamicResource MaterialDesign.Brush.Primary.Dark}" Padding="24,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <materialDesign:PackIcon Grid.Column="0" Kind="AccountDetails" Width="28" Height="28"
+                                         VerticalAlignment="Center" Margin="0,0,12,0"
+                                         Foreground="{DynamicResource MaterialDesign.Brush.Primary.Foreground}"/>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock x:Name="TitleText" FontSize="17" FontWeight="Bold"
+                               Foreground="{DynamicResource MaterialDesign.Brush.Primary.Foreground}"/>
+                    <TextBlock Text="Player details" FontSize="12" Opacity="0.8"
+                               Foreground="{DynamicResource MaterialDesign.Brush.Primary.Foreground}"/>
+                </StackPanel>
+                <Button Grid.Column="2"
+                        Style="{StaticResource MaterialDesignIconButton}"
+                        Foreground="{DynamicResource MaterialDesign.Brush.Primary.Foreground}"
+                        Width="34" Height="34" VerticalAlignment="Top"
+                        Click="Close_Click" ToolTip="Close">
+                    <materialDesign:PackIcon Kind="Close" Width="20" Height="20"/>
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- Body: two-column info grid -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="20,18">
+            <UniformGrid x:Name="InfoGrid" Columns="2"/>
+        </ScrollViewer>
+
+        <!-- Footer -->
+        <Border Grid.Row="2" Padding="20,12" Background="#14FFFFFF">
+            <Button Content="Close" HorizontalAlignment="Right"
+                    Style="{StaticResource MaterialDesignOutlinedButton}"
+                    Width="110" Click="Close_Click"/>
+        </Border>
+    </Grid>
+</Window>

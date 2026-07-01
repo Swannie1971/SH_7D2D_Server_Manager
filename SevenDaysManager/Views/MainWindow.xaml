@@ -202,7 +202,7 @@
                             <TextBlock Text="App Settings" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
-                    <TextBlock Text="v0.2.4"
+                    <TextBlock Text="v0.2.6"
                                HorizontalAlignment="Right" VerticalAlignment="Center"
                                FontSize="11" Opacity="0.8"
                                Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"/>
@@ -708,6 +708,17 @@
                         <materialDesign:Card UniformCornerRadius="10" Margin="4" Padding="20" Cursor="Hand"
                                              Background="{DynamicResource GlassBrush}"
                                              MouseLeftButtonUp="InstallCard_Click">
+                            <materialDesign:Card.Style>
+                                <Style TargetType="materialDesign:Card" BasedOn="{StaticResource {x:Type materialDesign:Card}}">
+                                    <Style.Triggers>
+                                        <!-- Block updating while the server is running -->
+                                        <DataTrigger Binding="{Binding SelectedServerRunning}" Value="True">
+                                            <Setter Property="IsEnabled" Value="False"/>
+                                            <Setter Property="Opacity"   Value="0.5"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </materialDesign:Card.Style>
                             <StackPanel>
                                 <Grid Margin="0,0,0,10">
                                     <materialDesign:PackIcon Kind="Download" Width="30" Height="30"
@@ -766,8 +777,20 @@
                                            FontSize="12" FontWeight="SemiBold"
                                            Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"
                                            Margin="0,0,0,4"/>
-                                <TextBlock Text="Click to install or update via SteamCMD"
-                                           FontSize="12" Opacity="0.55" TextWrapping="Wrap"/>
+                                <TextBlock FontSize="12" Opacity="0.55" TextWrapping="Wrap">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="Click to install or update via SteamCMD"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedServerRunning}" Value="True">
+                                                    <Setter Property="Text" Value="⚠ Stop the server before updating"/>
+                                                    <Setter Property="Foreground" Value="#FFB300"/>
+                                                    <Setter Property="Opacity" Value="1"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
                             </StackPanel>
                         </materialDesign:Card>
 

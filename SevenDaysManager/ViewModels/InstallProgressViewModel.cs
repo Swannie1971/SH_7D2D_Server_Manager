@@ -16,7 +16,10 @@ public partial class InstallProgressViewModel : ObservableObject
     public ObservableCollection<string> LogLines { get; } = new();
 
     [ObservableProperty] private bool   _isRunning;
-    [ObservableProperty] private string _statusMessage = "Starting install…";
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(StartCommand))]
+    private bool   _isReady = true;   // shown before the user clicks Start
+    [ObservableProperty] private string _statusMessage = "Ready — click Start to install or update.";
     [ObservableProperty] private bool   _isComplete;
     [ObservableProperty] private bool   _hasFailed;
 
@@ -44,8 +47,10 @@ public partial class InstallProgressViewModel : ObservableObject
         InstallDir = server.InstallDir;
     }
 
+    [RelayCommand(CanExecute = nameof(IsReady))]
     public async Task StartAsync()
     {
+        IsReady = false;
         IsRunning = true;
         IsComplete = false;
         HasFailed = false;

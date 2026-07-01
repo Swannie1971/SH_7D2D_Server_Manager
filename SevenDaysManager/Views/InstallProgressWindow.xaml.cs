@@ -28,11 +28,5 @@ public partial class InstallProgressWindow : Window
         ThemeService.ApplyTitleBar(this);
     }
 
-    protected override async void OnContentRendered(EventArgs e)
-    {
-        base.OnContentRendered(e);
-        await _vm.StartAsync();
-    }
-
     private void CloseButton_Click(object sender, RoutedEventArgs e) => Close();
 }

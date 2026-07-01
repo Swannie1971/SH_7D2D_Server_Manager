@@ -32,6 +32,9 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty] private bool   _installIsUpToDate;
     [ObservableProperty] private bool   _installCheckBusy;
 
+    // True while the selected server is not fully stopped — updating is blocked then
+    [ObservableProperty] private bool   _selectedServerRunning;
+
     // Action feedback
     [ObservableProperty] private string _actionError = "";
 
@@ -94,12 +97,17 @@ public partial class MainViewModel : ObservableObject
         }
         _ = RefreshInstallInfoAsync(value);
         _previousSelected = value;
+        UpdateSelectedServerRunning();
 
         if (value is { Status: ServerStatus.Running })
             StartLiveStats(value);
         else
             StopLiveStats();
     }
+
+    // Updating via SteamCMD must not run while the server process is up (file locks / corruption).
+    private void UpdateSelectedServerRunning() =>
+        SelectedServerRunning = SelectedServer is not null && SelectedServer.Status != ServerStatus.Stopped;
 
     // ── Server list ──────────────────────────────────────────────────────────
 
@@ -353,9 +361,10 @@ public partial class MainViewModel : ObservableObject
             var latest = await _steamCmd.GetLatestBuildIdAsync();
             if (latest is null)
             {
-                // Can't reach Steam — assume up to date rather than showing a false warning
-                InstallStatusLabel = "Up to date";
-                InstallIsUpToDate  = true;
+                // Couldn't determine the latest build (SteamCMD missing/offline) — don't claim
+                // "up to date"; show a neutral state so we never hide a real update.
+                InstallStatusLabel = "Version check unavailable";
+                InstallIsUpToDate  = false;
                 return;
             }
 
@@ -424,6 +433,8 @@ public partial class MainViewModel : ObservableObject
             // Live stats transitions (selected server only)
             if (wasSelected)
             {
+                UpdateSelectedServerRunning();
+
                 if (status == ServerStatus.Running)
                     StartLiveStats(server);
                 else if (status == ServerStatus.Stopped)

@@ -151,6 +151,17 @@ public partial class MainWindow : Window
     private void InstallCard_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
     {
         if (_vm.SelectedServer is not { } server) return;
+
+        // Don't allow install/update while the server is running — SteamCMD would fight file locks.
+        if (_vm.SelectedServerRunning)
+        {
+            MessageBox.Show(this,
+                "The server is currently running. Stop it before installing or updating.",
+                "Server is running",
+                MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
         new InstallProgressWindow(server) { Owner = this }.ShowDialog();
         _ = _vm.OnServerUpdatedAsync(server);
     }

@@ -13,7 +13,6 @@ public class SteamCmdService
 {
     private const int AppId = 294420;
     private const string SteamCmdZipUrl = "https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip";
-    private const string LatestBuildUrl = "https://api.steampowered.com/ISteamApps/UpToDateCheck/v1/?appid=294420&version=0&format=json";
 
     private static readonly HttpClient Http = new();
 
@@ -299,14 +298,45 @@ public class SteamCmdService
         return new InstallInfo(build.Groups[1].Value, IsUpToDate: false); // IsUpToDate resolved by async check
     }
 
-    // Fetch the latest published build ID for the 7D2D dedicated server from Steam
-    public async Task<string?> GetLatestBuildIdAsync()
+    // Fetch the latest published build ID for the public branch of the 7D2D dedicated server.
+    // Uses SteamCMD's own app_info_print so the number is the SAME buildid scheme as the local
+    // appmanifest (Steam's UpToDateCheck API returns an unrelated "version" number and cannot be
+    // compared against buildid — that produced false "up to date" results).
+    public async Task<string?> GetLatestBuildIdAsync(CancellationToken ct = default)
     {
+        if (!IsSteamCmdPresent) return null;
+
         try
         {
-            var json  = await Http.GetStringAsync(LatestBuildUrl);
-            var match = Regex.Match(json, @"""required_version""\s*:\s*(\d+)");
-            return match.Success ? match.Groups[1].Value : null;
+            var psi = new ProcessStartInfo
+            {
+                FileName               = SteamCmdExe,
+                RedirectStandardOutput = true,
+                RedirectStandardError  = true,
+                UseShellExecute        = false,
+                CreateNoWindow         = true,
+                WorkingDirectory       = _steamCmdDir
+            };
+            psi.ArgumentList.Add("+login");
+            psi.ArgumentList.Add("anonymous");
+            psi.ArgumentList.Add("+app_info_update");
+            psi.ArgumentList.Add("1");
+            psi.ArgumentList.Add("+app_info_print");
+            psi.ArgumentList.Add(AppId.ToString());
+            psi.ArgumentList.Add("+quit");
+
+            using var process = new Process { StartInfo = psi };
+            var sb = new StringBuilder();
+            process.OutputDataReceived += (_, e) => { if (e.Data is not null) sb.AppendLine(e.Data); };
+
+            process.Start();
+            process.BeginOutputReadLine();
+            await process.WaitForExitAsync(ct);
+
+            // VDF: "branches" { "public" { "buildid" "19053852" ... }
+            var m = Regex.Match(sb.ToString(),
+                @"""public""\s*\{[^}]*?""buildid""\s*""(\d+)""");
+            return m.Success ? m.Groups[1].Value : null;
         }
         catch { return null; }
     }

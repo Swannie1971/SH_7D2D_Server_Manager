@@ -112,6 +112,15 @@
                 BorderBrush="#22FFFFFF"
                 Padding="16,12">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                        Width="150" Margin="0,0,8,0"
+                        Command="{Binding StartCommand}"
+                        Visibility="{Binding IsReady, Converter={StaticResource BoolToVis}}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Download" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <TextBlock Text="Start" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
                 <Button Style="{StaticResource MaterialDesignOutlinedButton}"
                         Content="Cancel" Width="100" Margin="0,0,8,0"
                         Command="{Binding CancelCommand}"

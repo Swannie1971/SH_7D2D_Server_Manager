@@ -28,6 +28,11 @@ public partial class ConsoleView : UserControl
         if (DataContext is not ConsoleViewModel vm) return;
         switch (e.Key)
         {
+            case Key.Enter:
+                if (vm.SendCommandCommand.CanExecute(null))
+                    vm.SendCommandCommand.Execute(null);
+                e.Handled = true;
+                break;
             case Key.Up:
                 vm.HistoryUp();
                 CommandBox.CaretIndex = CommandBox.Text.Length;
