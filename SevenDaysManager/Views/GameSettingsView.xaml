@@ -244,13 +244,30 @@
                                                        VerticalAlignment="Center">
                                             <c:TrackedText.Style>
                                                 <Style TargetType="c:TrackedText">
+                                                    <!-- Idle: the preset's own ramp colour on a faint wash. -->
                                                     <Setter Property="Foreground"
                                                             Value="{Binding Severity, Converter={StaticResource SeverityToBrush}}"/>
                                                     <Style.Triggers>
+                                                        <!-- Selected: near-black ink, because the button is filled
+                                                             solid with the ramp colour. -->
                                                         <DataTrigger Binding="{Binding IsActive}" Value="True">
                                                             <Setter Property="Foreground"
                                                                     Value="{Binding Severity, Converter={StaticResource SeverityToBrush},
                                                                                     ConverterParameter=ink}"/>
+                                                        </DataTrigger>
+
+                                                        <!-- Hover MUST come last so it beats the IsActive setter.
+                                                             Hud.Button's template swaps the background to the dark
+                                                             SurfaceHover on mouse-over, and it does so from inside
+                                                             the ControlTemplate — which outranks anything we set
+                                                             here. So on the selected button the fill went dark while
+                                                             the ink stayed near-black: black on black, unreadable.
+                                                             Going light on hover keeps the label legible in both
+                                                             states. -->
+                                                        <DataTrigger Value="True"
+                                                                     Binding="{Binding IsMouseOver,
+                                                                               RelativeSource={RelativeSource AncestorType=Button}}">
+                                                            <Setter Property="Foreground" Value="{DynamicResource Hud.Fg}"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
