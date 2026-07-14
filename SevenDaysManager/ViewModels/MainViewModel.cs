@@ -59,6 +59,13 @@ public partial class MainViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(ActiveDetailTitle))]
     private object? _activeDetail;
 
+    /// <summary>
+    /// The version shown in the sidebar. Bound rather than hardcoded in the XAML, so it can't
+    /// drift from UpdateService.CurrentVersion — which is what the update check compares
+    /// against the GitHub release tag. One place to bump.
+    /// </summary>
+    public string AppVersion => $"V{Services.UpdateService.CurrentVersion}";
+
     public string ActiveDetailTitle => ActiveDetail switch
     {
         OverviewViewModel       => "Overview",

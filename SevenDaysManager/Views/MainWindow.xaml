@@ -249,7 +249,7 @@
                             <TextBlock Text="SETTINGS" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
-                    <TextBlock Text="V0.2.8"
+                    <TextBlock Text="{Binding AppVersion}"
                                HorizontalAlignment="Right" VerticalAlignment="Center"
                                Style="{StaticResource Hud.Mono.Text}"
                                FontSize="10" FontWeight="Bold"

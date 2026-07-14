@@ -6,8 +6,10 @@ namespace SevenDaysManager.Services;
 
 public static class UpdateService
 {
-    // Bump this constant with every release and tag on GitHub as "v{CurrentVersion}"
-    public const string CurrentVersion = "0.2.8";
+    // The single source of truth for the app version. The sidebar binds to it
+    // (MainViewModel.AppVersion), and the update check compares it against the latest
+    // GitHub release tag — so bump this and tag the release as "v{CurrentVersion}".
+    public const string CurrentVersion = "0.3.0";
 
     private static readonly HttpClient _http = new()
     {
