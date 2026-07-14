@@ -1,6 +1,5 @@
 using System.Windows;
-using MaterialDesignThemes.Wpf;
-using SevenDaysManager.Services;
+using System.Windows.Input;
 using SevenDaysManager.ViewModels;
 
 namespace SevenDaysManager.Views;
@@ -13,10 +12,11 @@ public partial class AddServerWindow : Window
         DataContext = new AddServerViewModel();
     }
 
-    protected override void OnSourceInitialized(EventArgs e)
+    // Borderless window: the header bar is the only thing left to drag by.
+    private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        base.OnSourceInitialized(e);
-        ThemeService.ApplyTitleBar(this);
+        if (e.ButtonState == MouseButtonState.Pressed)
+            DragMove();
     }
 
     private void SaveButton_Click(object sender, RoutedEventArgs e)
@@ -24,8 +24,7 @@ public partial class AddServerWindow : Window
         var vm = (AddServerViewModel)DataContext;
         if (vm.HasValidationError(out var msg))
         {
-            var snackbar = new SnackbarMessageQueue(TimeSpan.FromSeconds(3));
-            snackbar.Enqueue(msg);
+            HudDialog.Show(msg, "Invalid server", MessageBoxButton.OK, MessageBoxImage.Warning, owner: this);
             return;
         }
         DialogResult = true;

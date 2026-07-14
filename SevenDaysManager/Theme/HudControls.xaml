@@ -428,7 +428,16 @@
             <Setter.Value>
                 <ControlTemplate TargetType="ComboBox">
                     <Grid>
+                        <!-- ⚠ Style MUST be cleared, exactly as in Hud.Expander's header.
+                             An ambient ToggleButton style (Hud.Toggle) carries a fixed Width/Height
+                             for the switch pill. If it leaks in here, this button stops filling the
+                             ComboBox: the bordered box + caret shrink to a stub floating beside the
+                             selected-item text, instead of framing it. -->
                         <ToggleButton x:Name="Toggle"
+                                      Style="{x:Null}"
+                                      MinWidth="0" MinHeight="0"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Stretch"
                                       Focusable="False"
                                       IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}"
                                       ClickMode="Press">

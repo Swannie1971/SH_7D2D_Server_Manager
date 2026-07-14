@@ -1,6 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
+using System.Windows.Input;
 using SevenDaysManager.Models;
 using SevenDaysManager.ViewModels;
 
@@ -17,23 +17,23 @@ public partial class PlayerDetailsWindow : Window
         _player    = player;
         _playersVm = playersVm;
 
-        TitleText.Text = $"Player: {player.Name}";
+        TitleText.Text = player.Name;
 
         // Only fields we can reliably read from the server's "lp" telnet output.
-        AddCell("Player Name",     player.Name);
-        AddCell("Entity ID",       player.EntityId.ToString());
-        AddCell("Player ID",       string.IsNullOrEmpty(player.CrossId)  ? "—" : player.CrossId);
-        AddCell("Platform ID",     string.IsNullOrEmpty(player.PlatformId) ? "—" : player.PlatformId);
-        AddCell("Connection",      player.Connection);
-        AddCell("Current Position", string.IsNullOrEmpty(player.Position) ? "—" : player.Position);
-        AddCell("Level",           player.Level.ToString());
-        AddCell("Health",          player.Health.ToString());
-        AddCell("Score",           player.Score.ToString());
-        AddCell("Deaths",          player.Deaths.ToString());
-        AddCell("Zombie Kills",    player.Zombies.ToString());
-        AddCell("Player Kills",    player.PlayerKills.ToString());
-        AddCell("Ping",            $"{player.Ping} ms");
-        AddCell("IP Address",      string.IsNullOrEmpty(player.Ip) ? "—" : player.Ip);
+        AddCell("PLAYER NAME",      player.Name);
+        AddCell("ENTITY ID",        player.EntityId.ToString());
+        AddCell("PLAYER ID",        string.IsNullOrEmpty(player.CrossId)    ? "—" : player.CrossId);
+        AddCell("PLATFORM ID",      string.IsNullOrEmpty(player.PlatformId) ? "—" : player.PlatformId);
+        AddCell("CONNECTION",       player.Connection);
+        AddCell("CURRENT POSITION", string.IsNullOrEmpty(player.Position)   ? "—" : player.Position);
+        AddCell("LEVEL",            player.Level.ToString());
+        AddCell("HEALTH",           player.Health.ToString());
+        AddCell("SCORE",            player.Score.ToString());
+        AddCell("DEATHS",           player.Deaths.ToString());
+        AddCell("ZOMBIE KILLS",     player.Zombies.ToString());
+        AddCell("PLAYER KILLS",     player.PlayerKills.ToString());
+        AddCell("PING",             $"{player.Ping} ms");
+        AddCell("IP ADDRESS",       string.IsNullOrEmpty(player.Ip)         ? "—" : player.Ip);
     }
 
     private void AddCell(string label, string value)
@@ -52,27 +52,34 @@ public partial class PlayerDetailsWindow : Window
 
         InfoGrid.Children.Add(new Border
         {
-            Background    = new SolidColorBrush(Color.FromArgb(0x14, 0xFF, 0xFF, 0xFF)),
-            CornerRadius  = new CornerRadius(6),
-            Margin        = new Thickness(4),
-            Padding       = new Thickness(14, 10, 14, 10),
-            Child         = panel
+            Background      = (Brush)FindResource("Hud.Surface"),
+            BorderBrush     = (Brush)FindResource("Hud.Border"),
+            BorderThickness = new Thickness(1),
+            Margin          = new Thickness(0, 0, 8, 8),
+            Padding         = new Thickness(12, 9, 12, 9),
+            Child           = panel
         });
+    }
+
+    // Borderless window: the header bar is the only thing left to drag by.
+    private void Header_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.ButtonState == MouseButtonState.Pressed)
+            DragMove();
     }
 
     private async void GrantAdmin_Click(object sender, RoutedEventArgs e)
     {
         if (!int.TryParse(AdminLevelBox.Text.Trim(), out var level) || level < 0)
         {
-            AdminStatusText.Text = "Enter a valid admin level (0 or higher).";
+            SetStatus("Enter a valid admin level (0 or higher).", ok: false);
             return;
         }
 
         SetButtonsEnabled(false);
         var ok = await _playersVm.SetAdminLevelAsync(_player.EntityId, level);
-        AdminStatusText.Text = ok
-            ? $"Sent: admin add {_player.EntityId} {level}"
-            : "Not connected to server telnet.";
+        SetStatus(ok ? $"Sent: admin add {_player.EntityId} {level}"
+                     : "Not connected to server telnet.", ok);
         SetButtonsEnabled(true);
     }
 
@@ -80,10 +87,16 @@ public partial class PlayerDetailsWindow : Window
     {
         SetButtonsEnabled(false);
         var ok = await _playersVm.RemoveAdminAsync(_player.EntityId);
-        AdminStatusText.Text = ok
-            ? $"Sent: admin remove {_player.EntityId}"
-            : "Not connected to server telnet.";
+        SetStatus(ok ? $"Sent: admin remove {_player.EntityId}"
+                     : "Not connected to server telnet.", ok);
         SetButtonsEnabled(true);
+    }
+
+    // A failure rendered in the same neutral grey as a success is easy to miss.
+    private void SetStatus(string message, bool ok)
+    {
+        AdminStatusText.Text       = message;
+        AdminStatusText.Foreground = (Brush)FindResource(ok ? "Hud.Green" : "Hud.Red");
     }
 
     private void SetButtonsEnabled(bool enabled)

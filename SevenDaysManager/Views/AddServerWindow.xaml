@@ -3,13 +3,14 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:conv="clr-namespace:SevenDaysManager.Converters"
+        xmlns:c="clr-namespace:SevenDaysManager.Controls"
         Title="Add New Server"
-        Width="560" SizeToContent="Height"
+        Width="600" SizeToContent="Height"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
-        Background="{DynamicResource MaterialDesign.Brush.Background}"
-        TextElement.Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
-        TextElement.FontFamily="{materialDesign:MaterialDesignFont}"
         FontSize="14">
 
     <Window.Resources>
@@ -17,168 +18,227 @@
         <conv:FilePathToImageConverter x:Key="PathToImage"/>
     </Window.Resources>
 
-    <StackPanel>
-        <!-- Header -->
-        <Border Background="{DynamicResource MaterialDesign.Brush.Primary}" Padding="20,16">
-            <StackPanel>
-                <TextBlock Text="Add New Server" FontSize="18" FontWeight="Bold"
-                           Foreground="{DynamicResource MaterialDesign.Brush.Primary.Foreground}"/>
-                <TextBlock Text="Configure a new 7 Days to Die dedicated server"
-                           FontSize="11" Opacity="0.7"
-                           Foreground="{DynamicResource MaterialDesign.Brush.Primary.Foreground}"/>
-            </StackPanel>
-        </Border>
+    <Border Background="{DynamicResource Hud.Bg}"
+            BorderBrush="{DynamicResource Hud.BorderStrong}"
+            BorderThickness="1"
+            VerticalAlignment="Top">
+        <Grid VerticalAlignment="Top">
+            <c:HudAtmosphere Panel.ZIndex="0"/>
 
-        <StackPanel Margin="20">
+            <StackPanel Panel.ZIndex="1" VerticalAlignment="Top">
 
-            <!-- ── Server Banner Image ──────────────────────────────────── -->
-            <TextBlock Text="SERVER BANNER" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
-            <materialDesign:Card UniformCornerRadius="0" Margin="0,0,0,20" Height="160">
-                <Grid>
-                    <!-- Base always-visible background -->
-                    <Image Source="pack://application:,,,/Assets/bg.jpg"
-                           Stretch="UniformToFill"
-                           RenderOptions.BitmapScalingMode="HighQuality"/>
-                    <!-- Chosen logo centered + respects transparency -->
-                    <Image Source="{Binding LogoPath, Converter={StaticResource PathToImage}}"
-                           Stretch="Uniform"
-                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                           RenderOptions.BitmapScalingMode="HighQuality"
-                           Margin="12"/>
-                    <!-- Choose button overlaid bottom-right -->
-                    <Button Style="{StaticResource MaterialDesignRaisedButton}"
-                            materialDesign:ButtonAssist.CornerRadius="0"
-                            Command="{Binding BrowseLogoCommand}"
-                            HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                            Margin="0,0,12,12" Height="36" Padding="14,0"
-                            Background="#CC000000" BorderBrush="Transparent">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="ImageEdit" Width="16" Height="16"
-                                                     VerticalAlignment="Center" Margin="0,0,6,0"/>
-                            <TextBlock Text="Choose Image" FontSize="12" VerticalAlignment="Center"/>
+                <!-- ══ Header ══ -->
+                <Grid Height="64"
+                      Background="Transparent"
+                      MouseLeftButtonDown="Header_MouseLeftButtonDown">
+                    <Rectangle Fill="{DynamicResource Hud.BgElevated}"/>
+                    <Rectangle Fill="{DynamicResource Hud.HazardTile}" Opacity="0.3"/>
+                    <Border BorderBrush="{DynamicResource Hud.Border}" BorderThickness="0,0,0,1"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0">
+                        <materialDesign:PackIcon Kind="ServerPlus" Width="19" Height="19"
+                                                 Foreground="{DynamicResource Hud.Accent}"
+                                                 VerticalAlignment="Center" Margin="0,0,11,0"/>
+                        <StackPanel VerticalAlignment="Center">
+                            <c:TrackedText Text="ADD NEW SERVER"
+                                           Style="{StaticResource Hud.PanelHeader}"
+                                           FontSize="12.5"/>
+                            <TextBlock Text="Configure a new 7 Days to Die dedicated server"
+                                       Style="{StaticResource Hud.Mono.Text}"
+                                       FontSize="10.5"
+                                       Foreground="{DynamicResource Hud.FgFaint}"
+                                       Margin="0,3,0,0"/>
                         </StackPanel>
-                    </Button>
-                </Grid>
-            </materialDesign:Card>
-
-            <!-- ── General ──────────────────────────────────────────────── -->
-            <TextBlock Text="GENERAL" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
-            <materialDesign:Card UniformCornerRadius="0" Padding="16" Margin="0,0,0,20">
-                <StackPanel>
-                    <TextBox materialDesign:HintAssist.Hint="Server Name"
-                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                             Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
-                </StackPanel>
-            </materialDesign:Card>
-
-            <!-- ── World ────────────────────────────────────────────────── -->
-            <TextBlock Text="WORLD" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
-            <materialDesign:Card UniformCornerRadius="0" Padding="16" Margin="0,0,0,20">
-                <StackPanel>
-                    <Grid Margin="0,0,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <ComboBox materialDesign:HintAssist.Hint="Game World"
-                                  Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                                  ItemsSource="{Binding GameWorldOptions}"
-                                  SelectedItem="{Binding GameWorld}"/>
-                        <TextBox Grid.Column="2"
-                                 materialDesign:HintAssist.Hint="Save Name"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                 Text="{Binding GameName, UpdateSourceTrigger=PropertyChanged}"/>
-                    </Grid>
-
-                    <!-- RWG-only fields -->
-                    <Grid Visibility="{Binding IsRwg, Converter={StaticResource BoolToVis}}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBox materialDesign:HintAssist.Hint="World Seed (optional)"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                 Text="{Binding WorldGenSeed, UpdateSourceTrigger=PropertyChanged}"/>
-                        <ComboBox Grid.Column="2"
-                                  materialDesign:HintAssist.Hint="World Size"
-                                  Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                                  ItemsSource="{Binding WorldGenSizeOptions}"
-                                  SelectedItem="{Binding WorldGenSize}"/>
-                    </Grid>
-                </StackPanel>
-            </materialDesign:Card>
-
-            <!-- ── Network ──────────────────────────────────────────────── -->
-            <TextBlock Text="NETWORK" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
-            <materialDesign:Card UniformCornerRadius="0" Padding="16" Margin="0,0,0,20">
-                <StackPanel>
-                    <Grid Margin="0,0,0,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBox materialDesign:HintAssist.Hint="Game Port"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                 Text="{Binding ServerPort, UpdateSourceTrigger=PropertyChanged}"/>
-                        <TextBox Grid.Column="2"
-                                 materialDesign:HintAssist.Hint="Telnet Port"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                 Text="{Binding TelnetPort, UpdateSourceTrigger=PropertyChanged}"/>
-                        <TextBox Grid.Column="4"
-                                 materialDesign:HintAssist.Hint="Web Dashboard Port"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                 Text="{Binding WebDashboardPort, UpdateSourceTrigger=PropertyChanged}"/>
-                    </Grid>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBox materialDesign:HintAssist.Hint="Max Players"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                 Text="{Binding MaxPlayers, UpdateSourceTrigger=PropertyChanged}"/>
-                        <TextBox Grid.Column="2"
-                                 materialDesign:HintAssist.Hint="Join Password (optional)"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                 Text="{Binding ServerPassword, UpdateSourceTrigger=PropertyChanged}"/>
-                    </Grid>
-                </StackPanel>
-            </materialDesign:Card>
-
-            <!-- ── Options ──────────────────────────────────────────────── -->
-            <TextBlock Text="OPTIONS" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
-            <materialDesign:Card UniformCornerRadius="0" Padding="16" Margin="0,0,0,24">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="EAC (Anti-Cheat)" FontWeight="SemiBold"/>
-                        <TextBlock Text="Easy Anti-Cheat protection" FontSize="12" Opacity="0.6" Margin="0,2,0,0"/>
                     </StackPanel>
-                    <ToggleButton Grid.Column="1"
-                                  Style="{StaticResource Hud.Toggle}"
-                                  IsChecked="{Binding EacEnabled}"
-                                  VerticalAlignment="Center"/>
                 </Grid>
-            </materialDesign:Card>
 
-            <!-- ── Buttons ──────────────────────────────────────────────── -->
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource MaterialDesignFlatButton}"
-                        Content="Cancel" Width="100" Margin="0,0,8,0"
-                        Click="CancelButton_Click"/>
-                <Button Style="{StaticResource MaterialDesignRaisedButton}"
-                        Content="Add Server" Width="120"
-                        Click="SaveButton_Click"/>
+                <StackPanel Margin="16,16,16,0">
+
+                    <!-- ══ Banner ══ -->
+                    <c:HudPanel Header="SERVER BANNER" Tint="Violet" Margin="0,0,0,14">
+                        <Grid Height="150">
+                            <Image Source="pack://application:,,,/Assets/bg.jpg"
+                                   Stretch="UniformToFill"
+                                   RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <!-- Chosen logo, centred, transparency preserved -->
+                            <Image Source="{Binding LogoPath, Converter={StaticResource PathToImage}}"
+                                   Stretch="Uniform"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                   Margin="12"/>
+                            <Rectangle Fill="{DynamicResource Hud.ScanlineTile}" IsHitTestVisible="False"/>
+
+                            <Button Style="{StaticResource Hud.Button}"
+                                    Command="{Binding BrowseLogoCommand}"
+                                    HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                    Margin="0,0,10,10" Height="28" Padding="12,0"
+                                    Background="#CC08080A">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="ImageEdit" Width="13" Height="13"
+                                                             Foreground="{DynamicResource Hud.Accent}"
+                                                             VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <c:TrackedText Text="CHOOSE IMAGE" LetterSpacing="0.12"
+                                                   FontFamily="{DynamicResource Hud.Mono}"
+                                                   FontSize="9.5" FontWeight="Bold"
+                                                   Foreground="{DynamicResource Hud.Fg}"
+                                                   VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </c:HudPanel>
+
+                    <!-- ══ General ══ -->
+                    <c:HudPanel Header="GENERAL" Tint="Accent" Margin="0,0,0,14">
+                        <StackPanel>
+                            <c:TrackedText Text="SERVER NAME" Style="{StaticResource Hud.FieldLabel}"/>
+                            <TextBox Style="{StaticResource Hud.TextBox}"
+                                     Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+                        </StackPanel>
+                    </c:HudPanel>
+
+                    <!-- ══ World ══ -->
+                    <c:HudPanel Header="WORLD" Tint="Green" Margin="0,0,0,14">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="14"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <c:TrackedText Text="GAME WORLD" Style="{StaticResource Hud.FieldLabel}"/>
+                                    <ComboBox Style="{StaticResource Hud.ComboBox}"
+                                              ItemsSource="{Binding GameWorldOptions}"
+                                              SelectedItem="{Binding GameWorld}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <c:TrackedText Text="SAVE NAME" Style="{StaticResource Hud.FieldLabel}"/>
+                                    <TextBox Style="{StaticResource Hud.TextBox}"
+                                             Text="{Binding GameName, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- Seed + size only mean anything for a randomly generated world -->
+                            <Grid Visibility="{Binding IsRwg, Converter={StaticResource BoolToVis}}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="14"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <c:TrackedText Text="WORLD SEED (OPTIONAL)" Style="{StaticResource Hud.FieldLabel}"/>
+                                    <TextBox Style="{StaticResource Hud.TextBox}"
+                                             Text="{Binding WorldGenSeed, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <c:TrackedText Text="WORLD SIZE" Style="{StaticResource Hud.FieldLabel}"/>
+                                    <ComboBox Style="{StaticResource Hud.ComboBox}"
+                                              ItemsSource="{Binding WorldGenSizeOptions}"
+                                              SelectedItem="{Binding WorldGenSize}"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </c:HudPanel>
+
+                    <!-- ══ Network ══ -->
+                    <c:HudPanel Header="NETWORK" Tint="Blue" Margin="0,0,0,14">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="14"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="14"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <c:TrackedText Text="GAME PORT" Style="{StaticResource Hud.FieldLabel}"/>
+                                    <TextBox Style="{StaticResource Hud.TextBox}"
+                                             Text="{Binding ServerPort, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <c:TrackedText Text="TELNET PORT" Style="{StaticResource Hud.FieldLabel}"/>
+                                    <TextBox Style="{StaticResource Hud.TextBox}"
+                                             Text="{Binding TelnetPort, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="4">
+                                    <c:TrackedText Text="WEB DASHBOARD" Style="{StaticResource Hud.FieldLabel}"/>
+                                    <TextBox Style="{StaticResource Hud.TextBox}"
+                                             Text="{Binding WebDashboardPort, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="14"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <c:TrackedText Text="MAX PLAYERS" Style="{StaticResource Hud.FieldLabel}"/>
+                                    <TextBox Style="{StaticResource Hud.TextBox}"
+                                             Text="{Binding MaxPlayers, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2">
+                                    <c:TrackedText Text="JOIN PASSWORD (OPTIONAL)" Style="{StaticResource Hud.FieldLabel}"/>
+                                    <TextBox Style="{StaticResource Hud.TextBox}"
+                                             Text="{Binding ServerPassword, UpdateSourceTrigger=PropertyChanged}"/>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </c:HudPanel>
+
+                    <!-- ══ Options ══ -->
+                    <c:HudPanel Header="OPTIONS" Tint="Amber" Margin="0,0,0,16">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
+                                <c:TrackedText Text="EAC (ANTI-CHEAT)" Style="{StaticResource Hud.SettingLabel}"/>
+                                <TextBlock Text="Easy Anti-Cheat protection"
+                                           Style="{StaticResource Hud.SettingHint}"/>
+                            </StackPanel>
+                            <ToggleButton Grid.Column="1"
+                                          Style="{StaticResource Hud.Toggle}"
+                                          IsChecked="{Binding EacEnabled}"
+                                          VerticalAlignment="Center"/>
+                        </Grid>
+                    </c:HudPanel>
+                </StackPanel>
+
+                <!-- ══ Buttons ══ -->
+                <Border Background="{DynamicResource Hud.BgElevated}"
+                        BorderBrush="{DynamicResource Hud.Border}"
+                        BorderThickness="0,1,0,0"
+                        Padding="16,12">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Style="{StaticResource Hud.Button.Ghost}"
+                                Width="110" Height="30" Margin="0,0,8,0"
+                                Click="CancelButton_Click">
+                            <c:TrackedText Text="CANCEL" LetterSpacing="0.12"
+                                           FontFamily="{DynamicResource Hud.Mono}"
+                                           FontSize="10.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource Hud.FgMuted}"
+                                           VerticalAlignment="Center"/>
+                        </Button>
+                        <Button Style="{StaticResource Hud.Button.Primary}"
+                                Width="150" Height="30"
+                                Click="SaveButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Plus" Width="13" Height="13"
+                                                         VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <c:TrackedText Text="ADD SERVER" LetterSpacing="0.12"
+                                               FontFamily="{DynamicResource Hud.Mono}"
+                                               FontSize="10.5" FontWeight="Bold"
+                                               Foreground="{DynamicResource Hud.AccentInk}"
+                                               VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
             </StackPanel>
-        </StackPanel>
-    </StackPanel>
+
+            <c:HudBrackets Panel.ZIndex="2" Tint="Accent"/>
+        </Grid>
+    </Border>
 </Window>
