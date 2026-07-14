@@ -1,129 +1,117 @@
 <UserControl x:Class="SevenDaysManager.Views.OverviewView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:c="clr-namespace:SevenDaysManager.Controls">
 
     <UserControl.Resources>
-
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
 
-        <!-- Reusable label/value stack used in info grids -->
-        <Style x:Key="InfoLabel" TargetType="TextBlock">
-            <Setter Property="FontSize"   Value="11"/>
-            <Setter Property="Opacity"    Value="0.5"/>
-            <Setter Property="Margin"     Value="0,0,0,2"/>
+        <!-- Readout label: uppercase mono, wide tracking, rust.
+             Targets TrackedText (not TextBlock) — see TrackedText.cs for why. -->
+        <Style x:Key="Readout.Label" TargetType="c:TrackedText" BasedOn="{StaticResource Hud.StatCaption}">
+            <Setter Property="Margin" Value="0,0,0,4"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
         </Style>
-        <Style x:Key="InfoValue" TargetType="TextBlock">
+
+        <!-- Readout value: mono, tabular figures, accent -->
+        <Style x:Key="Readout.Value" TargetType="TextBlock" BasedOn="{StaticResource Hud.Mono.Text}">
             <Setter Property="FontSize"   Value="13"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
-            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-        </Style>
-        <Style x:Key="InfoValuePlain" TargetType="TextBlock">
-            <Setter Property="FontSize"   Value="12"/>
+            <Setter Property="Foreground" Value="{DynamicResource Hud.Accent}"/>
             <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
         </Style>
 
-        <!-- Card section header -->
-        <Style x:Key="SectionHeader" TargetType="TextBlock">
-            <Setter Property="FontSize"   Value="13"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Margin"     Value="0,0,0,14"/>
+        <!-- Plain mono value (system info) -->
+        <Style x:Key="Readout.Plain" TargetType="TextBlock" BasedOn="{StaticResource Hud.Mono.Text}">
+            <Setter Property="FontSize" Value="11.5"/>
+            <Setter Property="Foreground" Value="{DynamicResource Hud.FgMuted}"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
         </Style>
 
-        <!-- Stat tile bottom row -->
-        <Style x:Key="StatTileLabel" TargetType="TextBlock">
-            <Setter Property="FontSize"  Value="11"/>
-            <Setter Property="Opacity"   Value="0.5"/>
-            <Setter Property="Margin"    Value="0,6,0,0"/>
+        <!-- Gauge centre number -->
+        <Style x:Key="Gauge.Value" TargetType="TextBlock" BasedOn="{StaticResource Hud.Mono.Text}">
+            <Setter Property="FontSize"   Value="24"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource Hud.Fg}"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
         </Style>
-        <Style x:Key="StatTileValue" TargetType="TextBlock">
-            <Setter Property="FontSize"   Value="22"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Foreground" Value="{DynamicResource MaterialDesign.Brush.Secondary}"/>
+
+        <!-- Faint index stamp on stat tiles (01, 02 …) -->
+        <Style x:Key="Tile.Index" TargetType="TextBlock" BasedOn="{StaticResource Hud.Mono.Text}">
+            <Setter Property="FontSize"   Value="9"/>
+            <Setter Property="Foreground" Value="{DynamicResource Hud.FgFaint}"/>
+            <Setter Property="HorizontalAlignment" Value="Right"/>
+            <Setter Property="VerticalAlignment"   Value="Bottom"/>
+        </Style>
+
+        <Style x:Key="Tile.Desc" TargetType="TextBlock" BasedOn="{StaticResource Hud.Body}">
+            <Setter Property="FontSize" Value="10.5"/>
+            <Setter Property="Foreground" Value="{DynamicResource Hud.FgFaint}"/>
+            <Setter Property="Margin" Value="0,8,0,0"/>
         </Style>
     </UserControl.Resources>
 
     <ScrollViewer VerticalScrollBarVisibility="Auto" Background="Transparent" Padding="14">
         <StackPanel>
 
-            <!-- ══════════════════════════════════════════ ROW 1: Overview + System Info ══ -->
+            <!-- // OVERVIEW ▊ -->
+            <c:HudTitle Title="OVERVIEW" HorizontalAlignment="Left" Margin="4,2,0,14"/>
+
+            <!-- ══════════════════════════════ ROW 1: Telemetry + System ══ -->
             <Grid Margin="0,0,0,10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="10"/>
-                    <ColumnDefinition Width="290"/>
+                    <ColumnDefinition Width="300"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- Overview info card -->
-                <materialDesign:Card Grid.Column="0" UniformCornerRadius="10"
-                                     Padding="18" Background="{DynamicResource GlassBrush}">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                            <Border Width="4" CornerRadius="2" Margin="0,0,8,0"
-                                    Background="{DynamicResource MaterialDesign.Brush.Primary}"/>
-                            <TextBlock Text="Overview" Style="{StaticResource SectionHeader}" Margin="0"/>
+                <c:HudPanel Grid.Column="0" Header="TELEMETRY" Tint="Accent" Padding="18">
+                    <UniformGrid Columns="3">
+                        <StackPanel Margin="0,0,20,14">
+                            <c:TrackedText Text="SERVER NAME" Style="{StaticResource Readout.Label}"/>
+                            <TextBlock Text="{Binding ServerName}" Style="{StaticResource Readout.Value}"/>
+                        </StackPanel>
+                        <StackPanel Margin="0,0,20,14">
+                            <c:TrackedText Text="UPTIME" Style="{StaticResource Readout.Label}"/>
+                            <TextBlock Text="{Binding ServerUptime}" Style="{StaticResource Readout.Value}"/>
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,14">
+                            <c:TrackedText Text="GAME TIME" Style="{StaticResource Readout.Label}"/>
+                            <TextBlock Text="{Binding GameTime}" Style="{StaticResource Readout.Value}"/>
                         </StackPanel>
 
-                        <UniformGrid Columns="3">
-
-                            <!-- Col 1 -->
-                            <StackPanel Margin="0,0,20,12">
-                                <TextBlock Text="Server Name" Style="{StaticResource InfoLabel}"/>
-                                <TextBlock Text="{Binding ServerName}" Style="{StaticResource InfoValue}"/>
-                            </StackPanel>
-                            <StackPanel Margin="0,0,20,12">
-                                <TextBlock Text="Server Uptime" Style="{StaticResource InfoLabel}"/>
-                                <TextBlock Text="{Binding ServerUptime}" Style="{StaticResource InfoValue}"/>
-                            </StackPanel>
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock Text="Game Time" Style="{StaticResource InfoLabel}"/>
-                                <TextBlock Text="{Binding GameTime}" Style="{StaticResource InfoValue}"/>
-                            </StackPanel>
-
-                            <!-- Col 2 -->
-                            <StackPanel Margin="0,0,20,12">
-                                <TextBlock Text="Server IP" Style="{StaticResource InfoLabel}"/>
-                                <TextBlock Text="{Binding ServerIp}" Style="{StaticResource InfoValue}"/>
-                            </StackPanel>
-                            <StackPanel Margin="0,0,20,12">
-                                <TextBlock Text="Game Name" Style="{StaticResource InfoLabel}"/>
-                                <TextBlock Text="{Binding GameName}" Style="{StaticResource InfoValue}"/>
-                            </StackPanel>
-                            <StackPanel Margin="0,0,0,12">
-                                <TextBlock Text="Game Mode" Style="{StaticResource InfoLabel}"/>
-                                <TextBlock Text="{Binding GameMode}" Style="{StaticResource InfoValue}"/>
-                            </StackPanel>
-
-                            <!-- Col 3 -->
-                            <StackPanel Margin="0,0,20,0">
-                                <TextBlock Text="Server Port" Style="{StaticResource InfoLabel}"/>
-                                <TextBlock Text="{Binding ServerPortStr}" Style="{StaticResource InfoValue}"/>
-                            </StackPanel>
-                            <StackPanel Margin="0,0,20,0">
-                                <TextBlock Text="Game World" Style="{StaticResource InfoLabel}"/>
-                                <TextBlock Text="{Binding GameWorld}" Style="{StaticResource InfoValue}"/>
-                            </StackPanel>
-                            <StackPanel Margin="0,0,0,0">
-                                <TextBlock Text="Difficulty" Style="{StaticResource InfoLabel}"/>
-                                <TextBlock Text="{Binding GameDifficulty}" Style="{StaticResource InfoValue}"/>
-                            </StackPanel>
-
-                        </UniformGrid>
-                    </StackPanel>
-                </materialDesign:Card>
-
-                <!-- System Information card -->
-                <materialDesign:Card Grid.Column="2" UniformCornerRadius="10"
-                                     Padding="18" Background="{DynamicResource GlassBrush}">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                            <Border Width="4" CornerRadius="2" Margin="0,0,8,0"
-                                    Background="{DynamicResource MaterialDesign.Brush.Primary}"/>
-                            <TextBlock Text="System Information" Style="{StaticResource SectionHeader}" Margin="0"/>
+                        <StackPanel Margin="0,0,20,14">
+                            <c:TrackedText Text="SERVER IP" Style="{StaticResource Readout.Label}"/>
+                            <TextBlock Text="{Binding ServerIp}" Style="{StaticResource Readout.Value}"/>
+                        </StackPanel>
+                        <StackPanel Margin="0,0,20,14">
+                            <c:TrackedText Text="GAME NAME" Style="{StaticResource Readout.Label}"/>
+                            <TextBlock Text="{Binding GameName}" Style="{StaticResource Readout.Value}"/>
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,14">
+                            <c:TrackedText Text="GAME MODE" Style="{StaticResource Readout.Label}"/>
+                            <TextBlock Text="{Binding GameMode}" Style="{StaticResource Readout.Value}"/>
                         </StackPanel>
 
-                        <Grid Margin="0,0,0,10">
+                        <StackPanel Margin="0,0,20,0">
+                            <c:TrackedText Text="PORT" Style="{StaticResource Readout.Label}"/>
+                            <TextBlock Text="{Binding ServerPortStr}" Style="{StaticResource Readout.Value}"/>
+                        </StackPanel>
+                        <StackPanel Margin="0,0,20,0">
+                            <c:TrackedText Text="WORLD" Style="{StaticResource Readout.Label}"/>
+                            <TextBlock Text="{Binding GameWorld}" Style="{StaticResource Readout.Value}"/>
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,0">
+                            <c:TrackedText Text="DIFFICULTY" Style="{StaticResource Readout.Label}"/>
+                            <TextBlock Text="{Binding GameDifficulty}" Style="{StaticResource Readout.Value}"/>
+                        </StackPanel>
+                    </UniformGrid>
+                </c:HudPanel>
+
+                <c:HudPanel Grid.Column="2" Header="SYSTEM" Tint="Rust" Padding="18">
+                    <StackPanel>
+                        <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
@@ -136,258 +124,248 @@
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
 
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Device Name" Style="{StaticResource InfoLabel}" Margin="0,0,12,8" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding DeviceName}" Style="{StaticResource InfoValuePlain}" VerticalAlignment="Center" Margin="0,0,0,8"/>
+                            <c:TrackedText Grid.Row="0" Grid.Column="0" Text="DEVICE" Style="{StaticResource Hud.StatCaption}" Margin="0,0,12,9" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding DeviceName}" Style="{StaticResource Readout.Plain}" VerticalAlignment="Center" Margin="0,0,0,9"/>
 
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Processor" Style="{StaticResource InfoLabel}" Margin="0,0,12,8" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ProcessorName}" Style="{StaticResource InfoValuePlain}" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,0,8"/>
+                            <c:TrackedText Grid.Row="1" Grid.Column="0" Text="CPU" Style="{StaticResource Hud.StatCaption}" Margin="0,0,12,9" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ProcessorName}" Style="{StaticResource Readout.Plain}" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,0,9"/>
 
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="CPU Cores" Style="{StaticResource InfoLabel}" Margin="0,0,12,8" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ProcessorCount}" Style="{StaticResource InfoValuePlain}" VerticalAlignment="Center" Margin="0,0,0,8"/>
+                            <c:TrackedText Grid.Row="2" Grid.Column="0" Text="CORES" Style="{StaticResource Hud.StatCaption}" Margin="0,0,12,9" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ProcessorCount}" Style="{StaticResource Readout.Plain}" VerticalAlignment="Center" Margin="0,0,0,9"/>
 
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="System RAM" Style="{StaticResource InfoLabel}" Margin="0,0,12,8" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding TotalRam}" Style="{StaticResource InfoValuePlain}" VerticalAlignment="Center" Margin="0,0,0,8"/>
+                            <c:TrackedText Grid.Row="3" Grid.Column="0" Text="RAM" Style="{StaticResource Hud.StatCaption}" Margin="0,0,12,9" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding TotalRam}" Style="{StaticResource Readout.Plain}" VerticalAlignment="Center" Margin="0,0,0,9"/>
 
-                            <TextBlock Grid.Row="4" Grid.Column="0" Text="OS" Style="{StaticResource InfoLabel}" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding OsDescription}" Style="{StaticResource InfoValuePlain}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                            <c:TrackedText Grid.Row="4" Grid.Column="0" Text="OS" Style="{StaticResource Hud.StatCaption}" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding OsDescription}" Style="{StaticResource Readout.Plain}" TextWrapping="Wrap" VerticalAlignment="Center"/>
                         </Grid>
 
-                        <!-- Server version -->
-                        <Separator Margin="0,4,0,10" Opacity="0.2"/>
+                        <Rectangle Height="1" Fill="{DynamicResource Hud.Border}" Margin="0,14"/>
+
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Server Version" Style="{StaticResource InfoLabel}" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding ServerVersion}" FontSize="12" FontWeight="SemiBold"
-                                       Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"/>
+                            <c:TrackedText Text="BUILD" Style="{StaticResource Hud.StatCaption}"
+                                       Margin="0,0,10,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding ServerVersion}"
+                                       Style="{StaticResource Hud.Mono.Text}"
+                                       FontSize="11.5" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource Hud.Accent}"/>
                         </StackPanel>
                     </StackPanel>
-                </materialDesign:Card>
+                </c:HudPanel>
             </Grid>
 
-            <!-- ══════════════════════════════════════════ ROW 2: Status gauges ══ -->
-            <materialDesign:Card UniformCornerRadius="10" Padding="18"
-                                 Background="{DynamicResource GlassBrush}" Margin="0,0,0,10">
+            <!-- ══════════════════════════════ ROW 2: Status gauges ══ -->
+            <c:HudPanel Header="STATUS" Tint="Green" Padding="18" Margin="0,0,0,10">
                 <StackPanel>
-                    <Grid Margin="0,0,0,16">
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Border Width="4" CornerRadius="2" Margin="0,0,8,0"
-                                    Background="{DynamicResource MaterialDesign.Brush.Primary}"/>
-                            <TextBlock Text="Status" Style="{StaticResource SectionHeader}" Margin="0"/>
+
+                    <!-- Offline pill: square dot, chamfer-free border, red-soft fill -->
+                    <Border HorizontalAlignment="Left" Margin="0,0,0,16"
+                            Background="{DynamicResource Hud.RedSoft}"
+                            BorderBrush="{DynamicResource Hud.Red}"
+                            BorderThickness="1"
+                            Padding="10,4"
+                            Visibility="{Binding IsOffline, Converter={StaticResource BoolToVis}}">
+                        <StackPanel Orientation="Horizontal">
+                            <Rectangle Width="6" Height="6" Fill="{DynamicResource Hud.Red}"
+                                       Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <c:TrackedText Text="NO TELNET LINK — CHECK PORT/PASSWORD IN SERVER SETTINGS"
+                                       Style="{StaticResource Hud.PillText}"
+                                       Foreground="{DynamicResource Hud.Red}"/>
                         </StackPanel>
-                        <!-- Offline badge — visible when Telnet not connected -->
-                        <Border HorizontalAlignment="Right" VerticalAlignment="Center"
-                                CornerRadius="10" Padding="10,3"
-                                Background="#44FF5722"
-                                Visibility="{Binding IsOffline, Converter={StaticResource BoolToVis}}">
-                            <StackPanel Orientation="Horizontal">
-                                <Ellipse Width="7" Height="7" Fill="#FF5722" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                <TextBlock Text="Not connected — check Telnet port/password in Server Settings"
-                                           FontSize="11" Foreground="#FF5722" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
+                    </Border>
 
                     <UniformGrid Columns="4">
 
-                        <!-- Players -->
+                        <!-- PLAYERS -->
                         <StackPanel HorizontalAlignment="Center">
                             <Grid Width="130" Height="130">
-                                <!-- Track ring — always visible on dark backgrounds -->
                                 <Ellipse Width="112" Height="112" Fill="Transparent"
-                                         Stroke="{DynamicResource MaterialDesign.Brush.Primary}"
-                                         StrokeThickness="8" Opacity="0.2"/>
+                                         Stroke="{DynamicResource Hud.Border}" StrokeThickness="7"/>
                                 <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
                                              Width="130" Height="130"
-                                             Foreground="{DynamicResource MaterialDesign.Brush.Primary}"
+                                             Foreground="{DynamicResource Hud.Accent}"
                                              Value="{Binding PlayerCount, Mode=OneWay}"
                                              Maximum="{Binding MaxPlayers, Mode=OneWay}"/>
-                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <TextBlock HorizontalAlignment="Center">
-                                        <Run Text="{Binding PlayerCount, Mode=OneWay}" FontSize="26" FontWeight="Bold"/>
-                                        <Run Text="/" FontSize="13" Foreground="#80FFFFFF"/>
-                                        <Run Text="{Binding MaxPlayers, Mode=OneWay}" FontSize="13" Foreground="#80FFFFFF"/>
-                                    </TextBlock>
-                                </StackPanel>
+                                <TextBlock Style="{StaticResource Gauge.Value}" VerticalAlignment="Center">
+                                    <Run Text="{Binding PlayerCount, Mode=OneWay}"/><Run Text="/" FontSize="12" Foreground="#6E767D"/><Run Text="{Binding MaxPlayers, Mode=OneWay}" FontSize="12" Foreground="#6E767D"/>
+                                </TextBlock>
                             </Grid>
-                            <TextBlock Text="Players" HorizontalAlignment="Center"
-                                       FontSize="13" Opacity="0.6" Margin="0,10,0,0"/>
+                            <c:TrackedText Text="PLAYERS" Style="{StaticResource Hud.StatCaption}"
+                                       HorizontalAlignment="Center" Margin="0,12,0,0"/>
                         </StackPanel>
 
-                        <!-- Zombies -->
+                        <!-- ZOMBIES -->
                         <StackPanel HorizontalAlignment="Center">
                             <Grid Width="130" Height="130">
                                 <Ellipse Width="112" Height="112" Fill="Transparent"
-                                         Stroke="{DynamicResource MaterialDesign.Brush.Primary}"
-                                         StrokeThickness="8" Opacity="0.2"/>
+                                         Stroke="{DynamicResource Hud.Border}" StrokeThickness="7"/>
                                 <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
                                              Width="130" Height="130"
-                                             Foreground="{DynamicResource MaterialDesign.Brush.Primary}"
+                                             Foreground="{DynamicResource Hud.Red}"
                                              Value="{Binding ZombieCount, Mode=OneWay}"
                                              Maximum="{Binding MaxZombies, Mode=OneWay}"/>
-                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <TextBlock HorizontalAlignment="Center">
-                                        <Run Text="{Binding ZombieCount, Mode=OneWay}" FontSize="26" FontWeight="Bold"/>
-                                        <Run Text="/" FontSize="13" Foreground="#80FFFFFF"/>
-                                        <Run Text="{Binding MaxZombies, Mode=OneWay}" FontSize="13" Foreground="#80FFFFFF"/>
-                                    </TextBlock>
-                                </StackPanel>
+                                <TextBlock Style="{StaticResource Gauge.Value}" VerticalAlignment="Center">
+                                    <Run Text="{Binding ZombieCount, Mode=OneWay}"/><Run Text="/" FontSize="12" Foreground="#6E767D"/><Run Text="{Binding MaxZombies, Mode=OneWay}" FontSize="12" Foreground="#6E767D"/>
+                                </TextBlock>
                             </Grid>
-                            <TextBlock Text="Zombies" HorizontalAlignment="Center"
-                                       FontSize="13" Opacity="0.6" Margin="0,10,0,0"/>
+                            <c:TrackedText Text="ZOMBIES" Style="{StaticResource Hud.StatCaption}"
+                                       HorizontalAlignment="Center" Margin="0,12,0,0"/>
                         </StackPanel>
 
-                        <!-- Animals -->
+                        <!-- ANIMALS -->
                         <StackPanel HorizontalAlignment="Center">
                             <Grid Width="130" Height="130">
                                 <Ellipse Width="112" Height="112" Fill="Transparent"
-                                         Stroke="{DynamicResource MaterialDesign.Brush.Primary}"
-                                         StrokeThickness="8" Opacity="0.2"/>
+                                         Stroke="{DynamicResource Hud.Border}" StrokeThickness="7"/>
                                 <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
                                              Width="130" Height="130"
-                                             Foreground="{DynamicResource MaterialDesign.Brush.Primary}"
+                                             Foreground="{DynamicResource Hud.Violet}"
                                              Value="{Binding AnimalCount, Mode=OneWay}"
                                              Maximum="{Binding MaxAnimals, Mode=OneWay}"/>
-                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <TextBlock HorizontalAlignment="Center">
-                                        <Run Text="{Binding AnimalCount, Mode=OneWay}" FontSize="26" FontWeight="Bold"/>
-                                        <Run Text="/" FontSize="13" Foreground="#80FFFFFF"/>
-                                        <Run Text="{Binding MaxAnimals, Mode=OneWay}" FontSize="13" Foreground="#80FFFFFF"/>
-                                    </TextBlock>
-                                </StackPanel>
+                                <TextBlock Style="{StaticResource Gauge.Value}" VerticalAlignment="Center">
+                                    <Run Text="{Binding AnimalCount, Mode=OneWay}"/><Run Text="/" FontSize="12" Foreground="#6E767D"/><Run Text="{Binding MaxAnimals, Mode=OneWay}" FontSize="12" Foreground="#6E767D"/>
+                                </TextBlock>
                             </Grid>
-                            <TextBlock Text="Animals" HorizontalAlignment="Center"
-                                       FontSize="13" Opacity="0.6" Margin="0,10,0,0"/>
+                            <c:TrackedText Text="ANIMALS" Style="{StaticResource Hud.StatCaption}"
+                                       HorizontalAlignment="Center" Margin="0,12,0,0"/>
                         </StackPanel>
 
-                        <!-- Heap -->
+                        <!-- HEAP -->
                         <StackPanel HorizontalAlignment="Center">
                             <Grid Width="130" Height="130">
                                 <Ellipse Width="112" Height="112" Fill="Transparent"
-                                         Stroke="{DynamicResource MaterialDesign.Brush.Primary}"
-                                         StrokeThickness="8" Opacity="0.2"/>
+                                         Stroke="{DynamicResource Hud.Border}" StrokeThickness="7"/>
                                 <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
                                              Width="130" Height="130"
-                                             Foreground="{DynamicResource MaterialDesign.Brush.Primary}"
+                                             Foreground="{DynamicResource Hud.Amber}"
                                              Value="{Binding HeapPercent, Mode=OneWay}"
                                              Maximum="100"/>
-                                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <TextBlock HorizontalAlignment="Center">
-                                        <Run Text="{Binding HeapPercent, Mode=OneWay}" FontSize="26" FontWeight="Bold"/>
-                                        <Run Text="/ 100 %" FontSize="13" Foreground="#80FFFFFF"/>
-                                    </TextBlock>
-                                </StackPanel>
+                                <TextBlock Style="{StaticResource Gauge.Value}" VerticalAlignment="Center">
+                                    <Run Text="{Binding HeapPercent, Mode=OneWay}"/><Run Text="%" FontSize="12" Foreground="#6E767D"/>
+                                </TextBlock>
                             </Grid>
-                            <TextBlock HorizontalAlignment="Center" FontSize="13" Opacity="0.6" Margin="0,10,0,0">
-                                <Run Text="Heap "/>
-                                <Run Text="{Binding HeapUsedMb, Mode=OneWay}"/>
-                                <Run Text=" / "/>
-                                <Run Text="{Binding HeapMaxMb, Mode=OneWay}"/>
-                                <Run Text=" MB"/>
-                            </TextBlock>
+                            <!-- TrackedText renders a single glyph run, so it has no Inlines —
+                                 compose the caption into one string instead of using <Run>s. -->
+                            <c:TrackedText Style="{StaticResource Hud.StatCaption}"
+                                           HorizontalAlignment="Center" Margin="0,12,0,0">
+                                <c:TrackedText.Text>
+                                    <MultiBinding StringFormat="HEAP {0}/{1} MB">
+                                        <Binding Path="HeapUsedMb" Mode="OneWay"/>
+                                        <Binding Path="HeapMaxMb"  Mode="OneWay"/>
+                                    </MultiBinding>
+                                </c:TrackedText.Text>
+                            </c:TrackedText>
                         </StackPanel>
 
                     </UniformGrid>
                 </StackPanel>
-            </materialDesign:Card>
+            </c:HudPanel>
 
-            <!-- ══════════════════════════════════════════ ROW 3: Stat tiles ══ -->
+            <!-- ══════════════════════════════ ROW 3: Stat tiles ══ -->
             <UniformGrid Columns="6">
 
-                <!-- FPS -->
-                <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,8,0"
-                                     Background="{DynamicResource GlassBrush}">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Border Width="3" CornerRadius="2" Margin="0,0,6,0"
-                                    Background="{DynamicResource MaterialDesign.Brush.Primary}"/>
-                            <TextBlock Text="FPS" FontSize="12" FontWeight="SemiBold" Opacity="0.6"/>
+                <c:HudPanel Tint="Accent" Margin="0,0,8,0">
+                    <Grid Margin="16">
+                        <StackPanel>
+                            <Grid>
+                                <c:TrackedText Text="FPS" Style="{StaticResource Hud.StatCaption}"/>
+                                <Rectangle Height="2" Width="42" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                           Fill="{DynamicResource Hud.Accent}"/>
+                            </Grid>
+                            <TextBlock Text="{Binding Fps, StringFormat='{}{0:F1}'}"
+                                       Style="{StaticResource Hud.StatValue}" Margin="0,8,0,0"/>
+                            <TextBlock Text="Server game loop speed. 30+ is healthy."
+                                       Style="{StaticResource Tile.Desc}"/>
                         </StackPanel>
-                        <TextBlock Text="{Binding Fps, StringFormat='{}{0:F1}'}"
-                                   Style="{StaticResource StatTileValue}" Margin="0,6,0,0"/>
-                        <TextBlock Text="Server game loop speed. 30+ is healthy."
-                                   FontSize="10" Opacity="0.4" TextWrapping="Wrap" Margin="0,6,0,0"/>
-                    </StackPanel>
-                </materialDesign:Card>
+                        <TextBlock Text="01" Style="{StaticResource Tile.Index}"/>
+                    </Grid>
+                </c:HudPanel>
 
-                <!-- Entities -->
-                <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,8,0"
-                                     Background="{DynamicResource GlassBrush}">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Border Width="3" CornerRadius="2" Margin="0,0,6,0"
-                                    Background="{DynamicResource MaterialDesign.Brush.Primary}"/>
-                            <TextBlock Text="Entities" FontSize="12" FontWeight="SemiBold" Opacity="0.6"/>
+                <c:HudPanel Tint="Blue" Margin="0,0,8,0">
+                    <Grid Margin="16">
+                        <StackPanel>
+                            <Grid>
+                                <c:TrackedText Text="ENTITIES" Style="{StaticResource Hud.StatCaption}"/>
+                                <Rectangle Height="2" Width="42" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                           Fill="{DynamicResource Hud.Blue}"/>
+                            </Grid>
+                            <TextBlock Text="{Binding EntityCount}"
+                                       Style="{StaticResource Hud.StatValue}" Margin="0,8,0,0"/>
+                            <TextBlock Text="All active objects: players, zombies, animals."
+                                       Style="{StaticResource Tile.Desc}"/>
                         </StackPanel>
-                        <TextBlock Text="{Binding EntityCount}"
-                                   Style="{StaticResource StatTileValue}" Margin="0,6,0,0"/>
-                        <TextBlock Text="All active objects: players, zombies, animals."
-                                   FontSize="10" Opacity="0.4" TextWrapping="Wrap" Margin="0,6,0,0"/>
-                    </StackPanel>
-                </materialDesign:Card>
+                        <TextBlock Text="02" Style="{StaticResource Tile.Index}"/>
+                    </Grid>
+                </c:HudPanel>
 
-                <!-- RSS -->
-                <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,8,0"
-                                     Background="{DynamicResource GlassBrush}">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Border Width="3" CornerRadius="2" Margin="0,0,6,0"
-                                    Background="{DynamicResource MaterialDesign.Brush.Primary}"/>
-                            <TextBlock Text="RSS" FontSize="12" FontWeight="SemiBold" Opacity="0.6"/>
+                <c:HudPanel Tint="Amber" Margin="0,0,8,0">
+                    <Grid Margin="16">
+                        <StackPanel>
+                            <Grid>
+                                <c:TrackedText Text="RSS" Style="{StaticResource Hud.StatCaption}"/>
+                                <Rectangle Height="2" Width="42" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                           Fill="{DynamicResource Hud.Amber}"/>
+                            </Grid>
+                            <TextBlock Style="{StaticResource Hud.StatValue}" Margin="0,8,0,0">
+                                <Run Text="{Binding RssMb, Mode=OneWay}"/><Run Text=" MB" FontSize="13" Foreground="#6E767D"/>
+                            </TextBlock>
+                            <TextBlock Text="Total physical RAM used by the server process."
+                                       Style="{StaticResource Tile.Desc}"/>
                         </StackPanel>
-                        <TextBlock Style="{StaticResource StatTileValue}" Margin="0,6,0,0">
-                            <Run Text="{Binding RssMb, Mode=OneWay}"/><Run Text=" MB" FontSize="14"/>
-                        </TextBlock>
-                        <TextBlock Text="Total physical RAM used by the server process."
-                                   FontSize="10" Opacity="0.4" TextWrapping="Wrap" Margin="0,6,0,0"/>
-                    </StackPanel>
-                </materialDesign:Card>
+                        <TextBlock Text="03" Style="{StaticResource Tile.Index}"/>
+                    </Grid>
+                </c:HudPanel>
 
-                <!-- Chunks -->
-                <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,8,0"
-                                     Background="{DynamicResource GlassBrush}">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Border Width="3" CornerRadius="2" Margin="0,0,6,0"
-                                    Background="{DynamicResource MaterialDesign.Brush.Primary}"/>
-                            <TextBlock Text="Chunks" FontSize="12" FontWeight="SemiBold" Opacity="0.6"/>
+                <c:HudPanel Tint="Violet" Margin="0,0,8,0">
+                    <Grid Margin="16">
+                        <StackPanel>
+                            <Grid>
+                                <c:TrackedText Text="CHUNKS" Style="{StaticResource Hud.StatCaption}"/>
+                                <Rectangle Height="2" Width="42" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                           Fill="{DynamicResource Hud.Violet}"/>
+                            </Grid>
+                            <TextBlock Text="{Binding Chunks, Mode=OneWay}"
+                                       Style="{StaticResource Hud.StatValue}" Margin="0,8,0,0"/>
+                            <TextBlock Text="World sections loaded in memory around players."
+                                       Style="{StaticResource Tile.Desc}"/>
                         </StackPanel>
-                        <TextBlock Text="{Binding Chunks, Mode=OneWay}"
-                                   Style="{StaticResource StatTileValue}" Margin="0,6,0,0"/>
-                        <TextBlock Text="World sections loaded in memory around players."
-                                   FontSize="10" Opacity="0.4" TextWrapping="Wrap" Margin="0,6,0,0"/>
-                    </StackPanel>
-                </materialDesign:Card>
+                        <TextBlock Text="04" Style="{StaticResource Tile.Index}"/>
+                    </Grid>
+                </c:HudPanel>
 
-                <!-- CGO -->
-                <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,8,0"
-                                     Background="{DynamicResource GlassBrush}">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Border Width="3" CornerRadius="2" Margin="0,0,6,0"
-                                    Background="{DynamicResource MaterialDesign.Brush.Primary}"/>
-                            <TextBlock Text="CGO" FontSize="12" FontWeight="SemiBold" Opacity="0.6"/>
+                <c:HudPanel Tint="Rust" Margin="0,0,8,0">
+                    <Grid Margin="16">
+                        <StackPanel>
+                            <Grid>
+                                <c:TrackedText Text="CGO" Style="{StaticResource Hud.StatCaption}"/>
+                                <Rectangle Height="2" Width="42" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                           Fill="{DynamicResource Hud.Rust}"/>
+                            </Grid>
+                            <TextBlock Text="{Binding Cgo, Mode=OneWay}"
+                                       Style="{StaticResource Hud.StatValue}" Margin="0,8,0,0"/>
+                            <TextBlock Text="Active chunk objects: loot, doors, physics blocks."
+                                       Style="{StaticResource Tile.Desc}"/>
                         </StackPanel>
-                        <TextBlock Text="{Binding Cgo, Mode=OneWay}"
-                                   Style="{StaticResource StatTileValue}" Margin="0,6,0,0"/>
-                        <TextBlock Text="Active chunk objects: loot, doors, physics blocks."
-                                   FontSize="10" Opacity="0.4" TextWrapping="Wrap" Margin="0,6,0,0"/>
-                    </StackPanel>
-                </materialDesign:Card>
+                        <TextBlock Text="05" Style="{StaticResource Tile.Index}"/>
+                    </Grid>
+                </c:HudPanel>
 
-                <!-- Items -->
-                <materialDesign:Card UniformCornerRadius="10" Padding="16"
-                                     Background="{DynamicResource GlassBrush}">
-                    <StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Border Width="3" CornerRadius="2" Margin="0,0,6,0"
-                                    Background="{DynamicResource MaterialDesign.Brush.Primary}"/>
-                            <TextBlock Text="Items" FontSize="12" FontWeight="SemiBold" Opacity="0.6"/>
+                <c:HudPanel Tint="Green">
+                    <Grid Margin="16">
+                        <StackPanel>
+                            <Grid>
+                                <c:TrackedText Text="ITEMS" Style="{StaticResource Hud.StatCaption}"/>
+                                <Rectangle Height="2" Width="42" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                           Fill="{DynamicResource Hud.Green}"/>
+                            </Grid>
+                            <TextBlock Text="{Binding Items, Mode=OneWay}"
+                                       Style="{StaticResource Hud.StatValue}" Margin="0,8,0,0"/>
+                            <TextBlock Text="Dropped item stacks on the ground in the world."
+                                       Style="{StaticResource Tile.Desc}"/>
                         </StackPanel>
-                        <TextBlock Text="{Binding Items, Mode=OneWay}"
-                                   Style="{StaticResource StatTileValue}" Margin="0,6,0,0"/>
-                        <TextBlock Text="Dropped item stacks on the ground in the world."
-                                   FontSize="10" Opacity="0.4" TextWrapping="Wrap" Margin="0,6,0,0"/>
-                    </StackPanel>
-                </materialDesign:Card>
+                        <TextBlock Text="06" Style="{StaticResource Tile.Index}"/>
+                    </Grid>
+                </c:HudPanel>
 
             </UniformGrid>
 

@@ -3,13 +3,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:vm="clr-namespace:SevenDaysManager.ViewModels"
+        xmlns:c="clr-namespace:SevenDaysManager.Controls"
         Title="App Settings"
-        Width="940" Height="580"
+        Width="720" Height="620"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen"
-        Background="{DynamicResource MaterialDesign.Brush.Background}"
-        TextElement.Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
-        TextElement.FontFamily="{materialDesign:MaterialDesignFont}"
+        Background="{DynamicResource Hud.Bg}"
+        TextElement.Foreground="{DynamicResource Hud.Fg}"
         FontSize="14">
 
     <Window.Resources>
@@ -21,311 +21,183 @@
     </Window.DataContext>
 
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+        <c:HudAtmosphere Panel.ZIndex="0"/>
 
-        <!-- Header -->
-        <Border Grid.Row="0"
-                Background="{DynamicResource MaterialDesign.Brush.Primary}"
-                Padding="24,16">
-            <StackPanel>
-                <TextBlock Text="App Settings" FontSize="18" FontWeight="Bold"
-                           Foreground="{DynamicResource MaterialDesign.Brush.Primary.Foreground}"/>
-                <TextBlock Text="Theme, colours and global preferences"
-                           FontSize="11" Opacity="0.7"
-                           Foreground="{DynamicResource MaterialDesign.Brush.Primary.Foreground}"/>
-            </StackPanel>
-        </Border>
+        <Grid Panel.ZIndex="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
 
-        <!-- Two-column body -->
-        <Grid Grid.Row="1" Margin="24,20,24,20">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="20"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
+            <!-- Header: hazard-stripe background -->
+            <Grid Grid.Row="0" Height="66">
+                <Rectangle Fill="{DynamicResource Hud.BgElevated}"/>
+                <Rectangle Fill="{DynamicResource Hud.HazardTile}" Opacity="0.35"/>
+                <Border BorderBrush="{DynamicResource Hud.Border}" BorderThickness="0,0,0,1"/>
+                <StackPanel VerticalAlignment="Center" Margin="24,0">
+                    <c:TrackedText Text="APP SETTINGS" Style="{StaticResource Hud.PageTitle}"/>
+                    <c:TrackedText Text="GLOBAL PREFERENCES" Style="{StaticResource Hud.SectionLabel}"
+                               Margin="0,4,0,0"/>
+                </StackPanel>
+            </Grid>
 
-            <!-- ── LEFT: Theme ── -->
-            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="24,20">
                 <StackPanel>
 
-                    <TextBlock Text="THEME" FontSize="11" FontWeight="Bold"
-                               Opacity="0.5" Margin="0,0,0,8"/>
-
-                    <!-- Dark / Light toggle -->
-                    <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,16">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel VerticalAlignment="Center">
-                                <TextBlock Text="Dark Mode" FontWeight="SemiBold"/>
-                                <TextBlock Text="Toggle between dark and light theme"
-                                           FontSize="12" Opacity="0.6" Margin="0,2,0,0"/>
-                            </StackPanel>
-                            <ToggleButton Grid.Column="1"
-                                          Style="{StaticResource MaterialDesignSwitchToggleButton}"
-                                          IsChecked="{Binding IsDark}"
-                                          VerticalAlignment="Center"/>
-                        </Grid>
-                    </materialDesign:Card>
-
-                    <!-- Primary color -->
-                    <TextBlock Text="PRIMARY COLOR" FontSize="11" FontWeight="Bold"
-                               Opacity="0.5" Margin="0,0,0,8"/>
-                    <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,16">
+                    <!-- ══ APPEARANCE ══ -->
+                    <c:TrackedText Text="APPEARANCE" Style="{StaticResource Hud.SectionLabel}" Margin="0,0,0,8"/>
+                    <c:HudPanel Tint="Accent" Padding="18" Margin="0,0,0,18">
                         <StackPanel>
-                            <TextBlock Text="{Binding SelectedPrimary.Name, StringFormat='Selected: {0}', FallbackValue='Selected: none'}"
-                                       FontSize="12" Opacity="0.7" Margin="0,0,0,10"/>
-                            <ItemsControl ItemsSource="{Binding Swatches}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Button Command="{Binding DataContext.SelectPrimaryCommand,
-                                                    RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                CommandParameter="{Binding}"
-                                                Width="32" Height="32" Margin="3" Padding="0"
-                                                ToolTip="{Binding Name}"
-                                                Style="{StaticResource MaterialDesignIconButton}">
-                                            <Grid Width="32" Height="32">
-                                                <Ellipse Fill="{Binding Brush}" Width="28" Height="28"/>
-                                                <materialDesign:PackIcon Kind="Check" Width="16" Height="16"
-                                                                         Foreground="White"
-                                                                         HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                                         Visibility="{Binding IsSelectedPrimary, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                                            </Grid>
-                                        </Button>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
-                    </materialDesign:Card>
+                            <TextBlock Style="{StaticResource Hud.Body}" Margin="0,0,0,16"
+                                       Text="The tactical palette is fixed. You control the backdrop and how translucent the panels sit over it."/>
 
-                    <!-- Secondary color -->
-                    <TextBlock Text="SECONDARY / ACCENT COLOR" FontSize="11" FontWeight="Bold"
-                               Opacity="0.5" Margin="0,0,0,8"/>
-                    <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,16">
-                        <StackPanel>
-                            <TextBlock Text="{Binding SelectedSecondary.Name, StringFormat='Selected: {0}', FallbackValue='Selected: none'}"
-                                       FontSize="12" Opacity="0.7" Margin="0,0,0,10"/>
-                            <ItemsControl ItemsSource="{Binding Swatches}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Button Command="{Binding DataContext.SelectSecondaryCommand,
-                                                    RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                CommandParameter="{Binding}"
-                                                Width="32" Height="32" Margin="3" Padding="0"
-                                                ToolTip="{Binding Name}"
-                                                Style="{StaticResource MaterialDesignIconButton}">
-                                            <Grid Width="32" Height="32">
-                                                <Ellipse Fill="{Binding Brush}" Width="28" Height="28"/>
-                                                <materialDesign:PackIcon Kind="CheckCircle" Width="16" Height="16"
-                                                                         Foreground="White"
-                                                                         HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                                         Visibility="{Binding IsSelectedSecondary, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                                            </Grid>
-                                        </Button>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
-                    </materialDesign:Card>
-
-                    <!-- Card background -->
-                    <TextBlock Text="CARD BACKGROUND" FontSize="11" FontWeight="Bold"
-                               Opacity="0.5" Margin="0,0,0,8"/>
-                    <materialDesign:Card UniformCornerRadius="10" Padding="16">
-                        <StackPanel>
-                            <!-- Color swatches -->
-                            <TextBlock Text="{Binding SelectedCardColor.Name, StringFormat='Color: {0}', FallbackValue='Color: Charcoal'}"
-                                       FontSize="12" Opacity="0.7" Margin="0,0,0,10"/>
-                            <ItemsControl ItemsSource="{Binding CardSwatches}" Margin="0,0,0,16">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Button Command="{Binding DataContext.SelectCardColorCommand,
-                                                    RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                                CommandParameter="{Binding}"
-                                                Width="36" Height="36" Margin="3" Padding="0"
-                                                ToolTip="{Binding Name}"
-                                                Style="{StaticResource MaterialDesignIconButton}">
-                                            <Grid Width="36" Height="36">
-                                                <Ellipse Fill="{Binding Brush}" Width="30" Height="30"/>
-                                                <materialDesign:PackIcon Kind="Check" Width="16" Height="16"
-                                                                         Foreground="White"
-                                                                         HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                                         Visibility="{Binding IsSelected, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                                            </Grid>
-                                        </Button>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                            <!-- Opacity slider -->
-                            <TextBlock Text="{Binding CardOpacity, StringFormat='Opacity: {0}%'}"
-                                       FontSize="12" Opacity="0.7" Margin="0,0,0,6"/>
-                            <Slider Minimum="0" Maximum="95" TickFrequency="5" IsSnapToTickEnabled="True"
-                                    Value="{Binding CardOpacity}"/>
-                        </StackPanel>
-                    </materialDesign:Card>
-
-                    <!-- App background image -->
-                    <TextBlock Text="APP BACKGROUND" FontSize="11" FontWeight="Bold"
-                               Opacity="0.5" Margin="0,16,0,8"/>
-                    <materialDesign:Card UniformCornerRadius="10" Padding="16">
-                        <StackPanel>
-                            <TextBlock FontSize="12" Opacity="0.7" Margin="0,0,0,10" TextWrapping="Wrap">
+                            <!-- Background image -->
+                            <c:TrackedText Text="BACKGROUND IMAGE" Style="{StaticResource Hud.StatCaption}" Margin="0,0,0,8"/>
+                            <TextBlock FontSize="11"
+                                       TextTrimming="CharacterEllipsis" Margin="0,0,0,10">
                                 <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Text" Value="Using the default background"/>
+                                    <Style TargetType="TextBlock" BasedOn="{StaticResource Hud.Mono.Text}">
+                                        <Setter Property="Foreground" Value="{DynamicResource Hud.FgSubtle}"/>
+                                        <Setter Property="Text" Value="— using bundled default —"/>
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding HasCustomBackground}" Value="True">
                                                 <Setter Property="Text" Value="{Binding BackgroundImagePath}"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource Hud.Accent}"/>
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </TextBlock.Style>
                             </TextBlock>
-                            <StackPanel Orientation="Horizontal">
-                                <Button Content="Choose Image…"
-                                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,20">
+                                <Button Content="CHOOSE IMAGE"
+                                        Style="{StaticResource Hud.Button}"
                                         Command="{Binding BrowseBackgroundImageCommand}"
-                                        Height="36" Padding="14,0" Margin="0,0,10,0"/>
-                                <Button Content="Reset to Default"
-                                        Style="{StaticResource MaterialDesignOutlinedButton}"
+                                        Margin="0,0,10,0"/>
+                                <Button Content="RESET"
+                                        Style="{StaticResource Hud.Button.Ghost}"
                                         Command="{Binding ResetBackgroundImageCommand}"
-                                        Height="36" Padding="14,0"
                                         Visibility="{Binding HasCustomBackground, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                             </StackPanel>
+
+                            <!-- Panel opacity -->
+                            <Grid Margin="0,0,0,6">
+                                <c:TrackedText Text="PANEL OPACITY" Style="{StaticResource Hud.StatCaption}"/>
+                                <TextBlock Text="{Binding CardOpacity, StringFormat='{}{0}%'}"
+                                           Style="{StaticResource Hud.Mono.Text}"
+                                           Foreground="{DynamicResource Hud.Accent}"
+                                           HorizontalAlignment="Right"/>
+                            </Grid>
+                            <Slider Minimum="30" Maximum="100" TickFrequency="5" IsSnapToTickEnabled="True"
+                                    Value="{Binding CardOpacity}"
+                                    Foreground="{DynamicResource Hud.Accent}"/>
                         </StackPanel>
-                    </materialDesign:Card>
+                    </c:HudPanel>
+
+                    <!-- ══ PATHS ══ -->
+                    <c:TrackedText Text="PATHS" Style="{StaticResource Hud.SectionLabel}" Margin="0,0,0,8"/>
+                    <c:HudPanel Tint="Rust" Padding="18" Margin="0,0,0,18">
+                        <StackPanel>
+                            <c:TrackedText Text="DEFAULT SERVER INSTALL ROOT" Style="{StaticResource Hud.StatCaption}" Margin="0,0,0,6"/>
+                            <TextBlock Style="{StaticResource Hud.Body}" Margin="0,0,0,10"
+                                       Text="New servers are created as sub-folders here."/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="8"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Style="{StaticResource Hud.TextBox}"
+                                         Text="{Binding DefaultInstallRoot, UpdateSourceTrigger=PropertyChanged}"/>
+                                <Button Grid.Column="2" Content="BROWSE"
+                                        Style="{StaticResource Hud.Button}"
+                                        Command="{Binding BrowseInstallRootCommand}"/>
+                            </Grid>
+
+                            <c:TrackedText Text="STEAMCMD LOCATION" Style="{StaticResource Hud.StatCaption}" Margin="0,18,0,6"/>
+                            <Border Background="{DynamicResource Hud.Surface2}"
+                                    BorderBrush="{DynamicResource Hud.Border}" BorderThickness="1"
+                                    Padding="12,10">
+                                <TextBlock Text="{Binding SteamCmdExePreview}"
+                                           Style="{StaticResource Hud.Mono.Text}"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource Hud.FgSubtle}"
+                                           TextWrapping="Wrap"/>
+                            </Border>
+                        </StackPanel>
+                    </c:HudPanel>
+
+                    <!-- ══ BEHAVIOUR ══ -->
+                    <c:TrackedText Text="BEHAVIOUR" Style="{StaticResource Hud.SectionLabel}" Margin="0,0,0,8"/>
+                    <c:HudPanel Tint="Blue" Padding="18">
+                        <StackPanel>
+                            <!-- Start minimized -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <c:TrackedText Text="START MINIMIZED" Style="{StaticResource Hud.StatCaption}"/>
+                                    <TextBlock Style="{StaticResource Hud.Body}" Margin="0,4,0,0"
+                                               Text="Minimizes to tray on launch — useful when starting on boot."/>
+                                </StackPanel>
+                                <ToggleButton Grid.Column="1"
+                                              Style="{StaticResource Hud.Toggle}"
+                                              IsChecked="{Binding StartMinimized}"
+                                              VerticalAlignment="Center"/>
+                            </Grid>
+
+                            <Rectangle Height="1" Fill="{DynamicResource Hud.Border}" Margin="0,16"/>
+
+                            <!-- Auto-start on login -->
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center">
+                                    <c:TrackedText Text="AUTO-START ON LOGIN" Style="{StaticResource Hud.StatCaption}"/>
+                                    <TextBlock Style="{StaticResource Hud.Body}" Margin="0,4,0,0"
+                                               Text="Registers with Windows to launch when you log in."/>
+                                    <c:TrackedText Text="⚠ REQUIRES A PUBLISHED BUILD"
+                                               Style="{StaticResource Hud.StatCaption}"
+                                               Foreground="{DynamicResource Hud.Amber}"
+                                               Margin="0,6,0,0"
+                                               Visibility="{Binding IsDevBuild, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                </StackPanel>
+                                <ToggleButton Grid.Column="1"
+                                              IsChecked="{Binding AutoStartOnLogin}"
+                                              VerticalAlignment="Center">
+                                    <ToggleButton.Style>
+                                        <Style TargetType="ToggleButton" BasedOn="{StaticResource Hud.Toggle}">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsDevBuild}" Value="True">
+                                                    <Setter Property="IsEnabled" Value="False"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ToggleButton.Style>
+                                </ToggleButton>
+                            </Grid>
+                        </StackPanel>
+                    </c:HudPanel>
 
                 </StackPanel>
             </ScrollViewer>
 
-            <!-- ── RIGHT: Paths + Behaviour + Save ── -->
-            <Grid Grid.Column="2">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-
-                <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
-
-                        <!-- Paths -->
-                        <TextBlock Text="PATHS" FontSize="11" FontWeight="Bold"
-                                   Opacity="0.5" Margin="0,0,0,8"/>
-                        <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,16">
-                            <StackPanel>
-                                <TextBlock Text="Default Server Install Root" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                <TextBlock Text="New servers are created as sub-folders here"
-                                           FontSize="11" Opacity="0.55" Margin="0,0,0,10"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="8"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <TextBox Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                             materialDesign:HintAssist.Hint="e.g. C:\GameServers\7DaysToDie"
-                                             Text="{Binding DefaultInstallRoot, UpdateSourceTrigger=PropertyChanged}"/>
-                                    <Button Grid.Column="2"
-                                            Style="{StaticResource MaterialDesignOutlinedButton}"
-                                            Command="{Binding BrowseInstallRootCommand}"
-                                            Height="56" Padding="12,0">
-                                        <materialDesign:PackIcon Kind="FolderOpen"/>
-                                    </Button>
-                                </Grid>
-                                <TextBlock Text="SteamCMD Location" FontWeight="SemiBold" Margin="0,16,0,4"/>
-                                <TextBlock Text="Managed automatically inside the install root."
-                                           FontSize="11" Opacity="0.55" Margin="0,0,0,8"/>
-                                <Border Background="#1AFFFFFF" CornerRadius="4" Padding="12,10">
-                                    <TextBlock Text="{Binding SteamCmdExePreview}"
-                                               FontSize="12" Opacity="0.7" FontFamily="Consolas"
-                                               TextWrapping="Wrap"/>
-                                </Border>
-                            </StackPanel>
-                        </materialDesign:Card>
-
-                        <!-- Behaviour -->
-                        <TextBlock Text="BEHAVIOUR" FontSize="11" FontWeight="Bold"
-                                   Opacity="0.5" Margin="0,0,0,8"/>
-                        <materialDesign:Card UniformCornerRadius="10" Padding="16">
-                            <StackPanel>
-
-                                <!-- Start Minimized -->
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="Start Minimized" FontWeight="SemiBold"/>
-                                        <TextBlock Text="Minimizes to taskbar on launch — useful when starting on boot"
-                                                   FontSize="12" Opacity="0.6" Margin="0,2,0,0"/>
-                                    </StackPanel>
-                                    <ToggleButton Grid.Column="1"
-                                                  Style="{StaticResource MaterialDesignSwitchToggleButton}"
-                                                  IsChecked="{Binding StartMinimized}"
-                                                  VerticalAlignment="Center"/>
-                                </Grid>
-
-                                <Separator Margin="0,12" Opacity="0.2"/>
-
-                                <!-- Auto-start on login -->
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel VerticalAlignment="Center">
-                                        <TextBlock Text="Auto-start on Login" FontWeight="SemiBold"/>
-                                        <TextBlock Text="Registers with Windows to launch when you log in"
-                                                   FontSize="12" Opacity="0.6" Margin="0,2,0,0"/>
-                                        <TextBlock Text="⚠ Requires a published build (not dotnet run)"
-                                                   FontSize="11" Foreground="#FFFFA726" Margin="0,4,0,0"
-                                                   Visibility="{Binding IsDevBuild, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                                    </StackPanel>
-                                    <ToggleButton Grid.Column="1"
-                                                  IsChecked="{Binding AutoStartOnLogin}"
-                                                  VerticalAlignment="Center">
-                                        <ToggleButton.Style>
-                                            <Style TargetType="ToggleButton" BasedOn="{StaticResource MaterialDesignSwitchToggleButton}">
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding IsDevBuild}" Value="True">
-                                                        <Setter Property="IsEnabled" Value="False"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </ToggleButton.Style>
-                                    </ToggleButton>
-                                </Grid>
-
-                            </StackPanel>
-                        </materialDesign:Card>
-
-                    </StackPanel>
-                </ScrollViewer>
-
-                <!-- Save & Close pinned to bottom-right -->
-                <Button Grid.Row="1"
-                        Content="Save &amp; Close"
-                        Style="{StaticResource MaterialDesignRaisedButton}"
+            <!-- Footer -->
+            <Border Grid.Row="2"
+                    Background="{DynamicResource Hud.BgElevated}"
+                    BorderBrush="{DynamicResource Hud.Border}"
+                    BorderThickness="0,1,0,0"
+                    Padding="24,14">
+                <Button Content="SAVE &amp; CLOSE"
+                        Style="{StaticResource Hud.Button.Primary}"
                         HorizontalAlignment="Right"
-                        Width="140" Margin="0,16,0,0"
+                        Width="150"
                         Click="CloseButton_Click"/>
-            </Grid>
-
+            </Border>
         </Grid>
     </Grid>
 </Window>

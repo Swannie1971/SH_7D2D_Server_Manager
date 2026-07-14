@@ -13,9 +13,10 @@ public class AppSettings
     // Behaviour
     public bool StartMinimized { get; set; } = false;
 
-    // Card appearance
-    public string CardColor   { get; set; } = "1E1E1E";  // hex RGB, no #
-    public int    CardOpacity { get; set; } = 50;         // 0–100 %
+    // Panel appearance. The HUD palette is fixed, so only opacity is user-controlled;
+    // CardColor is retained purely so existing LiteDB documents still deserialize.
+    public string CardColor   { get; set; } = "0E0F12";
+    public int    CardOpacity { get; set; } = 92;         // 30–100 %
 
     // Empty = use the bundled default background
     public string BackgroundImagePath { get; set; } = "";

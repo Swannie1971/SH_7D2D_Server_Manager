@@ -1,0 +1,30 @@
+<UserControl x:Class="SevenDaysManager.Controls.HudStatusDot"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Root"
+             Width="16" Height="16"
+             IsHitTestVisible="False">
+
+    <!-- SQUARE. Never a circle — that's the whole point. -->
+    <Grid>
+        <!-- Expanding radar-ping ring (live only) -->
+        <Rectangle x:Name="Ping"
+                   Width="8" Height="8"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   Stroke="{Binding DotBrush, ElementName=Root}"
+                   StrokeThickness="1"
+                   Fill="Transparent"
+                   Opacity="0"
+                   RenderTransformOrigin="0.5,0.5">
+            <Rectangle.RenderTransform>
+                <ScaleTransform x:Name="PingScale" ScaleX="1" ScaleY="1"/>
+            </Rectangle.RenderTransform>
+        </Rectangle>
+
+        <!-- The dot itself -->
+        <Rectangle x:Name="Dot"
+                   Width="7" Height="7"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   Fill="{Binding DotBrush, ElementName=Root}"/>
+    </Grid>
+</UserControl>

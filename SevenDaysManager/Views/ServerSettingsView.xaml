@@ -2,94 +2,139 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:conv="clr-namespace:SevenDaysManager.Converters">
+             xmlns:conv="clr-namespace:SevenDaysManager.Converters"
+             xmlns:c="clr-namespace:SevenDaysManager.Controls">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <conv:FilePathToImageConverter x:Key="PathToImage"/>
     </UserControl.Resources>
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Background="Transparent">
         <StackPanel Margin="16">
 
-            <!-- Banner -->
-            <TextBlock Text="SERVER BANNER" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
-            <materialDesign:Card UniformCornerRadius="10" Margin="0,0,0,16" Height="140"
-                                 Background="Transparent"
-                                 materialDesign:ElevationAssist.Elevation="Dp0">
+            <c:HudTitle Title="SETTINGS" HorizontalAlignment="Left" Margin="2,0,0,16"/>
+
+            <!-- ══ BANNER ══ -->
+            <c:TrackedText Text="SERVER BANNER" Style="{StaticResource Hud.SectionLabel}"
+                           HorizontalAlignment="Left" Margin="0,0,0,8"/>
+            <c:HudPanel Tint="Violet" Padding="0" Margin="0,0,0,16" Height="150">
                 <Grid>
                     <Image Source="{Binding LogoPath, Converter={StaticResource PathToImage}}"
-                           Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="12"/>
-                    <Button Style="{StaticResource MaterialDesignRaisedButton}"
-                            materialDesign:ButtonAssist.CornerRadius="20"
+                           Stretch="Uniform"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Margin="14"/>
+                    <Button Style="{StaticResource Hud.Button}"
                             Command="{Binding BrowseLogoCommand}"
                             HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                            Margin="0,0,12,12" Height="32" Padding="12,0"
-                            Background="#CC000000" BorderBrush="Transparent">
+                            Margin="0,0,12,12" Height="28" Padding="12,0">
                         <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="ImageEdit" Width="14" Height="14" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                            <TextBlock Text="Change" FontSize="11" VerticalAlignment="Center"/>
+                            <materialDesign:PackIcon Kind="ImageEdit" Width="12" Height="12"
+                                                     VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <c:TrackedText Text="CHANGE" LetterSpacing="0.12"
+                                           FontFamily="{DynamicResource Hud.Mono}"
+                                           FontSize="10" FontWeight="Bold"
+                                           Foreground="{DynamicResource Hud.Fg}"
+                                           VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </Grid>
-            </materialDesign:Card>
+            </c:HudPanel>
 
-            <!-- Name -->
-            <TextBlock Text="GENERAL" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
-            <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,16"
-                                 Background="{DynamicResource GlassBrush}">
+            <!-- ══ GENERAL ══ -->
+            <c:TrackedText Text="GENERAL" Style="{StaticResource Hud.SectionLabel}"
+                           HorizontalAlignment="Left" Margin="0,0,0,8"/>
+            <c:HudPanel Tint="Accent" Padding="16" Margin="0,0,0,12">
                 <StackPanel>
-                    <TextBox materialDesign:HintAssist.Hint="Server Name"
-                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                    <c:TrackedText Text="SERVER NAME" Style="{StaticResource Hud.FieldLabel}"/>
+                    <TextBox Style="{StaticResource Hud.TextBox}"
                              Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"
-                             Margin="0,0,0,12"/>
-                    <TextBlock FontSize="11" Opacity="0.5"
-                               Text="{Binding InstallDir, StringFormat='Install folder: {0}'}"
-                               TextWrapping="Wrap"/>
+                             Margin="0,0,0,14"/>
+
+                    <c:TrackedText Text="INSTALL FOLDER" Style="{StaticResource Hud.FieldLabel}"/>
+                    <Border Background="{DynamicResource Hud.Surface2}"
+                            BorderBrush="{DynamicResource Hud.Border}" BorderThickness="1"
+                            Padding="11,8">
+                        <TextBlock Text="{Binding InstallDir}"
+                                   Style="{StaticResource Hud.Mono.Text}"
+                                   FontSize="10.5"
+                                   Foreground="{DynamicResource Hud.FgSubtle}"
+                                   TextWrapping="Wrap"/>
+                    </Border>
                 </StackPanel>
-            </materialDesign:Card>
+            </c:HudPanel>
 
             <!-- Save error -->
-            <Border CornerRadius="6" Background="#33F44336" Padding="12,8" Margin="0,0,0,8"
+            <Border Background="{DynamicResource Hud.RedSoft}"
+                    BorderBrush="{DynamicResource Hud.Red}" BorderThickness="1"
+                    Padding="12,8" Margin="0,0,0,10"
                     Visibility="{Binding HasSaveError, Converter={StaticResource BoolToVis}}">
-                <TextBlock Text="{Binding SaveError}" Foreground="#F44336" FontSize="12" TextWrapping="Wrap"/>
+                <TextBlock Text="{Binding SaveError}"
+                           Style="{StaticResource Hud.Mono.Text}"
+                           FontSize="11"
+                           Foreground="{DynamicResource Hud.Red}"
+                           TextWrapping="Wrap"/>
             </Border>
 
-            <Button Content="Save Changes"
-                    Style="{StaticResource MaterialDesignRaisedButton}"
+            <Button Style="{StaticResource Hud.Button.Primary}"
                     Command="{Binding SaveCommand}"
                     HorizontalAlignment="Left"
-                    Width="140" Margin="0,0,0,24"/>
+                    Width="160" Height="32" Margin="0,0,0,24">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="ContentSave" Width="13" Height="13"
+                                             VerticalAlignment="Center" Margin="0,0,6,0"/>
+                    <c:TrackedText Text="SAVE CHANGES" LetterSpacing="0.12"
+                                   FontFamily="{DynamicResource Hud.Mono}"
+                                   FontSize="10.5" FontWeight="Bold"
+                                   Foreground="{DynamicResource Hud.AccentInk}"
+                                   VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
 
-            <!-- Behaviour -->
-            <TextBlock Text="BEHAVIOUR" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
-            <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,24"
-                                 Background="{DynamicResource GlassBrush}">
+            <!-- ══ BEHAVIOUR ══ -->
+            <c:TrackedText Text="BEHAVIOUR" Style="{StaticResource Hud.SectionLabel}"
+                           HorizontalAlignment="Left" Margin="0,0,0,8"/>
+            <c:HudPanel Tint="Blue" Padding="16" Margin="0,0,0,24">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="Auto-start on App Launch" FontWeight="SemiBold"/>
-                        <TextBlock Text="Start this server automatically when the app opens"
-                                   FontSize="12" Opacity="0.6" Margin="0,2,0,0"/>
+                        <c:TrackedText Text="AUTO-START ON APP LAUNCH"
+                                       Style="{StaticResource Hud.StatCaption}"
+                                       HorizontalAlignment="Left"/>
+                        <TextBlock Style="{StaticResource Hud.Body}" Margin="0,4,0,0"
+                                   Text="Start this server automatically when the app opens."/>
                     </StackPanel>
                     <ToggleButton Grid.Column="1"
-                                  Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                                  Style="{StaticResource Hud.Toggle}"
                                   IsChecked="{Binding AutoStart}"
                                   VerticalAlignment="Center"/>
                 </Grid>
-            </materialDesign:Card>
+            </c:HudPanel>
 
-            <!-- Danger zone -->
-            <TextBlock Text="DANGER ZONE" FontSize="11" FontWeight="Bold"
-                       Foreground="#F44336" Opacity="0.8" Margin="0,0,0,10"/>
-            <materialDesign:Card UniformCornerRadius="10" Padding="16"
-                                 Background="{DynamicResource GlassBrush}"
-                                 BorderThickness="1" BorderBrush="#44F44336">
+            <!-- ══ DANGER ZONE ══ -->
+            <Grid Margin="0,0,0,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <c:TrackedText Text="DANGER ZONE"
+                               Style="{StaticResource Hud.SectionLabel}"
+                               Foreground="{DynamicResource Hud.Red}"
+                               HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                <!-- Hazard tape says "stop and read this" better than any label -->
+                <Rectangle Grid.Column="1" Height="8" Margin="12,0,0,0"
+                           VerticalAlignment="Center"
+                           Fill="{DynamicResource Hud.HazardTile}"
+                           Opacity="0.5"/>
+            </Grid>
+
+            <c:HudPanel Tint="Red" Padding="16" Margin="0,0,0,16">
                 <StackPanel>
-                    <!-- Normal state (hide when ConfirmDelete=true) -->
+
+                    <!-- Stage 1: arm the delete -->
                     <StackPanel>
                         <StackPanel.Style>
                             <Style TargetType="StackPanel">
@@ -101,54 +146,93 @@
                                 </Style.Triggers>
                             </Style>
                         </StackPanel.Style>
-                        <TextBlock Text="Delete Server" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                        <TextBlock Text="Removes this server from the manager. Server files on disk are NOT deleted."
-                                   FontSize="12" Opacity="0.6" TextWrapping="Wrap" Margin="0,0,0,12"/>
-                        <Button Content="Delete Server"
-                                Style="{StaticResource MaterialDesignOutlinedButton}"
-                                Foreground="#F44336" BorderBrush="#F44336"
+
+                        <c:TrackedText Text="DELETE SERVER" Style="{StaticResource Hud.StatCaption}"
+                                       Foreground="{DynamicResource Hud.Red}"
+                                       HorizontalAlignment="Left"/>
+                        <TextBlock Style="{StaticResource Hud.Body}" Margin="0,5,0,14"
+                                   Text="Removes this server from the manager. Files on disk are NOT deleted unless you choose to."/>
+                        <Button Style="{StaticResource Hud.Button}"
+                                BorderBrush="{DynamicResource Hud.Red}"
                                 Command="{Binding DeleteCommand}"
-                                HorizontalAlignment="Left" Width="140"/>
+                                HorizontalAlignment="Left" Width="160" Height="32">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="TrashCanOutline" Width="13" Height="13"
+                                                         Foreground="{DynamicResource Hud.Red}"
+                                                         VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <c:TrackedText Text="DELETE SERVER" LetterSpacing="0.12"
+                                               FontFamily="{DynamicResource Hud.Mono}"
+                                               FontSize="10.5" FontWeight="Bold"
+                                               Foreground="{DynamicResource Hud.Red}"
+                                               VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
 
-                    <!-- Confirm state -->
+                    <!-- Stage 2: confirm -->
                     <StackPanel Visibility="{Binding ConfirmDelete, Converter={StaticResource BoolToVis}}">
-                        <TextBlock Text="Are you sure?" FontWeight="SemiBold" Foreground="#F44336" Margin="0,0,0,8"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <materialDesign:PackIcon Kind="AlertOctagon" Width="16" Height="16"
+                                                     Foreground="{DynamicResource Hud.Red}"
+                                                     VerticalAlignment="Center" Margin="0,0,9,0"/>
+                            <c:TrackedText Text="ARE YOU SURE?"
+                                           Style="{StaticResource Hud.PanelHeader}"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource Hud.Red}"
+                                           VerticalAlignment="Center"/>
+                        </StackPanel>
 
-                        <CheckBox Content="Also delete server files from disk"
+                        <CheckBox Content="ALSO DELETE SERVER FILES FROM DISK"
                                   IsChecked="{Binding DeleteFiles}"
-                                  Margin="0,0,0,4"/>
-                        <TextBlock FontSize="11" Opacity="0.55" TextWrapping="Wrap" Margin="0,0,0,12"
-                                   Text="{Binding InstallDir, StringFormat='({0})'}"/>
+                                  Style="{StaticResource Hud.CheckBox}"
+                                  Margin="0,0,0,7"/>
+                        <Border Background="{DynamicResource Hud.Surface2}"
+                                BorderBrush="{DynamicResource Hud.Border}" BorderThickness="1"
+                                Padding="11,7" Margin="0,0,0,14">
+                            <TextBlock Text="{Binding InstallDir}"
+                                       Style="{StaticResource Hud.Mono.Text}"
+                                       FontSize="10"
+                                       Foreground="{DynamicResource Hud.FgSubtle}"
+                                       TextWrapping="Wrap"/>
+                        </Border>
 
                         <StackPanel Orientation="Horizontal">
-                            <Button Style="{StaticResource MaterialDesignRaisedButton}"
-                                    Background="#F44336" BorderBrush="#F44336"
+                            <!-- Chamfered red — the label changes with the checkbox, so it
+                                 always states exactly what is about to happen. -->
+                            <Button Style="{StaticResource Hud.Button.Stop}"
                                     Command="{Binding DeleteCommand}"
-                                    Width="150" Margin="0,0,8,0">
-                                <Button.Content>
-                                    <TextBlock>
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Text" Value="Remove from Manager"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding DeleteFiles}" Value="True">
-                                                        <Setter Property="Text" Value="Delete Everything"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </Button.Content>
+                                    Width="190" Height="34" Margin="0,0,8,0">
+                                <c:TrackedText LetterSpacing="0.12"
+                                               FontFamily="{DynamicResource Hud.Mono}"
+                                               FontSize="10.5" FontWeight="Bold"
+                                               Foreground="#12060A"
+                                               VerticalAlignment="Center">
+                                    <c:TrackedText.Style>
+                                        <Style TargetType="c:TrackedText">
+                                            <Setter Property="Text" Value="REMOVE FROM MANAGER"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding DeleteFiles}" Value="True">
+                                                    <Setter Property="Text" Value="DELETE EVERYTHING"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </c:TrackedText.Style>
+                                </c:TrackedText>
                             </Button>
-                            <Button Content="Cancel"
-                                    Style="{StaticResource MaterialDesignOutlinedButton}"
+
+                            <Button Style="{StaticResource Hud.Button.Ghost}"
                                     Command="{Binding CancelDeleteCommand}"
-                                    Width="100"/>
+                                    Width="110" Height="34">
+                                <c:TrackedText Text="CANCEL" LetterSpacing="0.12"
+                                               FontFamily="{DynamicResource Hud.Mono}"
+                                               FontSize="10.5" FontWeight="Bold"
+                                               Foreground="{DynamicResource Hud.FgMuted}"
+                                               VerticalAlignment="Center"/>
+                            </Button>
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
-            </materialDesign:Card>
+            </c:HudPanel>
 
         </StackPanel>
     </ScrollViewer>

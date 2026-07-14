@@ -28,12 +28,13 @@ public partial class UpdateAvailableWindow : Window
                 ? update.ReleaseNotes[..400] + "…"
                 : update.ReleaseNotes;
             NotesText.Text = notes;
+            NotesLabel.Visibility = Visibility.Visible;
             NotesPanel.Visibility = Visibility.Visible;
         }
 
-        // If we don't have a direct download URL, label button as "Open GitHub"
+        // No direct download URL (release has no .exe attached) — fall back to opening GitHub.
         if (string.IsNullOrEmpty(update.DownloadUrl))
-            DownloadButtonText.Text = "Open GitHub";
+            DownloadButtonText.Text = "OPEN GITHUB";
     }
 
     private async void Download_Click(object sender, RoutedEventArgs e)
@@ -49,7 +50,7 @@ public partial class UpdateAvailableWindow : Window
         DownloadButton.IsEnabled = false;
         NotNowButton.IsEnabled   = false;
         ProgressPanel.Visibility = Visibility.Visible;
-        StatusText.Text          = "Downloading…";
+        StatusText.Text          = "DOWNLOADING…";
 
         try
         {
@@ -83,7 +84,7 @@ public partial class UpdateAvailableWindow : Window
                 }
             }
 
-            Dispatcher.Invoke(() => StatusText.Text = "Installing…");
+            Dispatcher.Invoke(() => StatusText.Text = "INSTALLING…");
 
             // Write a swap script: wait for this process to exit, copy new exe over old, relaunch
             var scriptPath = Path.Combine(Path.GetTempPath(), "7d2d_update.cmd");
@@ -111,7 +112,9 @@ public partial class UpdateAvailableWindow : Window
         }
         catch (Exception ex)
         {
-            StatusText.Text          = $"Error: {ex.Message}";
+            // Turn the status line red — an accent-green failure message reads as success.
+            StatusText.Text          = $"ERROR: {ex.Message}";
+            StatusText.Foreground    = (System.Windows.Media.Brush)FindResource("Hud.Red");
             DownloadButton.IsEnabled = true;
             NotNowButton.IsEnabled   = true;
             ProgressBar.IsIndeterminate = false;

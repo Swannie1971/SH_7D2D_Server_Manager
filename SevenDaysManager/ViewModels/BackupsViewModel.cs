@@ -8,6 +8,8 @@ using CommunityToolkit.Mvvm.Input;
 using SevenDaysManager.Models;
 using SevenDaysManager.Services;
 
+using SevenDaysManager.Views;
+
 namespace SevenDaysManager.ViewModels;
 
 public partial class BackupsViewModel : ObservableObject
@@ -115,12 +117,12 @@ public partial class BackupsViewModel : ObservableObject
 
         if (IsServerRunning)
         {
-            MessageBox.Show("Stop the server before restoring a backup.",
+            HudDialog.Show("Stop the server before restoring a backup.",
                 "Server is running", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
-        var result = MessageBox.Show(
+        var result = HudDialog.Show(
             $"Restore \"{backup.FileName}\"?\n\nThis will replace save data and generated world files. This cannot be undone.",
             "Confirm Restore", MessageBoxButton.YesNo, MessageBoxImage.Warning);
         if (result != MessageBoxResult.Yes) return;
@@ -150,7 +152,7 @@ public partial class BackupsViewModel : ObservableObject
     {
         if (SelectedBackup is not { } backup) return;
 
-        var result = MessageBox.Show($"Permanently delete \"{backup.FileName}\"?",
+        var result = HudDialog.Show($"Permanently delete \"{backup.FileName}\"?",
             "Confirm Delete", MessageBoxButton.YesNo, MessageBoxImage.Question);
         if (result != MessageBoxResult.Yes) return;
 
@@ -197,7 +199,7 @@ public partial class BackupsViewModel : ObservableObject
         // Suggest <InstallDir>\ServerData as the new UserDataFolder
         var suggested = Path.Combine(_server.InstallDir, "ServerData");
 
-        var result = MessageBox.Show(
+        var result = HudDialog.Show(
             $"This will add UserDataFolder to your serverconfig.xml:\n\n{suggested}\n\n" +
             "All future saves will go there. Restart the server after applying.\n\n" +
             "If the server has existing saves in %APPDATA%, you will need to move them manually.",

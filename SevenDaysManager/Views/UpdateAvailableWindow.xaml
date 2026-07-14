@@ -2,73 +2,133 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:c="clr-namespace:SevenDaysManager.Controls"
         Title="Update Available"
-        Width="460" SizeToContent="Height"
+        Width="480" SizeToContent="Height"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
-        Background="{DynamicResource MaterialDesign.Brush.Background}"
-        TextElement.Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
-        TextElement.FontFamily="{materialDesign:MaterialDesignFont}"
         FontSize="14">
 
-    <StackPanel>
+    <Border Background="{DynamicResource Hud.Bg}"
+            BorderBrush="{DynamicResource Hud.BorderStrong}"
+            BorderThickness="1"
+            VerticalAlignment="Top">
+        <Grid VerticalAlignment="Top">
+            <c:HudAtmosphere Panel.ZIndex="0"/>
 
-        <!-- Header -->
-        <Border Background="{DynamicResource MaterialDesign.Brush.Primary.Dark}" Padding="24,16">
-            <StackPanel Orientation="Horizontal">
-                <materialDesign:PackIcon Kind="Update" Width="28" Height="28"
-                                         Foreground="{DynamicResource MaterialDesign.Brush.Primary.Foreground}"
-                                         VerticalAlignment="Center" Margin="0,0,12,0"/>
-                <StackPanel>
-                    <TextBlock Text="Update Available" FontSize="17" FontWeight="Bold"
-                               Foreground="{DynamicResource MaterialDesign.Brush.Primary.Foreground}"/>
-                    <TextBlock x:Name="SubtitleText" FontSize="12" Opacity="0.8"
-                               Foreground="{DynamicResource MaterialDesign.Brush.Primary.Foreground}"/>
+            <StackPanel Panel.ZIndex="1" VerticalAlignment="Top">
+
+                <!-- ══ Header ══ -->
+                <Grid Height="58">
+                    <Rectangle Fill="{DynamicResource Hud.BgElevated}"/>
+                    <Rectangle Fill="{DynamicResource Hud.HazardTile}" Opacity="0.3"/>
+                    <Border BorderBrush="{DynamicResource Hud.Border}" BorderThickness="0,0,0,1"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0">
+                        <materialDesign:PackIcon Kind="Update" Width="19" Height="19"
+                                                 Foreground="{DynamicResource Hud.Accent}"
+                                                 VerticalAlignment="Center" Margin="0,0,11,0"/>
+                        <StackPanel VerticalAlignment="Center">
+                            <c:TrackedText Text="UPDATE AVAILABLE"
+                                           Style="{StaticResource Hud.PanelHeader}"
+                                           FontSize="12.5"/>
+                            <!-- Version arrow: v0.2.8 → v0.2.9 (set in code-behind) -->
+                            <TextBlock x:Name="SubtitleText"
+                                       Style="{StaticResource Hud.Mono.Text}"
+                                       FontSize="10.5"
+                                       Foreground="{DynamicResource Hud.Rust}"
+                                       Margin="0,3,0,0"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+
+                <!-- ══ Body ══ -->
+                <StackPanel Margin="20,18,20,8">
+                    <TextBlock Style="{StaticResource Hud.Body}"
+                               FontSize="12.5"
+                               Foreground="{DynamicResource Hud.Fg}"
+                               LineHeight="20"
+                               Text="A new version is available. Update Now will download it, replace this build, and restart automatically."/>
+
+                    <!-- Release notes — phosphor terminal, since it's raw text from GitHub -->
+                    <c:TrackedText Text="RELEASE NOTES"
+                                   Style="{StaticResource Hud.FieldLabel}"
+                                   x:Name="NotesLabel"
+                                   Visibility="Collapsed"
+                                   Margin="0,16,0,5"/>
+                    <Border x:Name="NotesPanel"
+                            Background="{DynamicResource ConsoleBrush}"
+                            BorderBrush="{DynamicResource Hud.Border}"
+                            BorderThickness="1"
+                            Visibility="Collapsed">
+                        <Grid>
+                            <Rectangle Fill="{DynamicResource Hud.ScanlineTile}" IsHitTestVisible="False"/>
+                            <ScrollViewer MaxHeight="130" VerticalScrollBarVisibility="Auto" Padding="12,10">
+                                <TextBlock x:Name="NotesText"
+                                           Style="{StaticResource Hud.Mono.Text}"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource Hud.FgMuted}"
+                                           TextWrapping="Wrap"/>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+
+                    <!-- Download progress (revealed once the download starts) -->
+                    <StackPanel x:Name="ProgressPanel" Visibility="Collapsed" Margin="0,16,0,0">
+                        <ProgressBar x:Name="ProgressBar"
+                                     Style="{StaticResource Hud.ProgressBar}"
+                                     Minimum="0" Maximum="100"/>
+                        <TextBlock x:Name="StatusText"
+                                   Style="{StaticResource Hud.Mono.Text}"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource Hud.Accent}"
+                                   Margin="0,8,0,0"
+                                   HorizontalAlignment="Center"/>
+                    </StackPanel>
                 </StackPanel>
+
+                <!-- ══ Buttons ══ -->
+                <Border Background="{DynamicResource Hud.BgElevated}"
+                        BorderBrush="{DynamicResource Hud.Border}"
+                        BorderThickness="0,1,0,0"
+                        Padding="20,12"
+                        Margin="0,12,0,0">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="NotNowButton"
+                                Style="{StaticResource Hud.Button.Ghost}"
+                                Width="110" Height="30" Margin="0,0,10,0"
+                                Click="NotNow_Click">
+                            <c:TrackedText Text="NOT NOW" LetterSpacing="0.12"
+                                           FontFamily="{DynamicResource Hud.Mono}"
+                                           FontSize="10.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource Hud.FgMuted}"
+                                           VerticalAlignment="Center"/>
+                        </Button>
+
+                        <Button x:Name="DownloadButton"
+                                Style="{StaticResource Hud.Button.Primary}"
+                                Width="170" Height="30"
+                                Click="Download_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="CloudDownload" Width="13" Height="13"
+                                                         VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <!-- Code-behind swaps this to "Open GitHub" when the release has
+                                     no attached exe to download. -->
+                                <c:TrackedText x:Name="DownloadButtonText"
+                                               Text="UPDATE NOW" LetterSpacing="0.12"
+                                               FontFamily="{DynamicResource Hud.Mono}"
+                                               FontSize="10.5" FontWeight="Bold"
+                                               Foreground="{DynamicResource Hud.AccentInk}"
+                                               VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
             </StackPanel>
-        </Border>
 
-        <!-- Body -->
-        <StackPanel Margin="24,20,24,8">
-            <TextBlock TextWrapping="Wrap" Opacity="0.85" LineHeight="22">
-                A new version of 7D2D Server Manager is available. Click Update Now and the app will download, replace itself, and restart automatically.
-            </TextBlock>
-
-            <!-- Release notes snippet -->
-            <Border x:Name="NotesPanel" Background="#1AFFFFFF" CornerRadius="6"
-                    Padding="12,10" Margin="0,16,0,0"
-                    Visibility="Collapsed">
-                <ScrollViewer MaxHeight="120" VerticalScrollBarVisibility="Auto">
-                    <TextBlock x:Name="NotesText" FontSize="12" Opacity="0.7"
-                               TextWrapping="Wrap" FontFamily="Consolas"/>
-                </ScrollViewer>
-            </Border>
-
-            <!-- Download progress (hidden until download starts) -->
-            <StackPanel x:Name="ProgressPanel" Visibility="Collapsed" Margin="0,16,0,0">
-                <ProgressBar x:Name="ProgressBar" Height="6" Minimum="0" Maximum="100"
-                             Style="{StaticResource MaterialDesignLinearProgressBar}"/>
-                <TextBlock x:Name="StatusText" FontSize="12" Opacity="0.7"
-                           Margin="0,6,0,0" HorizontalAlignment="Center"/>
-            </StackPanel>
-        </StackPanel>
-
-        <!-- Buttons -->
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
-                    Margin="24,12,24,24">
-            <Button x:Name="NotNowButton" Content="Not Now"
-                    Style="{StaticResource MaterialDesignOutlinedButton}"
-                    Width="110" Margin="0,0,12,0"
-                    Click="NotNow_Click"/>
-            <Button x:Name="DownloadButton"
-                    Style="{StaticResource MaterialDesignRaisedButton}"
-                    Width="160" Click="Download_Click">
-                <StackPanel Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="CloudDownload" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                    <TextBlock x:Name="DownloadButtonText" Text="Update Now" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Button>
-        </StackPanel>
-
-    </StackPanel>
+            <c:HudBrackets Panel.ZIndex="2" Tint="Accent"/>
+        </Grid>
+    </Border>
 </Window>

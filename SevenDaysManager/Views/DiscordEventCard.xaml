@@ -2,59 +2,55 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:vm="clr-namespace:SevenDaysManager.ViewModels">
+             xmlns:vm="clr-namespace:SevenDaysManager.ViewModels"
+             xmlns:c="clr-namespace:SevenDaysManager.Controls">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-        <Style x:Key="FieldLabel" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="10"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Opacity" Value="0.5"/>
-            <Setter Property="Margin" Value="0,0,0,4"/>
-        </Style>
     </UserControl.Resources>
 
-    <!-- Left accent bar colour-coded to the event's colour -->
-    <Border Margin="0,0,0,10">
-        <Border.Style>
-            <Style TargetType="Border">
-                <Setter Property="Background" Value="{DynamicResource GlassBrush}"/>
-                <Setter Property="CornerRadius" Value="6"/>
-                <Setter Property="BorderThickness" Value="3,0,0,0"/>
-                <Setter Property="BorderBrush" Value="#57F287"/>
+    <!-- Panel outline is colour-coded to the event's Discord embed colour, so the card's
+         HUD tint carries the same meaning the embed will have. -->
+    <c:HudPanel Margin="0,0,0,10" Padding="0">
+        <c:HudPanel.Style>
+            <Style TargetType="c:HudPanel" BasedOn="{StaticResource {x:Type c:HudPanel}}">
+                <Setter Property="Tint" Value="Green"/>
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding Color}" Value="red">
-                        <Setter Property="BorderBrush" Value="#ED4245"/>
+                        <Setter Property="Tint" Value="Red"/>
                     </DataTrigger>
                     <DataTrigger Binding="{Binding Color}" Value="orange">
-                        <Setter Property="BorderBrush" Value="#FEA800"/>
+                        <Setter Property="Tint" Value="Amber"/>
                     </DataTrigger>
                     <DataTrigger Binding="{Binding Color}" Value="blue">
-                        <Setter Property="BorderBrush" Value="#5865F2"/>
+                        <Setter Property="Tint" Value="Blue"/>
                     </DataTrigger>
                     <DataTrigger Binding="{Binding Color}" Value="yellow">
-                        <Setter Property="BorderBrush" Value="#FEE75C"/>
+                        <Setter Property="Tint" Value="Amber"/>
                     </DataTrigger>
                     <DataTrigger Binding="{Binding Color}" Value="purple">
-                        <Setter Property="BorderBrush" Value="#9B59B6"/>
+                        <Setter Property="Tint" Value="Violet"/>
                     </DataTrigger>
                     <DataTrigger Binding="{Binding Color}" Value="grey">
-                        <Setter Property="BorderBrush" Value="#95A5A6"/>
+                        <Setter Property="Tint" Value="Neutral"/>
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
-        </Border.Style>
+        </c:HudPanel.Style>
 
         <StackPanel>
-            <!-- Card header -->
-            <Border Padding="14,10">
+            <!-- Card header: event name + enable toggle -->
+            <Border Padding="14,11">
                 <Grid>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding EventName}" FontSize="13" FontWeight="SemiBold"
+                    <c:TrackedText Text="{Binding EventName}"
+                                   LetterSpacing="0.12"
+                                   FontFamily="{DynamicResource Hud.Mono}"
+                                   FontSize="11.5" FontWeight="Bold"
+                                   Foreground="{DynamicResource Hud.Fg}"
+                                   HorizontalAlignment="Left"
                                    VerticalAlignment="Center"/>
-                    </StackPanel>
                     <ToggleButton IsChecked="{Binding Enabled}"
-                                  Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                                  Style="{StaticResource Hud.Toggle}"
                                   HorizontalAlignment="Right" VerticalAlignment="Center"/>
                 </Grid>
             </Border>
@@ -63,25 +59,31 @@
             <StackPanel Visibility="{Binding Enabled, Converter={StaticResource BoolToVis}}"
                         Margin="14,0,14,14">
 
-                <!-- Webhook URL override -->
-                <TextBlock Text="WEBHOOK URL" Style="{StaticResource FieldLabel}"/>
+                <!-- Webhook override -->
+                <c:TrackedText Text="WEBHOOK URL" Style="{StaticResource Hud.FieldLabel}"/>
                 <TextBox Text="{Binding WebhookOverride, UpdateSourceTrigger=PropertyChanged}"
-                         materialDesign:HintAssist.Hint="(uses default webhook)"
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                         FontSize="12" FontFamily="Consolas" Margin="0,0,0,12"/>
+                         Style="{StaticResource Hud.TextBox}"
+                         FontSize="11"
+                         Margin="0,0,0,12"/>
 
                 <!-- Message -->
-                <TextBlock FontSize="10" FontWeight="SemiBold" Opacity="0.5" Margin="0,0,0,4">
-                    <Run Text="MESSAGE TEXT"/>
-                    <Run Text=" — VARS: " Foreground="#888"/>
-                    <Run Text="{Binding Variables, Mode=OneWay}" Foreground="#888"/>
-                </TextBlock>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                    <c:TrackedText Text="MESSAGE TEXT" Style="{StaticResource Hud.StatCaption}"/>
+                    <TextBlock Text="{Binding Variables, Mode=OneWay}"
+                               Style="{StaticResource Hud.Mono.Text}"
+                               FontSize="9.5"
+                               Foreground="{DynamicResource Hud.FgFaint}"
+                               VerticalAlignment="Center"
+                               Margin="8,0,0,0"/>
+                </StackPanel>
                 <TextBox Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}"
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                         FontSize="12" TextWrapping="Wrap" MinHeight="60"
-                         AcceptsReturn="True" Margin="0,0,0,12"/>
+                         Style="{StaticResource Hud.TextBox}"
+                         TextWrapping="Wrap" MinHeight="62"
+                         AcceptsReturn="True"
+                         VerticalContentAlignment="Top"
+                         Margin="0,0,0,12"/>
 
-                <!-- Color + Cooldown row -->
+                <!-- Colour + cooldown -->
                 <Grid Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -90,26 +92,22 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="COLOR" Style="{StaticResource FieldLabel}"/>
+                        <c:TrackedText Text="COLOR" Style="{StaticResource Hud.FieldLabel}"/>
                         <ComboBox ItemsSource="{x:Static vm:DiscordEventViewModel.ColorOptions}"
                                   SelectedItem="{Binding Color}"
-                                  Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                                  FontSize="12"/>
+                                  Style="{StaticResource Hud.ComboBox}"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2">
-                        <TextBlock Style="{StaticResource FieldLabel}">
-                            <Run Text="COOLDOWN (SEC)"/>
-                            <Run Text=" — 0 = NONE" Foreground="#666"/>
-                        </TextBlock>
+                        <c:TrackedText Text="COOLDOWN (SEC)" Style="{StaticResource Hud.FieldLabel}"/>
                         <TextBox Text="{Binding CooldownSeconds, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                 FontSize="12" TextAlignment="Center"/>
+                                 Style="{StaticResource Hud.TextBox}"
+                                 TextAlignment="Center"/>
                     </StackPanel>
                 </Grid>
 
-                <!-- Thumbnail URL + Role mention row -->
-                <Grid Margin="0,0,0,0">
+                <!-- Thumbnail + role mention -->
+                <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="16"/>
@@ -117,28 +115,127 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0">
-                        <TextBlock Style="{StaticResource FieldLabel}">
-                            <Run Text="THUMBNAIL URL"/>
-                            <Run Text=" (use {IMAGE} for server logo)" Foreground="#666" FontSize="9"/>
-                        </TextBlock>
+                        <c:TrackedText Text="THUMBNAIL URL" Style="{StaticResource Hud.FieldLabel}"/>
                         <TextBox Text="{Binding ThumbnailUrl, UpdateSourceTrigger=PropertyChanged}"
-                                 materialDesign:HintAssist.Hint="https://… or {IMAGE}"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                 FontSize="11" FontFamily="Consolas"/>
+                                 Style="{StaticResource Hud.TextBox}"
+                                 FontSize="10.5"/>
+                        <TextBlock Text="{}{IMAGE} = server logo"
+                                   Style="{StaticResource Hud.Body}"
+                                   FontSize="9.5"
+                                   Foreground="{DynamicResource Hud.FgFaint}"
+                                   Margin="0,4,0,0"/>
                     </StackPanel>
 
                     <StackPanel Grid.Column="2">
-                        <TextBlock Style="{StaticResource FieldLabel}">
-                            <Run Text="ROLE MENTION ID"/>
-                            <Run Text=" (pings this role)" Foreground="#666" FontSize="9"/>
-                        </TextBlock>
+                        <c:TrackedText Text="ROLE MENTION ID" Style="{StaticResource Hud.FieldLabel}"/>
                         <TextBox Text="{Binding RoleMentionId, UpdateSourceTrigger=PropertyChanged}"
-                                 materialDesign:HintAssist.Hint="123456789012345678  (optional)"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                 FontSize="11" FontFamily="Consolas"/>
+                                 Style="{StaticResource Hud.TextBox}"
+                                 FontSize="10.5"/>
+                        <TextBlock Text="Pings this role (optional)"
+                                   Style="{StaticResource Hud.Body}"
+                                   FontSize="9.5"
+                                   Foreground="{DynamicResource Hud.FgFaint}"
+                                   Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Grid>
+
+                <!-- ══ PREVIEW ══
+                     A live mock of the Discord embed. The message is rendered through the SAME
+                     substitution rules the sender uses (see DiscordEventViewModel.Substitute),
+                     with sample values, so what you see is what will post. -->
+                <c:TrackedText Text="PREVIEW" Style="{StaticResource Hud.FieldLabel}" Margin="0,14,0,5"/>
+                <Border Background="{DynamicResource Hud.Surface2}"
+                        BorderBrush="{DynamicResource Hud.Border}" BorderThickness="1"
+                        Padding="12">
+                    <StackPanel>
+                        <!-- The embed: coloured left bar = the actual Discord embed colour -->
+                        <Border Background="#1E1F22" Padding="12,10"
+                                BorderBrush="{Binding PreviewAccent}"
+                                BorderThickness="4,0,0,0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Grid.Column="0">
+                                    <TextBlock Text="{Binding PreviewTitle}"
+                                               FontFamily="{DynamicResource Hud.Sans}"
+                                               FontSize="12.5" FontWeight="Bold"
+                                               Foreground="#F2F3F5"
+                                               TextWrapping="Wrap"/>
+                                    <TextBlock Text="{Binding PreviewMessage}"
+                                               FontFamily="{DynamicResource Hud.Sans}"
+                                               FontSize="12"
+                                               Foreground="#DBDEE1"
+                                               TextWrapping="Wrap"
+                                               Margin="0,5,0,0"/>
+                                    <TextBlock Text="{Binding PreviewTimestamp}"
+                                               FontFamily="{DynamicResource Hud.Sans}"
+                                               FontSize="10"
+                                               Foreground="#949BA4"
+                                               Margin="0,7,0,0"/>
+                                </StackPanel>
+
+                                <!-- Thumbnail. PreviewThumbnail is null for a bad/unreachable URL
+                                     (or for the {IMAGE} placeholder), so the card can't break. -->
+                                <Border Grid.Column="1" Width="60" Height="60"
+                                        Margin="12,0,0,0" VerticalAlignment="Top"
+                                        Visibility="{Binding HasThumbnail, Converter={StaticResource BoolToVis}}">
+                                    <Image Source="{Binding PreviewThumbnail}" Stretch="UniformToFill"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <TextBlock Text="preview · sample values"
+                                   Style="{StaticResource Hud.Mono.Text}"
+                                   FontSize="9.5"
+                                   Foreground="{DynamicResource Hud.FgFaint}"
+                                   HorizontalAlignment="Right"
+                                   Margin="0,7,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- ══ Per-card actions ══
+                     Send Test posts THIS event to THIS event's webhook (honouring its override,
+                     colour, thumbnail and role mention) — the global test can only hit the
+                     default webhook, so it can't verify a per-event override. -->
+                <Grid Margin="0,12,0,0">
+                    <TextBlock Text="{Binding Status}"
+                               Style="{StaticResource Hud.Mono.Text}"
+                               FontSize="10"
+                               Foreground="{DynamicResource Hud.FgSubtle}"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Left"
+                               TextTrimming="CharacterEllipsis"/>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Command="{Binding SendTestCommand}"
+                                Style="{StaticResource Hud.Button}"
+                                Height="28" Padding="12,0" Margin="0,0,8,0">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Send" Width="12" Height="12"
+                                                         VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <c:TrackedText Text="SEND TEST" LetterSpacing="0.12"
+                                               FontFamily="{DynamicResource Hud.Mono}"
+                                               FontSize="10" FontWeight="Bold"
+                                               Foreground="{DynamicResource Hud.Fg}"
+                                               VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <Button Command="{Binding SaveEventCommand}"
+                                Style="{StaticResource Hud.Button.Primary}"
+                                Height="28" Padding="14,0">
+                            <c:TrackedText Text="SAVE" LetterSpacing="0.12"
+                                           FontFamily="{DynamicResource Hud.Mono}"
+                                           FontSize="10" FontWeight="Bold"
+                                           Foreground="{DynamicResource Hud.AccentInk}"
+                                           VerticalAlignment="Center"/>
+                        </Button>
                     </StackPanel>
                 </Grid>
             </StackPanel>
         </StackPanel>
-    </Border>
+    </c:HudPanel>
 </UserControl>

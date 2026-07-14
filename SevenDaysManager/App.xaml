@@ -7,20 +7,50 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <!-- MaterialDesign still supplies base control templates; we override its
+                     palette and kill its radii/shadows in the Hud dictionaries below. -->
                 <materialDesign:BundledTheme BaseTheme="Dark"
-                                             PrimaryColor="Teal"
-                                             SecondaryColor="LightGreen" />
+                                             PrimaryColor="Lime"
+                                             SecondaryColor="DeepOrange" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
+
+                <!-- Tactical HUD -->
+                <ResourceDictionary Source="Theme/TacticalDark.xaml"/>
+                <ResourceDictionary Source="Theme/HudControls.xaml"/>
+                <ResourceDictionary Source="Theme/HudPanel.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <SolidColorBrush x:Key="GlassBrush" Color="#801E1E1E"/>
+            <!-- Panel fill. Overwritten at runtime by CardBrushService using the user's
+                 opacity slider, so panels can become translucent glass over a bg image. -->
+            <SolidColorBrush x:Key="GlassBrush" Color="#0E0F12" Opacity="0.82"/>
+
             <BitmapImage x:Key="AppBackgroundSource" UriSource="pack://application:,,,/Assets/bg.jpg"/>
 
+            <!-- ══ Override MaterialDesign's palette with the abyss ══ -->
+            <!-- MD's default dark greys are too blue/light — the background must be near-black. -->
+            <SolidColorBrush x:Key="MaterialDesign.Brush.Background"        Color="#08080A"/>
+            <SolidColorBrush x:Key="MaterialDesign.Brush.Foreground"        Color="#E8E6E3"/>
+            <SolidColorBrush x:Key="MaterialDesign.Brush.Primary"           Color="#C1F24A"/>
+            <SolidColorBrush x:Key="MaterialDesign.Brush.Primary.Dark"      Color="#0B0C0E"/>
+            <SolidColorBrush x:Key="MaterialDesign.Brush.Primary.Light"     Color="#D4F77E"/>
+            <SolidColorBrush x:Key="MaterialDesign.Brush.Primary.Foreground" Color="#0A1500"/>
+            <SolidColorBrush x:Key="MaterialDesign.Brush.Secondary"         Color="#D97757"/>
+            <SolidColorBrush x:Key="MaterialDesign.Brush.Secondary.Foreground" Color="#0A1500"/>
+
+            <!-- ══ Kill rounded corners + shadows globally ══ -->
             <Style TargetType="materialDesign:Card"
                    BasedOn="{StaticResource {x:Type materialDesign:Card}}">
+                <Setter Property="UniformCornerRadius" Value="0"/>
+                <Setter Property="materialDesign:ElevationAssist.Elevation" Value="Dp0"/>
                 <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesign.Brush.Secondary}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource Hud.Border}"/>
+                <Setter Property="Background" Value="{DynamicResource GlassBrush}"/>
             </Style>
+
+            <!-- Every button in the app defaults to the square HUD look -->
+            <Style TargetType="Button" BasedOn="{StaticResource Hud.Button}"/>
+            <Style TargetType="TextBox" BasedOn="{StaticResource Hud.TextBox}"/>
+            <Style TargetType="ProgressBar" BasedOn="{StaticResource Hud.ProgressBar}"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

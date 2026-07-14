@@ -91,6 +91,53 @@ public class DiscordService
         catch { }
     }
 
+    // ── Per-event test ───────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Post a single event exactly as it would fire for real (same colour, thumbnail and role
+    /// mention), but with sample values — and, unlike SendEventAsync, it REPORTS FAILURE and
+    /// ignores both the Enabled flag and the cooldown, so a test always sends and always tells
+    /// you whether it worked.
+    /// </summary>
+    public async Task<bool> SendEventTestAsync(
+        DiscordEventConfig evt,
+        string             webhookUrl,
+        string             serverName,
+        string?            logoPath = null)
+    {
+        if (string.IsNullOrWhiteSpace(webhookUrl)) return false;
+
+        var message = Format(evt.Message, serverName,
+            minutes: 10, players: 3, maxPlayers: 8,
+            ipPort: "127.0.0.1:26900", reason: "test");
+
+        var color = ResolveColor(evt.Color);
+
+        // {IMAGE} means "the server's own logo" — it's only usable if that's a real URL Discord
+        // can fetch; a local file path is meaningless to them, so drop the thumbnail instead.
+        var thumb = evt.ThumbnailUrl?.Replace("{IMAGE}", logoPath ?? "");
+        if (!Uri.TryCreate(thumb, UriKind.Absolute, out var thumbUri) ||
+            (thumbUri.Scheme != Uri.UriSchemeHttp && thumbUri.Scheme != Uri.UriSchemeHttps))
+            thumb = null;
+
+        var embedObj = string.IsNullOrWhiteSpace(thumb)
+            ? (object)new { description = message, color }
+            : new { description = message, color, thumbnail = new { url = thumb } };
+
+        string? content = !string.IsNullOrWhiteSpace(evt.RoleMentionId)
+            ? $"<@&{evt.RoleMentionId}>" : null;
+
+        var payload = JsonSerializer.Serialize(new { content, embeds = new[] { embedObj } });
+
+        try
+        {
+            var resp = await _http.PostAsync(webhookUrl,
+                new StringContent(payload, Encoding.UTF8, "application/json"));
+            return resp.IsSuccessStatusCode;
+        }
+        catch { return false; }
+    }
+
     // ── Test ─────────────────────────────────────────────────────────────────
 
     public async Task<bool> TestAsync(string webhookUrl)

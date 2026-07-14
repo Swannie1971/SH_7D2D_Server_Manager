@@ -65,7 +65,7 @@
 
                 <TextBlock Text="ADMIN" FontSize="11" FontWeight="Bold"
                            Opacity="0.5" Margin="4,18,0,8"/>
-                <materialDesign:Card UniformCornerRadius="8" Padding="16" Background="#14FFFFFF">
+                <materialDesign:Card UniformCornerRadius="0" Padding="16" Background="#14FFFFFF">
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>

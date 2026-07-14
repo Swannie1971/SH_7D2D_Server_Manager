@@ -2,7 +2,8 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:views="clr-namespace:SevenDaysManager.Views">
+             xmlns:views="clr-namespace:SevenDaysManager.Views"
+             xmlns:c="clr-namespace:SevenDaysManager.Controls">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
@@ -11,89 +12,102 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- ══ Header ══ -->
-        <Border Grid.Row="0" Background="{DynamicResource MaterialDesign.Brush.Primary.Dark}" Padding="16,10">
-            <Grid>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <materialDesign:PackIcon Kind="MessageBadge" Width="20" Height="20"
-                                             VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <TextBlock Text="Discord Notifications" FontSize="15" FontWeight="SemiBold"
-                               VerticalAlignment="Center"/>
-                    <ToggleButton IsChecked="{Binding Enabled}"
-                                  Style="{StaticResource MaterialDesignSwitchToggleButton}"
-                                  Margin="20,0,0,0" VerticalAlignment="Center"/>
-                    <TextBlock VerticalAlignment="Center" Margin="8,0,0,0" FontSize="12" Opacity="0.7">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Text" Value="Disabled"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Enabled}" Value="True">
-                                        <Setter Property="Text" Value="Enabled"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-                </StackPanel>
+        <!-- ══ Title ══ -->
+        <c:HudTitle Grid.Row="0" Title="DISCORD" HorizontalAlignment="Left" Margin="16,14,0,12"/>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Button Command="{Binding TestDiscordCommand}"
-                            Style="{StaticResource MaterialDesignOutlinedButton}"
-                            Height="30" Padding="14,0" FontSize="12" Margin="0,0,8,0"
-                            IsEnabled="{Binding Enabled}">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="Send" Width="14" Height="14"
-                                                     VerticalAlignment="Center" Margin="0,0,6,0"/>
-                            <TextBlock Text="Send Test" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-                    <Button Command="{Binding SaveCommand}"
-                            Style="{StaticResource MaterialDesignRaisedButton}"
-                            Height="30" Padding="14,0" FontSize="12">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="ContentSave" Width="14" Height="14"
-                                                     VerticalAlignment="Center" Margin="0,0,6,0"/>
-                            <TextBlock Text="Save" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
-            </Grid>
-        </Border>
+        <!-- ══ Master switch + actions ══ -->
+        <Grid Grid.Row="1" Margin="16,0,16,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <ToggleButton IsChecked="{Binding Enabled}"
+                              Style="{StaticResource Hud.Toggle}"
+                              VerticalAlignment="Center"/>
+                <TextBlock VerticalAlignment="Center" Margin="12,0,0,0">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource Hud.Mono.Text}">
+                            <Setter Property="FontSize"   Value="11"/>
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="Text"       Value="NOTIFICATIONS DISABLED"/>
+                            <Setter Property="Foreground" Value="{DynamicResource Hud.FgFaint}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Enabled}" Value="True">
+                                    <Setter Property="Text"       Value="NOTIFICATIONS ENABLED"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource Hud.Accent}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Command="{Binding TestDiscordCommand}"
+                        Style="{StaticResource Hud.Button}"
+                        IsEnabled="{Binding Enabled}"
+                        Height="30" Padding="14,0" Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Send" Width="13" Height="13"
+                                                 VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <c:TrackedText Text="SEND TEST" LetterSpacing="0.12"
+                                       FontFamily="{DynamicResource Hud.Mono}"
+                                       FontSize="10.5" FontWeight="Bold"
+                                       Foreground="{DynamicResource Hud.Fg}"
+                                       VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding SaveCommand}"
+                        Style="{StaticResource Hud.Button.Primary}"
+                        Height="30" Padding="14,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="ContentSave" Width="13" Height="13"
+                                                 VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <c:TrackedText Text="SAVE" LetterSpacing="0.12"
+                                       FontFamily="{DynamicResource Hud.Mono}"
+                                       FontSize="10.5" FontWeight="Bold"
+                                       Foreground="{DynamicResource Hud.AccentInk}"
+                                       VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
 
         <!-- ══ Body ══ -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="16" IsEnabled="{Binding Enabled}">
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Background="Transparent">
+            <StackPanel Margin="16,0,16,16" IsEnabled="{Binding Enabled}">
 
                 <!-- Default webhook -->
-                <materialDesign:Card Padding="16" Margin="0,0,0,12"
-                                     Background="{DynamicResource GlassBrush}">
+                <c:TrackedText Text="DEFAULT WEBHOOK" Style="{StaticResource Hud.SectionLabel}"
+                               HorizontalAlignment="Left" Margin="0,0,0,8"/>
+                <c:HudPanel Tint="Blue" Padding="16" Margin="0,0,0,16">
                     <StackPanel>
-                        <TextBlock Text="DEFAULT WEBHOOK URL" FontSize="10" FontWeight="SemiBold"
-                                   Opacity="0.5" Margin="0,0,0,6"/>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBox Grid.Column="0"
-                                     Text="{Binding DefaultWebhook, UpdateSourceTrigger=PropertyChanged}"
-                                     materialDesign:HintAssist.Hint="https://discord.com/api/webhooks/..."
-                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                     FontSize="12" FontFamily="Consolas"/>
-                        </Grid>
-                        <TextBlock Text="{Binding TestStatus, Mode=OneWay}"
-                                   FontSize="11" Margin="0,6,0,0" Opacity="0.7"/>
-                        <TextBlock FontSize="10" Opacity="0.4" TextWrapping="Wrap" Margin="0,8,0,0">
-                            Each event below can use its own webhook instead. Leave blank on an event to use this default.
-                            Discord → Server Settings → Integrations → Webhooks → New Webhook → Copy Webhook URL
-                        </TextBlock>
-                    </StackPanel>
-                </materialDesign:Card>
+                        <c:TrackedText Text="WEBHOOK URL" Style="{StaticResource Hud.FieldLabel}"/>
+                        <TextBox Text="{Binding DefaultWebhook, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource Hud.TextBox}"
+                                 FontSize="11"/>
 
-                <!-- Event cards — 2-column grid -->
+                        <TextBlock Text="{Binding TestStatus, Mode=OneWay}"
+                                   Style="{StaticResource Hud.Mono.Text}"
+                                   FontSize="10.5"
+                                   Foreground="{DynamicResource Hud.Accent}"
+                                   Margin="0,8,0,0"
+                                   TextWrapping="Wrap"/>
+
+                        <TextBlock Style="{StaticResource Hud.Body}" Margin="0,10,0,0"
+                                   Text="Each event below can override this with its own webhook. Leave an event's URL blank to use this default."/>
+                        <TextBlock Style="{StaticResource Hud.Body}"
+                                   FontSize="10.5"
+                                   Foreground="{DynamicResource Hud.FgFaint}"
+                                   Margin="0,6,0,0"
+                                   Text="Discord → Server Settings → Integrations → Webhooks → New Webhook → Copy Webhook URL"/>
+                    </StackPanel>
+                </c:HudPanel>
+
+                <!-- Events -->
+                <c:TrackedText Text="EVENTS" Style="{StaticResource Hud.SectionLabel}"
+                               HorizontalAlignment="Left" Margin="0,0,0,8"/>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>

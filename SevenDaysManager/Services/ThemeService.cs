@@ -35,34 +35,23 @@ public static class ThemeService
         return new();
     }
 
+    // The tactical HUD palette is fixed — the title bar is always the elevated abyss
+    // (#0B0C0E) so the OS chrome disappears into the window.
+    private static readonly Color TitleBarColor = Color.FromRgb(0x0B, 0x0C, 0x0E);
+
     public static void Apply(AppThemeSettings settings)
     {
-        var helper = new PaletteHelper();
-        var theme = helper.GetTheme();
-
-        theme.SetBaseTheme(settings.IsDark ? BaseTheme.Dark : BaseTheme.Light);
-
-        Color primary = default;
-        if (TryGetSwatchColor(settings.PrimaryColor, out primary))
-            theme.SetPrimaryColor(primary);
-
-        if (TryGetSwatchColor(settings.SecondaryColor, out var secondary))
-            theme.SetSecondaryColor(secondary);
-
-        helper.SetTheme(theme);
+        // Palette is fixed by the HUD theme dictionaries; nothing to recolour at runtime.
+        // We keep the settings round-trip so existing saved files stay valid.
         Save(settings);
-
-        if (primary != default)
-            UpdateAllTitleBars(primary);
+        UpdateAllTitleBars(TitleBarColor);
     }
 
-    // Apply the current primary colour to a single window's title bar (call from OnSourceInitialized)
+    // Paint a single window's title bar to match the abyss (call from OnSourceInitialized)
     public static void ApplyTitleBar(Window w)
     {
         if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000)) return;
-        var helper = new PaletteHelper();
-        var primary = helper.GetTheme().PrimaryMid.Color;
-        int bgr = primary.R | (primary.G << 8) | (primary.B << 16);
+        int bgr = TitleBarColor.R | (TitleBarColor.G << 8) | (TitleBarColor.B << 16);
         var hwnd = new WindowInteropHelper(w).Handle;
         if (hwnd != IntPtr.Zero)
             DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR, ref bgr, 4);

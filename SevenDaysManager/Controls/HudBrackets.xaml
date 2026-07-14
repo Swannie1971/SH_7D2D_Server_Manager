@@ -1,0 +1,57 @@
+<UserControl x:Class="SevenDaysManager.Controls.HudBrackets"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Root"
+             IsHitTestVisible="False">
+
+    <!--
+      MEASURED FROM THE RUSTPANEL REFERENCE (do not "improve" this from memory):
+
+        • The panel outline is a COMPLETE, CONTINUOUS 1px border — not corner brackets.
+          Sampling the reference: the top edge of a tile runs unbroken for 500+px at a
+          constant colour. Earlier attempts drew short corner ticks, or long arms that met
+          in a neon rectangle. Both were wrong.
+
+        • The colour is DARK and DESATURATED. A "green" panel edge samples as #267F49 —
+          roughly 50% luminance, not the #C1F24A accent. Drawing the border at full accent
+          saturation is what made this read as neon piping.
+
+        • No glow. The border is etched, not emissive.
+
+      Corner brackets DO exist as a separate flourish (brighter ticks over the border), so the
+      Arm property is retained — but the border is the primary read.
+    -->
+    <Grid>
+        <!-- The outline: continuous, 1px, dark tint -->
+        <Border BorderBrush="{Binding EdgeBrush, ElementName=Root}" BorderThickness="1"/>
+
+        <!-- Corner ticks: same hue, a touch brighter, so corners read crisper -->
+        <Rectangle HorizontalAlignment="Left"  VerticalAlignment="Top"
+                   Width="{Binding Arm, ElementName=Root}" Height="1"
+                   Fill="{Binding CornerBrush, ElementName=Root}"/>
+        <Rectangle HorizontalAlignment="Left"  VerticalAlignment="Top"
+                   Width="1" Height="{Binding Arm, ElementName=Root}"
+                   Fill="{Binding CornerBrush, ElementName=Root}"/>
+
+        <Rectangle HorizontalAlignment="Right" VerticalAlignment="Top"
+                   Width="{Binding Arm, ElementName=Root}" Height="1"
+                   Fill="{Binding CornerBrush, ElementName=Root}"/>
+        <Rectangle HorizontalAlignment="Right" VerticalAlignment="Top"
+                   Width="1" Height="{Binding Arm, ElementName=Root}"
+                   Fill="{Binding CornerBrush, ElementName=Root}"/>
+
+        <Rectangle HorizontalAlignment="Left"  VerticalAlignment="Bottom"
+                   Width="{Binding Arm, ElementName=Root}" Height="1"
+                   Fill="{Binding CornerBrush, ElementName=Root}"/>
+        <Rectangle HorizontalAlignment="Left"  VerticalAlignment="Bottom"
+                   Width="1" Height="{Binding Arm, ElementName=Root}"
+                   Fill="{Binding CornerBrush, ElementName=Root}"/>
+
+        <Rectangle HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                   Width="{Binding Arm, ElementName=Root}" Height="1"
+                   Fill="{Binding CornerBrush, ElementName=Root}"/>
+        <Rectangle HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                   Width="1" Height="{Binding Arm, ElementName=Root}"
+                   Fill="{Binding CornerBrush, ElementName=Root}"/>
+    </Grid>
+</UserControl>

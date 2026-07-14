@@ -2,133 +2,204 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:c="clr-namespace:SevenDaysManager.Controls"
         Title="Install / Update Server"
-        Width="700" Height="520"
+        Width="740" Height="560"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
-        Background="{DynamicResource MaterialDesign.Brush.Background}"
-        TextElement.Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
-        TextElement.FontFamily="{materialDesign:MaterialDesignFont}"
         FontSize="14">
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
     </Window.Resources>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+    <Border Background="{DynamicResource Hud.Bg}"
+            BorderBrush="{DynamicResource Hud.BorderStrong}"
+            BorderThickness="1">
+        <Grid>
+            <c:HudAtmosphere Panel.ZIndex="0"/>
 
-        <!-- Header -->
-        <Border Grid.Row="0"
-                Background="{DynamicResource MaterialDesign.Brush.Primary}"
-                Padding="20,16">
-            <StackPanel>
-                <TextBlock Text="{Binding ServerName, StringFormat='Installing: {0}'}"
-                           FontSize="18" FontWeight="Bold"
-                           Foreground="{DynamicResource MaterialDesign.Brush.Primary.Foreground}"/>
-                <TextBlock Text="{Binding InstallDir}"
-                           FontSize="11" Opacity="0.7"
-                           Foreground="{DynamicResource MaterialDesign.Brush.Primary.Foreground}"
-                           TextTrimming="CharacterEllipsis"/>
-            </StackPanel>
-        </Border>
+            <Grid Panel.ZIndex="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
 
-        <!-- Log output -->
-        <materialDesign:Card Grid.Row="1" UniformCornerRadius="8" Margin="16,16,16,8"
-                             Background="#CC080808">
-            <ScrollViewer x:Name="LogScroller"
-                          VerticalScrollBarVisibility="Auto"
-                          Padding="12">
-                <ItemsControl ItemsSource="{Binding LogLines}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding}"
-                                       FontFamily="Consolas" FontSize="12"
-                                       Foreground="#B0BEC5"
-                                       TextWrapping="Wrap"/>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
-        </materialDesign:Card>
-
-        <!-- Progress + stats -->
-        <StackPanel Grid.Row="2" Margin="16,0,16,10">
-
-            <!-- Determinate bar while downloading, indeterminate otherwise -->
-            <Grid>
-                <ProgressBar Height="6"
-                             Maximum="100" Value="{Binding DownloadPercent}"
-                             Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"
-                             Visibility="{Binding HasProgress, Converter={StaticResource BoolToVis}}"/>
-                <ProgressBar Height="6"
-                             IsIndeterminate="True"
-                             Foreground="{DynamicResource MaterialDesign.Brush.Secondary}">
-                    <ProgressBar.Style>
-                        <Style TargetType="ProgressBar">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Binding="{Binding IsRunning}"   Value="True"/>
-                                        <Condition Binding="{Binding HasProgress}" Value="False"/>
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </MultiDataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ProgressBar.Style>
-                </ProgressBar>
-            </Grid>
-
-            <!-- Stats row -->
-            <Grid Margin="0,8,0,0" Visibility="{Binding HasProgress, Converter={StaticResource BoolToVis}}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Text="{Binding DownloadStats}"
-                           FontFamily="Consolas" FontSize="13" FontWeight="SemiBold"
-                           Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"
-                           VerticalAlignment="Center"/>
-                <TextBlock Grid.Column="1"
-                           Text="{Binding DownloadPercent, StringFormat='{}{0}%'}"
-                           FontSize="20" FontWeight="Bold" Opacity="0.25"
-                           VerticalAlignment="Center"/>
-            </Grid>
-
-            <TextBlock Text="{Binding StatusMessage}"
-                       FontSize="12" Opacity="0.6" Margin="0,6,0,0"/>
-        </StackPanel>
-
-        <!-- Buttons -->
-        <Border Grid.Row="3"
-                BorderThickness="0,1,0,0"
-                BorderBrush="#22FFFFFF"
-                Padding="16,12">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource MaterialDesignRaisedButton}"
-                        Width="150" Margin="0,0,8,0"
-                        Command="{Binding StartCommand}"
-                        Visibility="{Binding IsReady, Converter={StaticResource BoolToVis}}">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="Download" VerticalAlignment="Center" Margin="0,0,6,0"/>
-                        <TextBlock Text="Start" VerticalAlignment="Center"/>
+                <!-- ══ Header ══ -->
+                <Grid Grid.Row="0" Height="64"
+                      Background="Transparent"
+                      MouseLeftButtonDown="Header_MouseLeftButtonDown">
+                    <Rectangle Fill="{DynamicResource Hud.BgElevated}"/>
+                    <Rectangle Fill="{DynamicResource Hud.HazardTile}" Opacity="0.3"/>
+                    <Border BorderBrush="{DynamicResource Hud.Border}" BorderThickness="0,0,0,1"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0">
+                        <materialDesign:PackIcon Kind="PackageDown" Width="19" Height="19"
+                                                 Foreground="{DynamicResource Hud.Accent}"
+                                                 VerticalAlignment="Center" Margin="0,0,11,0"/>
+                        <StackPanel VerticalAlignment="Center">
+                            <c:TrackedText Text="INSTALL / UPDATE SERVER"
+                                           Style="{StaticResource Hud.PanelHeader}"
+                                           FontSize="12.5"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                <TextBlock Text="{Binding ServerName}"
+                                           Style="{StaticResource Hud.Mono.Text}"
+                                           FontSize="10.5"
+                                           Foreground="{DynamicResource Hud.Rust}"/>
+                                <TextBlock Text="{Binding InstallDir}"
+                                           Style="{StaticResource Hud.Mono.Text}"
+                                           FontSize="10"
+                                           Foreground="{DynamicResource Hud.FgFaint}"
+                                           TextTrimming="CharacterEllipsis"
+                                           MaxWidth="440"
+                                           Margin="10,0,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
                     </StackPanel>
-                </Button>
-                <Button Style="{StaticResource MaterialDesignOutlinedButton}"
-                        Content="Cancel" Width="100" Margin="0,0,8,0"
-                        Command="{Binding CancelCommand}"
-                        Visibility="{Binding IsRunning, Converter={StaticResource BoolToVis}}"/>
-                <Button Style="{StaticResource MaterialDesignRaisedButton}"
-                        Content="Close" Width="100"
-                        Click="CloseButton_Click"/>
-            </StackPanel>
-        </Border>
-    </Grid>
+                </Grid>
+
+                <!-- ══ SteamCMD output — phosphor terminal ══ -->
+                <Grid Grid.Row="1" Margin="16,16,16,10">
+                    <Rectangle Fill="{DynamicResource ConsoleBrush}"/>
+                    <Rectangle Fill="{DynamicResource Hud.ScanlineTile}" IsHitTestVisible="False"/>
+                    <Border BorderBrush="{DynamicResource Hud.Border}" BorderThickness="1"/>
+
+                    <!-- HorizontalScrollBarVisibility MUST be Disabled: anything else measures
+                         children against infinite width, so TextWrapping never kicks in and
+                         SteamCMD's long progress lines get clipped at the right edge. -->
+                    <ScrollViewer x:Name="LogScroller"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  Background="Transparent"
+                                  Padding="12,10">
+                        <ItemsControl ItemsSource="{Binding LogLines}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding}"
+                                               FontFamily="{DynamicResource Hud.Mono}"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource Hud.FgMuted}"
+                                               TextWrapping="Wrap"
+                                               Padding="0,1"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+
+                    <c:HudBrackets Tint="Accent"/>
+                </Grid>
+
+                <!-- ══ Progress ══ -->
+                <StackPanel Grid.Row="2" Margin="16,0,16,12">
+
+                    <!-- Determinate while downloading; indeterminate while SteamCMD is working -->
+                    <Grid>
+                        <ProgressBar Style="{StaticResource Hud.ProgressBar}"
+                                     Maximum="100" Value="{Binding DownloadPercent}"
+                                     Visibility="{Binding HasProgress, Converter={StaticResource BoolToVis}}"/>
+                        <ProgressBar IsIndeterminate="True">
+                            <ProgressBar.Style>
+                                <Style TargetType="ProgressBar" BasedOn="{StaticResource Hud.ProgressBar}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <MultiDataTrigger>
+                                            <MultiDataTrigger.Conditions>
+                                                <Condition Binding="{Binding IsRunning}"   Value="True"/>
+                                                <Condition Binding="{Binding HasProgress}" Value="False"/>
+                                            </MultiDataTrigger.Conditions>
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </MultiDataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ProgressBar.Style>
+                        </ProgressBar>
+                    </Grid>
+
+                    <!-- DownloadStats already carries the percentage, so don't print it twice. -->
+                    <TextBlock Text="{Binding DownloadStats}"
+                               Style="{StaticResource Hud.Mono.Text}"
+                               FontSize="12.5" FontWeight="Bold"
+                               Foreground="{DynamicResource Hud.Accent}"
+                               Margin="0,10,0,0"
+                               Visibility="{Binding HasProgress, Converter={StaticResource BoolToVis}}"/>
+
+                    <!-- Status: neutral while idle, green on success, red on failure.
+                         A green "Install failed." reads as success. -->
+                    <TextBlock Text="{Binding StatusMessage}"
+                               FontSize="11"
+                               TextWrapping="Wrap"
+                               Margin="0,8,0,0">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource Hud.Mono.Text}">
+                                <Setter Property="Foreground" Value="{DynamicResource Hud.FgSubtle}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsComplete}" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource Hud.Green}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding HasFailed}" Value="True">
+                                        <Setter Property="Foreground" Value="{DynamicResource Hud.Red}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+
+                <!-- ══ Buttons ══ -->
+                <Border Grid.Row="3"
+                        Background="{DynamicResource Hud.BgElevated}"
+                        BorderThickness="0,1,0,0"
+                        BorderBrush="{DynamicResource Hud.Border}"
+                        Padding="16,12">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+
+                        <!-- START: only before the run begins -->
+                        <Button Style="{StaticResource Hud.Button.Primary}"
+                                Width="150" Height="30" Margin="0,0,8,0"
+                                Command="{Binding StartCommand}"
+                                Visibility="{Binding IsReady, Converter={StaticResource BoolToVis}}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Download" Width="13" Height="13"
+                                                         VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <c:TrackedText Text="START" LetterSpacing="0.12"
+                                               FontFamily="{DynamicResource Hud.Mono}"
+                                               FontSize="10.5" FontWeight="Bold"
+                                               Foreground="{DynamicResource Hud.AccentInk}"
+                                               VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+
+                        <!-- CANCEL: only while running -->
+                        <Button Style="{StaticResource Hud.Button}"
+                                BorderBrush="{DynamicResource Hud.Amber}"
+                                Width="110" Height="30" Margin="0,0,8,0"
+                                Command="{Binding CancelCommand}"
+                                Visibility="{Binding IsRunning, Converter={StaticResource BoolToVis}}">
+                            <c:TrackedText Text="CANCEL" LetterSpacing="0.12"
+                                           FontFamily="{DynamicResource Hud.Mono}"
+                                           FontSize="10.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource Hud.Amber}"
+                                           VerticalAlignment="Center"/>
+                        </Button>
+
+                        <Button Style="{StaticResource Hud.Button.Ghost}"
+                                Width="110" Height="30"
+                                Click="CloseButton_Click">
+                            <c:TrackedText Text="CLOSE" LetterSpacing="0.12"
+                                           FontFamily="{DynamicResource Hud.Mono}"
+                                           FontSize="10.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource Hud.FgMuted}"
+                                           VerticalAlignment="Center"/>
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <c:HudBrackets Panel.ZIndex="2" Tint="Accent"/>
+        </Grid>
+    </Border>
 </Window>

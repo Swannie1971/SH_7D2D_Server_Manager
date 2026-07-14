@@ -1,0 +1,43 @@
+<UserControl x:Class="SevenDaysManager.Controls.HudAtmosphere"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             IsHitTestVisible="False"
+             ClipToBounds="True">
+
+    <!-- Every layer here is whisper-faint by design. If you can see one on its own,
+         it's too strong. Stacked, they make the window feel like live instrumentation. -->
+    <Grid x:Name="Root">
+
+        <!-- Scrim — knocks the background photo back just enough for text contrast -->
+        <Rectangle Fill="{DynamicResource Hud.BgScrim}"/>
+
+        <!-- Engineering grid — 34x34 accent lines @ 2.6% -->
+        <Rectangle Fill="{DynamicResource Hud.GridTile}"/>
+
+        <!-- Scanlines — 1px every 4px, white @ 1.5% -->
+        <Rectangle Fill="{DynamicResource Hud.ScanlineTile}"/>
+
+        <!-- Horizon glows — toxic green top-left, rust bottom-right -->
+        <Rectangle Fill="{DynamicResource Hud.GlowTopLeft}"/>
+        <Rectangle Fill="{DynamicResource Hud.GlowBottomRight}"/>
+
+        <!-- Scan sweep — a soft accent band drifting top->bottom every 9s.
+             ⚠ Wrapped in a zero-height Canvas so its fixed 260px height CANNOT contribute to
+             layout. Left bare, it forces any SizeToContent host (e.g. HudDialog) to be at least
+             260px tall, leaving a dead gap below the content. A Canvas measures as 0x0 and does
+             not constrain its children, so the band still paints in full. -->
+        <Canvas VerticalAlignment="Stretch" HorizontalAlignment="Stretch" ClipToBounds="False">
+            <Rectangle x:Name="Sweep"
+                       Height="260"
+                       Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Grid}}"
+                       Fill="{DynamicResource Hud.SweepBrush}">
+                <Rectangle.RenderTransform>
+                    <TranslateTransform x:Name="SweepShift" Y="-260"/>
+                </Rectangle.RenderTransform>
+            </Rectangle>
+        </Canvas>
+
+        <!-- Vignette — darkens the edges -->
+        <Rectangle Fill="{DynamicResource Hud.Vignette}"/>
+    </Grid>
+</UserControl>

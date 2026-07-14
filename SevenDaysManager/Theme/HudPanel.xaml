@@ -1,0 +1,70 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="clr-namespace:SevenDaysManager.Controls">
+
+    <Style TargetType="{x:Type c:HudPanel}">
+        <Setter Property="Background"  Value="{DynamicResource GlassBrush}"/>
+        <Setter Property="Foreground"  Value="{DynamicResource Hud.Fg}"/>
+        <Setter Property="Padding"     Value="0"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="VerticalContentAlignment"   Value="Stretch"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type c:HudPanel}">
+                    <Grid>
+                        <!-- Panel fill. NOTE: no BorderBrush/BorderThickness — the corner
+                             brackets ARE the outline (see HudBrackets). A continuous border
+                             underneath is what made this read as a generic card. -->
+                        <Border Background="{TemplateBinding Background}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- Header row (only when Header is set) -->
+                                <Border x:Name="HeaderRow" Grid.Row="0" Padding="18,14,18,10">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="▸"
+                                                   Foreground="{DynamicResource Hud.Rust}"
+                                                   FontFamily="{DynamicResource Hud.Mono}"
+                                                   FontSize="11" FontWeight="Bold"
+                                                   VerticalAlignment="Center"
+                                                   Margin="0,0,8,0"/>
+                                        <c:TrackedText Text="{TemplateBinding Header}"
+                                                       LetterSpacing="0.16"
+                                                       Foreground="{DynamicResource Hud.Fg}"
+                                                       FontFamily="{DynamicResource Hud.Mono}"
+                                                       FontSize="11.5" FontWeight="Bold"
+                                                       VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <ContentPresenter Grid.Row="1"
+                                                  Margin="{TemplateBinding Padding}"
+                                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- The outline: four long corner brackets, full-saturation tint -->
+                        <c:HudBrackets x:Name="Brackets" Tint="{TemplateBinding Tint}"/>
+                    </Grid>
+
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Header" Value="{x:Null}">
+                            <Setter TargetName="HeaderRow" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="Header" Value="">
+                            <Setter TargetName="HeaderRow" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="ShowBrackets" Value="False">
+                            <Setter TargetName="Brackets" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

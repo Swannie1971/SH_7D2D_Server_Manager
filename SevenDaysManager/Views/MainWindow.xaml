@@ -8,18 +8,18 @@
         xmlns:vm="clr-namespace:SevenDaysManager.ViewModels"
         xmlns:views="clr-namespace:SevenDaysManager.Views"
         xmlns:conv="clr-namespace:SevenDaysManager.Converters"
+        xmlns:c="clr-namespace:SevenDaysManager.Controls"
         mc:Ignorable="d"
         Title="7 Days to Die — Server Manager"
         Height="780" Width="1280"
         MinHeight="600" MinWidth="900"
         WindowStartupLocation="CenterScreen"
-        Background="{DynamicResource MaterialDesign.Brush.Background}"
-        TextElement.Foreground="{DynamicResource MaterialDesign.Brush.Foreground}"
-        TextElement.FontFamily="{materialDesign:MaterialDesignFont}"
+        Background="{DynamicResource Hud.Bg}"
+        TextElement.Foreground="{DynamicResource Hud.Fg}"
         FontSize="14">
 
     <Window.Resources>
-        <SolidColorBrush x:Key="ConsoleBrush" Color="#CC080808"/>
+        <!-- ConsoleBrush now lives in Theme/TacticalDark.xaml so ConsoleView can see it too -->
         <conv:FilePathToImageConverter x:Key="PathToImage"/>
         <conv:StringToVisibilityConverter x:Key="StringToVisibility"/>
         <conv:NullToVisibilityConverter x:Key="NullToVisible"/>
@@ -33,60 +33,73 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
 
-        <!-- Background image — full opacity, sits behind everything -->
+        <!-- Background image — sits behind everything -->
         <Image Grid.ColumnSpan="3"
                Source="{DynamicResource AppBackgroundSource}"
                Stretch="UniformToFill"
                RenderOptions.BitmapScalingMode="HighQuality"/>
 
+        <!-- Atmosphere: grid, scanlines, glows, scan sweep, vignette.
+             Above the image, below the UI, never interactive. -->
+        <c:HudAtmosphere Grid.ColumnSpan="3" Panel.ZIndex="1"/>
+
         <!-- ═══════════════════════════════════════════════ SIDEBAR ══ -->
-        <Grid Grid.Column="0" Background="{DynamicResource MaterialDesign.Brush.Background}">
+        <Grid Grid.Column="0" Panel.ZIndex="2" Background="{DynamicResource Hud.BgElevated}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="64"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- App header bar -->
+            <!-- App header bar — no accent fill; accent is a highlight, not a paint bucket -->
             <Border Grid.Row="0"
-                    Background="{DynamicResource MaterialDesign.Brush.Primary}"
-                    Padding="12,0">
+                    Background="{DynamicResource Hud.BgElevated}"
+                    BorderBrush="{DynamicResource Hud.Border}"
+                    BorderThickness="0,0,0,1"
+                    Padding="14,0">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="7D2D Server Manager"
-                               FontSize="15" FontWeight="Bold" VerticalAlignment="Center"
-                               Foreground="{DynamicResource MaterialDesign.Brush.Primary.Foreground}"/>
+                    <c:TrackedText Text="7D2D MANAGER"
+                               Style="{StaticResource Hud.PanelHeader}"
+                               FontSize="13"
+                               VerticalAlignment="Center"/>
                     <Button Grid.Column="1"
-                            Style="{StaticResource MaterialDesignIconButton}"
-                            Foreground="{DynamicResource MaterialDesign.Brush.Primary.Foreground}"
+                            Style="{StaticResource Hud.Button.Icon}"
                             ToolTip="Add server"
-                            Width="36" Height="36"
                             Click="AddServerButton_Click">
-                        <materialDesign:PackIcon Kind="Plus" Width="20" Height="20"/>
+                        <materialDesign:PackIcon Kind="Plus" Width="18" Height="18"/>
                     </Button>
                 </Grid>
             </Border>
 
-            <!-- Large logo centered in the empty sidebar space -->
-            <Image Grid.Row="1"
+            <!-- MY SERVERS section rule — own row, so it can never overlap the list -->
+            <ContentControl Grid.Row="1"
+                            Template="{StaticResource Hud.SectionRule}"
+                            Tag="MY SERVERS"
+                            Margin="12,14,12,2"/>
+
+            <!-- Large logo — sits behind the list, only visible when there are no servers -->
+            <Image Grid.Row="2"
                    Source="pack://application:,,,/Assets/logo.png"
                    HorizontalAlignment="Stretch"
                    VerticalAlignment="Center"
                    Margin="7,0"
                    MaxHeight="220"
                    Stretch="Uniform"
+                   Opacity="0.9"
                    RenderOptions.BitmapScalingMode="HighQuality"/>
 
             <!-- Server list -->
-            <ListBox Grid.Row="1"
+            <ListBox Grid.Row="2"
                      ItemsSource="{Binding Servers}"
                      SelectedItem="{Binding SelectedServer}"
                      Background="Transparent"
                      BorderThickness="0"
-                     Padding="8,8,8,0"
+                     Padding="8,4,8,0"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
@@ -97,26 +110,23 @@
                             <Setter.Value>
                                 <ControlTemplate TargetType="ListBoxItem">
                                     <Grid>
-                                        <!-- Primary-color left accent bar, only visible when selected -->
-                                        <Border x:Name="Accent" Width="4" HorizontalAlignment="Left"
-                                                CornerRadius="4,0,0,4"
-                                                Background="{DynamicResource MaterialDesign.Brush.Primary}"
+                                        <!-- 2px accent left bar + accent-tint gradient when active -->
+                                        <Border x:Name="Bar" Width="2" HorizontalAlignment="Left"
+                                                Background="{DynamicResource Hud.Accent}"
                                                 Visibility="Collapsed"/>
-                                        <Border x:Name="Bd" CornerRadius="8" Background="Transparent"
-                                                BorderThickness="1" BorderBrush="Transparent"
-                                                Margin="0">
+                                        <Border x:Name="Bd" Background="Transparent"
+                                                BorderThickness="1" BorderBrush="Transparent">
                                             <ContentPresenter/>
                                         </Border>
                                     </Grid>
                                     <ControlTemplate.Triggers>
                                         <Trigger Property="IsSelected" Value="True">
-                                            <Setter TargetName="Bd" Property="Background" Value="#30009688"/>
-                                            <Setter TargetName="Bd" Property="BorderBrush"
-                                                    Value="{DynamicResource MaterialDesign.Brush.Primary}"/>
-                                            <Setter TargetName="Accent" Property="Visibility" Value="Visible"/>
+                                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Hud.AccentSoft}"/>
+                                            <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource Hud.AccentBorder}"/>
+                                            <Setter TargetName="Bar" Property="Visibility" Value="Visible"/>
                                         </Trigger>
                                         <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="Bd" Property="Background" Value="#18FFFFFF"/>
+                                            <Setter TargetName="Bd" Property="Background" Value="{DynamicResource Hud.SurfaceHover}"/>
                                         </Trigger>
                                     </ControlTemplate.Triggers>
                                 </ControlTemplate>
@@ -126,117 +136,204 @@
                 </ListBox.ItemContainerStyle>
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="{x:Type models:Server}">
-                        <materialDesign:Card Padding="0" UniformCornerRadius="8"
-                                             Background="{DynamicResource GlassBrush}">
-                            <Grid Margin="12,10">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto"/>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <!-- Status dot -->
-                                <Ellipse Width="10" Height="10" Margin="0,0,10,0" VerticalAlignment="Center">
-                                    <Ellipse.Style>
-                                        <Style TargetType="Ellipse">
-                                            <Setter Property="Fill" Value="#757575"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Status}" Value="running">
-                                                    <Setter Property="Fill" Value="#4CAF50"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding Status}" Value="starting">
-                                                    <Setter Property="Fill" Value="#FF9800"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding Status}" Value="stopping">
-                                                    <Setter Property="Fill" Value="#FF5722"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </Ellipse.Style>
-                                </Ellipse>
-                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13"/>
-                                    <TextBlock FontSize="11" Opacity="0.6"
-                                               Text="{Binding ServerPort, StringFormat='Port {0}'}"/>
+                        <Grid Margin="10,9">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+
+                            <!-- SQUARE status dot — never a circle -->
+                            <Rectangle Width="6" Height="6" Margin="0,0,10,0" VerticalAlignment="Center">
+                                <Rectangle.Style>
+                                    <Style TargetType="Rectangle">
+                                        <Setter Property="Fill" Value="{DynamicResource Hud.FgFaint}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Status}" Value="running">
+                                                <Setter Property="Fill" Value="{DynamicResource Hud.Green}"/>
+                                                <Setter Property="Effect">
+                                                    <Setter.Value>
+                                                        <DropShadowEffect Color="#22C55E" BlurRadius="8" ShadowDepth="0" Opacity="0.9"/>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Status}" Value="starting">
+                                                <Setter Property="Fill" Value="{DynamicResource Hud.Amber}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Status}" Value="stopping">
+                                                <Setter Property="Fill" Value="{DynamicResource Hud.Red}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Rectangle.Style>
+                            </Rectangle>
+
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding Name}"
+                                           FontFamily="{DynamicResource Hud.Mono}"
+                                           FontSize="11.5" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Hud.Fg}"
+                                           TextTrimming="CharacterEllipsis"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                                    <TextBlock Text="{Binding ServerPort, StringFormat='PORT {0}'}"
+                                               Style="{StaticResource Hud.Mono.Text}"
+                                               FontSize="9.5"
+                                               Foreground="{DynamicResource Hud.FgSubtle}"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,8,0"/>
+                                    <!-- Status pill -->
+                                    <Border Padding="5,1" BorderThickness="1" VerticalAlignment="Center">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background"  Value="#144D545B"/>
+                                                <Setter Property="BorderBrush" Value="#4D545B"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Status}" Value="running">
+                                                        <Setter Property="Background"  Value="{DynamicResource Hud.GreenSoft}"/>
+                                                        <Setter Property="BorderBrush" Value="{DynamicResource Hud.Green}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="starting">
+                                                        <Setter Property="Background"  Value="{DynamicResource Hud.AmberSoft}"/>
+                                                        <Setter Property="BorderBrush" Value="{DynamicResource Hud.Amber}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="stopping">
+                                                        <Setter Property="Background"  Value="{DynamicResource Hud.RedSoft}"/>
+                                                        <Setter Property="BorderBrush" Value="{DynamicResource Hud.Red}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock FontFamily="{DynamicResource Hud.Mono}"
+                                                   FontSize="8.5" FontWeight="Bold">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Text" Value="STOPPED"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource Hud.FgFaint}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status}" Value="running">
+                                                            <Setter Property="Text" Value="RUNNING"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource Hud.Green}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="starting">
+                                                            <Setter Property="Text" Value="STARTING"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource Hud.Amber}"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="stopping">
+                                                            <Setter Property="Text" Value="STOPPING"/>
+                                                            <Setter Property="Foreground" Value="{DynamicResource Hud.Red}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
                                 </StackPanel>
-                                <!-- Status badge -->
-                                <TextBlock Grid.Column="2" FontSize="10" FontWeight="Bold" VerticalAlignment="Center">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="STOPPED"/>
-                                            <Setter Property="Foreground" Value="#757575"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding Status}" Value="running">
-                                                    <Setter Property="Text" Value="RUNNING"/>
-                                                    <Setter Property="Foreground" Value="#4CAF50"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding Status}" Value="starting">
-                                                    <Setter Property="Text" Value="STARTING"/>
-                                                    <Setter Property="Foreground" Value="#FF9800"/>
-                                                </DataTrigger>
-                                                <DataTrigger Binding="{Binding Status}" Value="stopping">
-                                                    <Setter Property="Text" Value="STOPPING"/>
-                                                    <Setter Property="Foreground" Value="#FF5722"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </Grid>
-                        </materialDesign:Card>
+                            </StackPanel>
+                        </Grid>
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
 
-            <!-- App settings button -->
-            <Border Grid.Row="2"
-                    Background="{DynamicResource GlassBrush}"
+            <!-- SYSTEM strip: app settings + version -->
+            <Border Grid.Row="3"
+                    Background="{DynamicResource Hud.BgElevated}"
                     BorderThickness="0,1,0,0"
-                    BorderBrush="#33FFFFFF"
-                    Padding="12,8">
+                    BorderBrush="{DynamicResource Hud.Border}"
+                    Padding="12,10">
                 <Grid>
-                    <Button Style="{StaticResource MaterialDesignFlatButton}"
-                            HorizontalAlignment="Left" Padding="4"
+                    <Button Style="{StaticResource Hud.Button.Ghost}"
+                            HorizontalAlignment="Left" Padding="10,0"
                             Click="AppSettingsButton_Click">
                         <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="Cog" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                            <TextBlock Text="App Settings" VerticalAlignment="Center"/>
+                            <materialDesign:PackIcon Kind="Cog" Width="14" Height="14"
+                                                     VerticalAlignment="Center" Margin="0,0,8,0"/>
+                            <TextBlock Text="SETTINGS" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
-                    <TextBlock Text="v0.2.8"
+                    <TextBlock Text="V0.2.8"
                                HorizontalAlignment="Right" VerticalAlignment="Center"
-                               FontSize="11" Opacity="0.8"
-                               Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"/>
+                               Style="{StaticResource Hud.Mono.Text}"
+                               FontSize="10" FontWeight="Bold"
+                               Foreground="{DynamicResource Hud.Accent}"/>
                 </Grid>
             </Border>
+
+            <!-- ⚠ Hazard rail — dashed rust ticks down the sidebar's outer edge.
+                 Spans all rows; the signature RustPanel sidebar element. -->
+            <Rectangle Grid.RowSpan="4" Width="3"
+                       HorizontalAlignment="Right"
+                       Fill="{DynamicResource Hud.RailTile}"
+                       Opacity="0.75"
+                       IsHitTestVisible="False"/>
         </Grid>
 
         <!-- Drag splitter -->
-        <GridSplitter Grid.Column="1" Width="4"
+        <GridSplitter Grid.Column="1" Width="4" Panel.ZIndex="2"
                       HorizontalAlignment="Stretch"
-                      Background="#33FFFFFF"/>
+                      Background="{DynamicResource Hud.Border}"/>
 
         <!-- ════════════════════════════════════════ DETAIL PANE ══ -->
-        <Grid Grid.Column="2" Background="Transparent">
+        <Grid Grid.Column="2" Panel.ZIndex="2" Background="Transparent">
             <Grid.RowDefinitions>
                 <RowDefinition Height="64"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
-            <!-- Header bar -->
-            <Border Grid.Row="0"
-                    Background="{DynamicResource MaterialDesign.Brush.Primary}"
-                    Padding="20,0">
-                <Grid>
-                    <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="{Binding SelectedServer.Name, FallbackValue='No server selected'}"
-                                   FontSize="18" FontWeight="Bold"
-                                   Foreground="{DynamicResource MaterialDesign.Brush.Primary.Foreground}"/>
-                        <TextBlock FontSize="11" Opacity="0.7"
-                                   Foreground="{DynamicResource MaterialDesign.Brush.Primary.Foreground}"
-                                   Text="{Binding SelectedServer.GameWorld, StringFormat='{}7 Days to Die  ·  {0}', FallbackValue='Select a server from the list'}"/>
+            <!-- Command bar — instrument chrome, not a paint bucket.
+                 Elevated abyss + a 2px accent underline; the accent stays a highlight. -->
+            <Grid Grid.Row="0">
+                <Rectangle Fill="{DynamicResource Hud.BgElevated}"/>
+                <!-- Faint hazard tape washing in from the right edge -->
+                <Rectangle Fill="{DynamicResource Hud.HazardTile}" Opacity="0.10"
+                           HorizontalAlignment="Right" Width="220"/>
+                <Border BorderBrush="{DynamicResource Hud.Border}" BorderThickness="0,0,0,1"/>
+                <!-- 2px accent underline, left-anchored -->
+                <Rectangle Height="2" VerticalAlignment="Bottom" HorizontalAlignment="Left"
+                           Width="180" Fill="{DynamicResource Hud.Accent}"/>
+
+                <Grid Margin="20,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Live square status dot -->
+                    <Rectangle Grid.Column="0" Width="7" Height="7"
+                               VerticalAlignment="Center" Margin="0,0,12,0">
+                        <Rectangle.Style>
+                            <Style TargetType="Rectangle">
+                                <Setter Property="Fill" Value="{DynamicResource Hud.FgFaint}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding SelectedServer.Status}" Value="running">
+                                        <Setter Property="Fill" Value="{DynamicResource Hud.Green}"/>
+                                        <Setter Property="Effect">
+                                            <Setter.Value>
+                                                <DropShadowEffect Color="#22C55E" BlurRadius="9" ShadowDepth="0" Opacity="0.9"/>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedServer.Status}" Value="starting">
+                                        <Setter Property="Fill" Value="{DynamicResource Hud.Amber}"/>
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding SelectedServer.Status}" Value="stopping">
+                                        <Setter Property="Fill" Value="{DynamicResource Hud.Red}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Rectangle.Style>
+                    </Rectangle>
+
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <c:TrackedText Text="{Binding SelectedServer.Name, FallbackValue='NO SERVER SELECTED'}"
+                                       Style="{StaticResource Hud.PanelHeader}"
+                                       FontSize="14"/>
+                        <TextBlock Style="{StaticResource Hud.Mono.Text}"
+                                   FontSize="10"
+                                   Foreground="{DynamicResource Hud.Rust}"
+                                   Margin="0,4,0,0"
+                                   Text="{Binding SelectedServer.GameWorld, StringFormat='{}7 DAYS TO DIE  ·  {0}', FallbackValue='SELECT A SERVER FROM THE LIST'}"/>
                     </StackPanel>
                 </Grid>
-            </Border>
+            </Grid>
 
             <!-- Body: left overview + right nav cards -->
             <Grid Grid.Row="1">
@@ -251,7 +348,7 @@
                     <StackPanel Margin="14,14,14,14">
 
                         <!-- Game banner -->
-                        <materialDesign:Card UniformCornerRadius="10" Margin="0,0,0,14" Height="170"
+                        <materialDesign:Card UniformCornerRadius="0" Margin="0,0,0,14" Height="170"
                                              Background="Transparent"
                                              materialDesign:ElevationAssist.Elevation="Dp0">
                             <Grid>
@@ -264,84 +361,107 @@
                             </Grid>
                         </materialDesign:Card>
 
-                        <!-- Status -->
-                        <TextBlock Text="STATUS" FontSize="10" FontWeight="Bold" Opacity="0.4" Margin="2,0,0,6"/>
-                        <materialDesign:Card UniformCornerRadius="8" Padding="12,10" Margin="0,0,0,12"
-                                             Background="{DynamicResource GlassBrush}">
+                        <!-- ══ STATUS ══ -->
+                        <c:TrackedText Text="STATUS" Style="{StaticResource Hud.SectionLabel}"
+                                       HorizontalAlignment="Left" Margin="2,0,0,6"/>
+                        <c:HudPanel Tint="Amber" Padding="12,10" Margin="0,0,0,14">
                             <StackPanel Orientation="Horizontal">
-                                <Ellipse Width="10" Height="10" Margin="0,0,10,0" VerticalAlignment="Center">
-                                    <Ellipse.Style>
-                                        <Style TargetType="Ellipse">
-                                            <Setter Property="Fill" Value="#757575"/>
+                                <!-- SQUARE status dot, glowing when live -->
+                                <Rectangle Width="7" Height="7" Margin="0,0,10,0" VerticalAlignment="Center">
+                                    <Rectangle.Style>
+                                        <Style TargetType="Rectangle">
+                                            <Setter Property="Fill" Value="{DynamicResource Hud.FgFaint}"/>
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding SelectedServer.Status}" Value="running">
-                                                    <Setter Property="Fill" Value="#4CAF50"/>
+                                                    <Setter Property="Fill" Value="{DynamicResource Hud.Green}"/>
+                                                    <Setter Property="Effect">
+                                                        <Setter.Value>
+                                                            <DropShadowEffect Color="#22C55E" BlurRadius="9" ShadowDepth="0" Opacity="0.9"/>
+                                                        </Setter.Value>
+                                                    </Setter>
                                                 </DataTrigger>
                                                 <DataTrigger Binding="{Binding SelectedServer.Status}" Value="starting">
-                                                    <Setter Property="Fill" Value="#FF9800"/>
+                                                    <Setter Property="Fill" Value="{DynamicResource Hud.Amber}"/>
                                                 </DataTrigger>
                                                 <DataTrigger Binding="{Binding SelectedServer.Status}" Value="stopping">
-                                                    <Setter Property="Fill" Value="#FF5722"/>
+                                                    <Setter Property="Fill" Value="{DynamicResource Hud.Red}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
-                                    </Ellipse.Style>
-                                </Ellipse>
-                                <TextBlock FontWeight="SemiBold" VerticalAlignment="Center">
+                                    </Rectangle.Style>
+                                </Rectangle>
+                                <TextBlock VerticalAlignment="Center">
                                     <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="Stopped"/>
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource Hud.Mono.Text}">
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                            <Setter Property="Text" Value="STOPPED"/>
+                                            <Setter Property="Foreground" Value="{DynamicResource Hud.FgMuted}"/>
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding SelectedServer.Status}" Value="running">
-                                                    <Setter Property="Text" Value="Running"/>
+                                                    <Setter Property="Text" Value="RUNNING"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource Hud.Green}"/>
                                                 </DataTrigger>
                                                 <DataTrigger Binding="{Binding SelectedServer.Status}" Value="starting">
-                                                    <Setter Property="Text" Value="Starting…"/>
+                                                    <Setter Property="Text" Value="STARTING…"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource Hud.Amber}"/>
                                                 </DataTrigger>
                                                 <DataTrigger Binding="{Binding SelectedServer.Status}" Value="stopping">
-                                                    <Setter Property="Text" Value="Stopping…"/>
+                                                    <Setter Property="Text" Value="STOPPING…"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource Hud.Red}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </TextBlock.Style>
                                 </TextBlock>
                             </StackPanel>
-                        </materialDesign:Card>
+                        </c:HudPanel>
 
-                        <!-- Server info -->
-                        <TextBlock Text="SERVER INFO" FontSize="10" FontWeight="Bold" Opacity="0.4" Margin="2,0,0,6"/>
-                        <materialDesign:Card UniformCornerRadius="8" Padding="14" Margin="0,0,0,12"
-                                             Background="{DynamicResource GlassBrush}">
+                        <!-- ══ SERVER INFO ══ -->
+                        <c:TrackedText Text="SERVER INFO" Style="{StaticResource Hud.SectionLabel}"
+                                       HorizontalAlignment="Left" Margin="2,0,0,6"/>
+                        <c:HudPanel Tint="Blue" Padding="14" Margin="0,0,0,14">
                             <StackPanel>
-                                <Grid Margin="0,0,0,8">
-                                    <TextBlock Text="World" Opacity="0.5" FontSize="12" VerticalAlignment="Center"/>
+                                <Grid Margin="0,0,0,9">
+                                    <c:TrackedText Text="WORLD" Style="{StaticResource Hud.StatCaption}"
+                                                   HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                     <TextBlock Text="{Binding SelectedServer.GameWorld, FallbackValue='—'}"
-                                               HorizontalAlignment="Right" FontSize="12" FontWeight="SemiBold"/>
+                                               Style="{StaticResource Hud.Mono.Text}" FontSize="11.5"
+                                               HorizontalAlignment="Right"/>
                                 </Grid>
-                                <Grid Margin="0,0,0,8">
-                                    <TextBlock Text="Save Name" Opacity="0.5" FontSize="12" VerticalAlignment="Center"/>
+                                <Grid Margin="0,0,0,9">
+                                    <c:TrackedText Text="SAVE NAME" Style="{StaticResource Hud.StatCaption}"
+                                                   HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                     <TextBlock Text="{Binding SelectedServer.GameName, FallbackValue='—'}"
-                                               HorizontalAlignment="Right" FontSize="12" FontWeight="SemiBold"/>
+                                               Style="{StaticResource Hud.Mono.Text}" FontSize="11.5"
+                                               HorizontalAlignment="Right"/>
                                 </Grid>
-                                <Grid Margin="0,0,0,8">
-                                    <TextBlock Text="Port" Opacity="0.5" FontSize="12" VerticalAlignment="Center"/>
+                                <Grid Margin="0,0,0,9">
+                                    <c:TrackedText Text="PORT" Style="{StaticResource Hud.StatCaption}"
+                                                   HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                     <TextBlock Text="{Binding SelectedServer.ServerPort, FallbackValue='—'}"
-                                               HorizontalAlignment="Right" FontSize="12" FontWeight="SemiBold"/>
+                                               Style="{StaticResource Hud.Mono.Text}" FontSize="11.5"
+                                               HorizontalAlignment="Right"/>
                                 </Grid>
-                                <Grid Margin="0,0,0,8">
-                                    <TextBlock Text="Max Players" Opacity="0.5" FontSize="12" VerticalAlignment="Center"/>
+                                <Grid Margin="0,0,0,9">
+                                    <c:TrackedText Text="MAX PLAYERS" Style="{StaticResource Hud.StatCaption}"
+                                                   HorizontalAlignment="Left" VerticalAlignment="Center"/>
                                     <TextBlock Text="{Binding SelectedServer.MaxPlayers, FallbackValue='—'}"
-                                               HorizontalAlignment="Right" FontSize="12" FontWeight="SemiBold"/>
+                                               Style="{StaticResource Hud.Mono.Text}" FontSize="11.5"
+                                               HorizontalAlignment="Right"/>
                                 </Grid>
                                 <Grid>
-                                    <TextBlock Text="EAC" Opacity="0.5" FontSize="12" VerticalAlignment="Center"/>
-                                    <TextBlock HorizontalAlignment="Right" FontSize="12" FontWeight="SemiBold">
+                                    <c:TrackedText Text="EAC" Style="{StaticResource Hud.StatCaption}"
+                                                   HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                                    <TextBlock HorizontalAlignment="Right">
                                         <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Text" Value="Disabled"/>
+                                            <Style TargetType="TextBlock" BasedOn="{StaticResource Hud.Mono.Text}">
+                                                <Setter Property="FontSize" Value="11.5"/>
+                                                <Setter Property="Text" Value="DISABLED"/>
+                                                <Setter Property="Foreground" Value="{DynamicResource Hud.FgFaint}"/>
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding SelectedServer.EacEnabled}" Value="True">
-                                                        <Setter Property="Text" Value="Enabled"/>
+                                                        <Setter Property="Text" Value="ENABLED"/>
+                                                        <Setter Property="Foreground" Value="{DynamicResource Hud.Accent}"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -349,41 +469,52 @@
                                     </TextBlock>
                                 </Grid>
                             </StackPanel>
-                        </materialDesign:Card>
+                        </c:HudPanel>
 
-                        <!-- Server actions -->
-                        <TextBlock Text="SERVER ACTIONS" FontSize="10" FontWeight="Bold" Opacity="0.4" Margin="2,0,0,6"/>
+                        <!-- ══ SERVER ACTIONS ══ -->
+                        <c:TrackedText Text="SERVER ACTIONS" Style="{StaticResource Hud.SectionLabel}"
+                                       HorizontalAlignment="Left" Margin="2,0,0,6"/>
                         <UniformGrid Columns="3" Margin="0,0,0,4">
-                            <Button Style="{StaticResource MaterialDesignRaisedButton}"
-                                    materialDesign:ButtonAssist.CornerRadius="6"
-                                    Background="#388E3C" BorderBrush="#388E3C"
+                            <!-- START: chamfered accent — the affirmative action -->
+                            <Button Style="{StaticResource Hud.Button.Start}"
                                     Command="{Binding StartServerCommand}"
-                                    Margin="0,0,4,4" Height="38" Padding="4,0">
+                                    Margin="0,0,4,4" Height="34" Padding="4,0">
                                 <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Play" Width="14" Height="14"
-                                                             VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                    <TextBlock Text="Start" FontSize="12" VerticalAlignment="Center"/>
+                                    <materialDesign:PackIcon Kind="Play" Width="13" Height="13"
+                                                             VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <c:TrackedText Text="START" LetterSpacing="0.12"
+                                                   FontFamily="{DynamicResource Hud.Mono}"
+                                                   FontSize="10.5" FontWeight="Bold"
+                                                   Foreground="{DynamicResource Hud.AccentInk}"
+                                                   VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Button>
-                            <Button Style="{StaticResource MaterialDesignRaisedButton}"
-                                    materialDesign:ButtonAssist.CornerRadius="6"
-                                    Background="#C62828" BorderBrush="#C62828"
+                            <!-- STOP: chamfered red — destructive -->
+                            <Button Style="{StaticResource Hud.Button.Stop}"
                                     Command="{Binding StopServerCommand}"
-                                    Margin="4,0,4,4" Height="38" Padding="4,0">
+                                    Margin="4,0,4,4" Height="34" Padding="4,0">
                                 <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Stop" Width="14" Height="14"
-                                                             VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                    <TextBlock Text="Stop" FontSize="12" VerticalAlignment="Center"/>
+                                    <materialDesign:PackIcon Kind="Stop" Width="13" Height="13"
+                                                             VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <c:TrackedText Text="STOP" LetterSpacing="0.12"
+                                                   FontFamily="{DynamicResource Hud.Mono}"
+                                                   FontSize="10.5" FontWeight="Bold"
+                                                   Foreground="#12060A"
+                                                   VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Button>
-                            <Button Style="{StaticResource MaterialDesignOutlinedButton}"
-                                    materialDesign:ButtonAssist.CornerRadius="6"
+                            <!-- RESTART: ghost outline -->
+                            <Button Style="{StaticResource Hud.Button.Restart}"
                                     Command="{Binding RestartServerCommand}"
-                                    Margin="4,0,0,4" Height="38" Padding="4,0">
+                                    Margin="4,0,0,4" Height="34" Padding="4,0">
                                 <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Restart" Width="14" Height="14"
-                                                             VerticalAlignment="Center" Margin="0,0,4,0"/>
-                                    <TextBlock Text="Restart" FontSize="12" VerticalAlignment="Center"/>
+                                    <materialDesign:PackIcon Kind="Restart" Width="13" Height="13"
+                                                             VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                    <c:TrackedText Text="RESTART" LetterSpacing="0.12"
+                                                   FontFamily="{DynamicResource Hud.Mono}"
+                                                   FontSize="10.5" FontWeight="Bold"
+                                                   Foreground="{DynamicResource Hud.Accent}"
+                                                   VerticalAlignment="Center"/>
                                 </StackPanel>
                             </Button>
                         </UniformGrid>
@@ -391,9 +522,9 @@
                         <!-- Live stats panel -->
                         <Border Margin="0,8,0,0">
                             <StackPanel>
-                                <TextBlock Text="LIVE STATS" FontSize="10" FontWeight="Bold" Opacity="0.4" Margin="2,0,0,6"/>
-                                <materialDesign:Card UniformCornerRadius="8" Padding="12"
-                                                     Background="{DynamicResource GlassBrush}">
+                                <c:TrackedText Text="LIVE STATS" Style="{StaticResource Hud.SectionLabel}"
+                                               HorizontalAlignment="Left" Margin="2,0,0,6"/>
+                                <c:HudPanel Tint="Green" Padding="12">
                                     <StackPanel>
 
                                         <!-- Stats table -->
@@ -403,64 +534,69 @@
                                                 <ColumnDefinition Width="*"/>
                                             </Grid.ColumnDefinitions>
                                             <Grid.RowDefinitions>
-                                                <RowDefinition Height="22"/>
-                                                <RowDefinition Height="22"/>
-                                                <RowDefinition Height="22"/>
-                                                <RowDefinition Height="22"/>
-                                                <RowDefinition Height="22"/>
-                                                <RowDefinition Height="22"/>
+                                                <RowDefinition Height="23"/>
+                                                <RowDefinition Height="23"/>
+                                                <RowDefinition Height="23"/>
+                                                <RowDefinition Height="23"/>
+                                                <RowDefinition Height="23"/>
+                                                <RowDefinition Height="23"/>
                                             </Grid.RowDefinitions>
 
-                                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Players" Opacity="0.5" FontSize="12" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                                            <TextBlock Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center">
-                                                <Run Text="{Binding LivePlayers, Mode=OneWay}"/>
-                                                <Run Text="/" Foreground="#80FFFFFF"/>
-                                                <Run Text="{Binding SelectedServer.MaxPlayers, FallbackValue='?'}"/>
+                                            <c:TrackedText Grid.Row="0" Grid.Column="0" Text="PLAYERS" Style="{StaticResource Hud.StatCaption}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                            <TextBlock Grid.Row="0" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                       Style="{StaticResource Hud.Mono.Text}" FontSize="11.5">
+                                                <Run Text="{Binding LivePlayers, Mode=OneWay}"/><Run Text="/" Foreground="#6E767D"/><Run Text="{Binding SelectedServer.MaxPlayers, FallbackValue='?'}" Foreground="#6E767D"/>
                                             </TextBlock>
 
-                                            <TextBlock Grid.Row="1" Grid.Column="0" Text="FPS" Opacity="0.5" FontSize="12" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                                            <TextBlock Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"
+                                            <c:TrackedText Grid.Row="1" Grid.Column="0" Text="FPS" Style="{StaticResource Hud.StatCaption}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                            <TextBlock Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                       Style="{StaticResource Hud.Mono.Text}" FontSize="11.5"
                                                        Text="{Binding LiveFps, Mode=OneWay, StringFormat='{}{0:F1}'}"
-                                                       Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"/>
+                                                       Foreground="{DynamicResource Hud.Accent}"/>
 
-                                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Entities" Opacity="0.5" FontSize="12" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                                            <TextBlock Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"
+                                            <c:TrackedText Grid.Row="2" Grid.Column="0" Text="ENTITIES" Style="{StaticResource Hud.StatCaption}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                       Style="{StaticResource Hud.Mono.Text}" FontSize="11.5"
                                                        Text="{Binding LiveEntities, Mode=OneWay}"/>
 
-                                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Game Time" Opacity="0.5" FontSize="12" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                                            <TextBlock Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"
+                                            <c:TrackedText Grid.Row="3" Grid.Column="0" Text="GAME TIME" Style="{StaticResource Hud.StatCaption}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                            <TextBlock Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                       Style="{StaticResource Hud.Mono.Text}" FontSize="11.5"
                                                        Text="{Binding LiveGameTime, Mode=OneWay}"/>
 
-                                            <TextBlock Grid.Row="4" Grid.Column="0" Text="Uptime" Opacity="0.5" FontSize="12" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                                            <TextBlock Grid.Row="4" Grid.Column="1" HorizontalAlignment="Right" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"
+                                            <c:TrackedText Grid.Row="4" Grid.Column="0" Text="UPTIME" Style="{StaticResource Hud.StatCaption}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                            <TextBlock Grid.Row="4" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                       Style="{StaticResource Hud.Mono.Text}" FontSize="11.5"
                                                        Text="{Binding LiveUptime, Mode=OneWay}"/>
 
-                                            <TextBlock Grid.Row="5" Grid.Column="0" Text="Server PID" Opacity="0.5" FontSize="12" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                                            <TextBlock Grid.Row="5" Grid.Column="1" HorizontalAlignment="Right" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"
+                                            <c:TrackedText Grid.Row="5" Grid.Column="0" Text="SERVER PID" Style="{StaticResource Hud.StatCaption}" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                            <TextBlock Grid.Row="5" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                       Style="{StaticResource Hud.Mono.Text}" FontSize="11.5"
                                                        Text="{Binding LiveServerPid, Mode=OneWay}"/>
                                         </Grid>
 
-                                        <Separator Margin="0,8" Opacity="0.15"/>
+                                        <Rectangle Height="1" Fill="{DynamicResource Hud.Border}" Margin="0,10"/>
 
-                                        <!-- CPU and RAM gauges -->
+                                        <!-- CPU and RAM gauges. The rings stay circular — they read
+                                             as instrument dials, not as rounded corners. -->
                                         <UniformGrid Columns="2">
                                             <StackPanel HorizontalAlignment="Center">
                                                 <Grid Width="90" Height="90">
                                                     <Ellipse Width="76" Height="76" Fill="Transparent"
-                                                             Stroke="{DynamicResource MaterialDesign.Brush.Secondary}"
-                                                             StrokeThickness="6" Opacity="0.2"/>
+                                                             Stroke="{DynamicResource Hud.Border}"
+                                                             StrokeThickness="5"/>
                                                     <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
                                                                  Width="90" Height="90"
-                                                                 Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"
+                                                                 Foreground="{DynamicResource Hud.Accent}"
                                                                  Value="{Binding LiveCpuPct, Mode=OneWay}"
                                                                  Maximum="100"/>
                                                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                        <TextBlock HorizontalAlignment="Center">
-                                                            <Run Text="{Binding LiveCpuPct, Mode=OneWay, StringFormat='{}{0:F0}'}" FontSize="22" FontWeight="Bold"/>
-                                                            <Run Text="%" FontSize="11" Foreground="#80FFFFFF"/>
+                                                        <TextBlock HorizontalAlignment="Center"
+                                                                   Style="{StaticResource Hud.Mono.Text}">
+                                                            <Run Text="{Binding LiveCpuPct, Mode=OneWay, StringFormat='{}{0:F0}'}" FontSize="20" FontWeight="Bold"/><Run Text="%" FontSize="10" Foreground="#6E767D"/>
                                                         </TextBlock>
-                                                        <TextBlock Text="CPU" HorizontalAlignment="Center"
-                                                                   FontSize="11" Opacity="0.5"/>
+                                                        <c:TrackedText Text="CPU" Style="{StaticResource Hud.StatCaption}"
+                                                                       HorizontalAlignment="Center" Margin="0,2,0,0"/>
                                                     </StackPanel>
                                                 </Grid>
                                             </StackPanel>
@@ -468,36 +604,36 @@
                                             <StackPanel HorizontalAlignment="Center">
                                                 <Grid Width="90" Height="90">
                                                     <Ellipse Width="76" Height="76" Fill="Transparent"
-                                                             Stroke="{DynamicResource MaterialDesign.Brush.Secondary}"
-                                                             StrokeThickness="6" Opacity="0.2"/>
+                                                             Stroke="{DynamicResource Hud.Border}"
+                                                             StrokeThickness="5"/>
                                                     <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
                                                                  Width="90" Height="90"
-                                                                 Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"
+                                                                 Foreground="{DynamicResource Hud.Amber}"
                                                                  Value="{Binding LiveRamPct, Mode=OneWay}"
                                                                  Maximum="100"/>
                                                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                                                        <TextBlock HorizontalAlignment="Center">
-                                                            <Run Text="{Binding LiveRamPct, Mode=OneWay, StringFormat='{}{0:F0}'}" FontSize="22" FontWeight="Bold"/>
-                                                            <Run Text="%" FontSize="11" Foreground="#80FFFFFF"/>
+                                                        <TextBlock HorizontalAlignment="Center"
+                                                                   Style="{StaticResource Hud.Mono.Text}">
+                                                            <Run Text="{Binding LiveRamPct, Mode=OneWay, StringFormat='{}{0:F0}'}" FontSize="20" FontWeight="Bold"/><Run Text="%" FontSize="10" Foreground="#6E767D"/>
                                                         </TextBlock>
-                                                        <TextBlock Text="RAM" HorizontalAlignment="Center"
-                                                                   FontSize="11" Opacity="0.5"/>
+                                                        <c:TrackedText Text="RAM" Style="{StaticResource Hud.StatCaption}"
+                                                                       HorizontalAlignment="Center" Margin="0,2,0,0"/>
                                                     </StackPanel>
                                                 </Grid>
                                             </StackPanel>
                                         </UniformGrid>
 
                                     </StackPanel>
-                                </materialDesign:Card>
+                                </c:HudPanel>
                             </StackPanel>
                         </Border>
 
                         <!-- Action error log -->
-                        <Border CornerRadius="6" Margin="0,6,0,0" ClipToBounds="True"
+                        <Border CornerRadius="0" Margin="0,6,0,0" ClipToBounds="True"
                                 Visibility="{Binding ActionError, Converter={StaticResource StringToVisibility}}">
                             <!-- Header bar -->
                             <StackPanel>
-                                <Border Background="#CC1A1A1A" Padding="8,6" CornerRadius="6,6,0,0">
+                                <Border Background="#CC1A1A1A" Padding="8,6" CornerRadius="0">
                                     <Grid>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                             <materialDesign:PackIcon Kind="AlertCircleOutline"
@@ -521,7 +657,7 @@
                                     </Grid>
                                 </Border>
                                 <!-- Log content — selectable TextBox styled as read-only terminal -->
-                                <Border Background="#EE0D0D0D" CornerRadius="0,0,6,6" MaxHeight="160">
+                                <Border Background="#EE0D0D0D" CornerRadius="0" MaxHeight="160">
                                     <ScrollViewer VerticalScrollBarVisibility="Auto"
                                                   HorizontalScrollBarVisibility="Disabled">
                                         <TextBox Text="{Binding ActionError, Mode=OneWay}"
@@ -542,7 +678,7 @@
                 </ScrollViewer>
 
                 <!-- Divider -->
-                <Border Grid.Column="1" Background="#22FFFFFF"/>
+                <Border Grid.Column="1" Background="{DynamicResource Hud.Border}"/>
 
                 <!-- ── RIGHT: cards home / inline detail ── -->
                 <Grid Grid.Column="2">
@@ -553,20 +689,20 @@
 
                     <!-- Back nav bar (visible when a detail is open) -->
                     <Border Grid.Row="0"
-                            Background="#CC111111"
-                            BorderThickness="0,0,0,1" BorderBrush="#33FFFFFF"
+                            Background="{DynamicResource Hud.BgElevated}"
+                            BorderThickness="0,0,0,1" BorderBrush="{DynamicResource Hud.Border}"
                             Padding="8,6"
                             Visibility="{Binding ActiveDetail, Converter={StaticResource NotNullToVisible}}">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Button Style="{StaticResource MaterialDesignIconButton}"
-                                    Width="32" Height="32" Padding="0"
+                            <Button Style="{StaticResource Hud.Button.Icon}"
                                     Command="{Binding GoHomeCommand}"
                                     ToolTip="Back to cards">
-                                <materialDesign:PackIcon Kind="ArrowLeft" Width="18" Height="18"/>
+                                <materialDesign:PackIcon Kind="ArrowLeft" Width="16" Height="16"/>
                             </Button>
-                            <TextBlock Text="{Binding ActiveDetailTitle}"
-                                       FontSize="13" FontWeight="SemiBold"
-                                       VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            <c:TrackedText Text="{Binding ActiveDetailTitle}"
+                                           Style="{StaticResource Hud.PanelHeader}"
+                                           FontSize="12"
+                                           VerticalAlignment="Center" Margin="8,0,0,0"/>
                         </StackPanel>
                     </Border>
 
@@ -575,143 +711,141 @@
                                   Visibility="{Binding ActiveDetail, Converter={StaticResource NullToVisible}}">
                         <UniformGrid Columns="2" Margin="12,12,12,12">
 
-                        <materialDesign:Card UniformCornerRadius="10" Margin="4" Padding="20" Cursor="Hand"
-                                             Background="{DynamicResource GlassBrush}"
+                        <materialDesign:Card Style="{StaticResource Hud.NavCard}"
                                              MouseLeftButtonUp="OverviewCard_Click">
-                            <StackPanel>
-                                <materialDesign:PackIcon Kind="ViewDashboard" Width="30" Height="30"
-                                                         Foreground="{DynamicResource MaterialDesign.Brush.Primary}"
-                                                         Margin="0,0,0,10"/>
-                                <TextBlock Text="Overview" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                            <Grid>
+                                <StackPanel Margin="18">
+                                <materialDesign:PackIcon Kind="ViewDashboard" Style="{StaticResource Hud.NavCard.Icon}"/>
+                                <c:TrackedText Text="OVERVIEW" Style="{StaticResource Hud.NavCard.Title}"/>
                                 <TextBlock Text="Live server stats, metrics and system info"
-                                           FontSize="12" Opacity="0.55" TextWrapping="Wrap"/>
+                                           Style="{StaticResource Hud.NavCard.Desc}"/>
                             </StackPanel>
+                                <c:HudBrackets Tint="Accent"/>
+                            </Grid>
                         </materialDesign:Card>
 
-                        <materialDesign:Card UniformCornerRadius="10" Margin="4" Padding="20" Cursor="Hand"
-                                             Background="{DynamicResource GlassBrush}"
+                        <materialDesign:Card Style="{StaticResource Hud.NavCard}"
                                              MouseLeftButtonUp="ConsoleCard_Click">
-                            <StackPanel>
-                                <materialDesign:PackIcon Kind="Console" Width="30" Height="30"
-                                                         Foreground="{DynamicResource MaterialDesign.Brush.Primary}"
-                                                         Margin="0,0,0,10"/>
-                                <TextBlock Text="Console" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                            <Grid>
+                                <StackPanel Margin="18">
+                                <materialDesign:PackIcon Kind="Console" Style="{StaticResource Hud.NavCard.Icon}"/>
+                                <c:TrackedText Text="CONSOLE" Style="{StaticResource Hud.NavCard.Title}"/>
                                 <TextBlock Text="Live telnet stream and command input"
-                                           FontSize="12" Opacity="0.55" TextWrapping="Wrap"/>
+                                           Style="{StaticResource Hud.NavCard.Desc}"/>
                             </StackPanel>
+                                <c:HudBrackets Tint="Green"/>
+                            </Grid>
                         </materialDesign:Card>
 
-                        <materialDesign:Card UniformCornerRadius="10" Margin="4" Padding="20" Cursor="Hand"
-                                             Background="{DynamicResource GlassBrush}"
+                        <materialDesign:Card Style="{StaticResource Hud.NavCard}"
                                              MouseLeftButtonUp="ConfigCard_Click">
-                            <StackPanel>
-                                <materialDesign:PackIcon Kind="TuneVariant" Width="30" Height="30"
-                                                         Foreground="{DynamicResource MaterialDesign.Brush.Primary}"
-                                                         Margin="0,0,0,10"/>
-                                <TextBlock Text="Config" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                            <Grid>
+                                <StackPanel Margin="18">
+                                <materialDesign:PackIcon Kind="TuneVariant" Style="{StaticResource Hud.NavCard.Icon}"/>
+                                <c:TrackedText Text="CONFIG" Style="{StaticResource Hud.NavCard.Title}"/>
                                 <TextBlock Text="Edit serverconfig.xml — ports, world, gameplay"
-                                           FontSize="12" Opacity="0.55" TextWrapping="Wrap"/>
+                                           Style="{StaticResource Hud.NavCard.Desc}"/>
                             </StackPanel>
+                                <c:HudBrackets Tint="Blue"/>
+                            </Grid>
                         </materialDesign:Card>
 
-                        <materialDesign:Card UniformCornerRadius="10" Margin="4" Padding="20" Cursor="Hand"
-                                             Background="{DynamicResource GlassBrush}"
+                        <materialDesign:Card Style="{StaticResource Hud.NavCard}"
                                              MouseLeftButtonUp="GameSettingsCard_Click">
-                            <StackPanel>
-                                <materialDesign:PackIcon Kind="GamepadVariant" Width="30" Height="30"
-                                                         Foreground="{DynamicResource MaterialDesign.Brush.Primary}"
-                                                         Margin="0,0,0,10"/>
-                                <TextBlock Text="Game Settings" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                            <Grid>
+                                <StackPanel Margin="18">
+                                <materialDesign:PackIcon Kind="GamepadVariant" Style="{StaticResource Hud.NavCard.Icon}"/>
+                                <c:TrackedText Text="GAME SETTINGS" Style="{StaticResource Hud.NavCard.Title}"/>
                                 <TextBlock Text="Difficulty, zombies, blood moon, loot and more"
-                                           FontSize="12" Opacity="0.55" TextWrapping="Wrap"/>
+                                           Style="{StaticResource Hud.NavCard.Desc}"/>
                             </StackPanel>
+                                <c:HudBrackets Tint="Violet"/>
+                            </Grid>
                         </materialDesign:Card>
 
-                        <materialDesign:Card UniformCornerRadius="10" Margin="4" Padding="20" Cursor="Hand"
-                                             Background="{DynamicResource GlassBrush}"
+                        <materialDesign:Card Style="{StaticResource Hud.NavCard}"
                                              MouseLeftButtonUp="PlayersCard_Click">
-                            <StackPanel>
-                                <materialDesign:PackIcon Kind="AccountGroup" Width="30" Height="30"
-                                                         Foreground="{DynamicResource MaterialDesign.Brush.Primary}"
-                                                         Margin="0,0,0,10"/>
-                                <TextBlock Text="Players" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                            <Grid>
+                                <StackPanel Margin="18">
+                                <materialDesign:PackIcon Kind="AccountGroup" Style="{StaticResource Hud.NavCard.Icon}"/>
+                                <c:TrackedText Text="PLAYERS" Style="{StaticResource Hud.NavCard.Title}"/>
                                 <TextBlock Text="Online list, kick, ban and broadcast"
-                                           FontSize="12" Opacity="0.55" TextWrapping="Wrap"/>
+                                           Style="{StaticResource Hud.NavCard.Desc}"/>
                             </StackPanel>
+                                <c:HudBrackets Tint="Amber"/>
+                            </Grid>
                         </materialDesign:Card>
 
-                        <materialDesign:Card UniformCornerRadius="10" Margin="4" Padding="20" Cursor="Hand"
-                                             Background="{DynamicResource GlassBrush}"
+                        <materialDesign:Card Style="{StaticResource Hud.NavCard}"
                                              MouseLeftButtonUp="DiscordCard_Click">
-                            <StackPanel>
-                                <materialDesign:PackIcon Kind="MessageBadge" Width="30" Height="30"
-                                                         Foreground="{DynamicResource MaterialDesign.Brush.Primary}"
-                                                         Margin="0,0,0,10"/>
-                                <TextBlock Text="Discord" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                            <Grid>
+                                <StackPanel Margin="18">
+                                <materialDesign:PackIcon Kind="MessageBadge" Style="{StaticResource Hud.NavCard.Icon}"/>
+                                <c:TrackedText Text="DISCORD" Style="{StaticResource Hud.NavCard.Title}"/>
                                 <TextBlock Text="Webhook notifications for server events"
-                                           FontSize="12" Opacity="0.55" TextWrapping="Wrap"/>
+                                           Style="{StaticResource Hud.NavCard.Desc}"/>
                             </StackPanel>
+                                <c:HudBrackets Tint="Violet"/>
+                            </Grid>
                         </materialDesign:Card>
 
-                        <materialDesign:Card UniformCornerRadius="10" Margin="4" Padding="20" Cursor="Hand"
-                                             Background="{DynamicResource GlassBrush}"
+                        <materialDesign:Card Style="{StaticResource Hud.NavCard}"
                                              MouseLeftButtonUp="BackupsCard_Click">
-                            <StackPanel>
-                                <materialDesign:PackIcon Kind="Archive" Width="30" Height="30"
-                                                         Foreground="{DynamicResource MaterialDesign.Brush.Primary}"
-                                                         Margin="0,0,0,10"/>
-                                <TextBlock Text="Backups" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                            <Grid>
+                                <StackPanel Margin="18">
+                                <materialDesign:PackIcon Kind="Archive" Style="{StaticResource Hud.NavCard.Icon}"/>
+                                <c:TrackedText Text="BACKUPS" Style="{StaticResource Hud.NavCard.Title}"/>
                                 <TextBlock Text="Create and restore save game backups"
-                                           FontSize="12" Opacity="0.55" TextWrapping="Wrap"/>
+                                           Style="{StaticResource Hud.NavCard.Desc}"/>
                             </StackPanel>
+                                <c:HudBrackets Tint="Blue"/>
+                            </Grid>
                         </materialDesign:Card>
 
-                        <materialDesign:Card UniformCornerRadius="10" Margin="4" Padding="20" Cursor="Hand"
-                                             Background="{DynamicResource GlassBrush}"
+                        <materialDesign:Card Style="{StaticResource Hud.NavCard}"
                                              MouseLeftButtonUp="ScheduleCard_Click">
-                            <StackPanel>
-                                <materialDesign:PackIcon Kind="CalendarClock" Width="30" Height="30"
-                                                         Foreground="{DynamicResource MaterialDesign.Brush.Primary}"
-                                                         Margin="0,0,0,10"/>
-                                <TextBlock Text="Schedule" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                            <Grid>
+                                <StackPanel Margin="18">
+                                <materialDesign:PackIcon Kind="CalendarClock" Style="{StaticResource Hud.NavCard.Icon}"/>
+                                <c:TrackedText Text="SCHEDULE" Style="{StaticResource Hud.NavCard.Title}"/>
                                 <TextBlock Text="Automated restarts with in-game warnings"
-                                           FontSize="12" Opacity="0.55" TextWrapping="Wrap"/>
+                                           Style="{StaticResource Hud.NavCard.Desc}"/>
                             </StackPanel>
+                                <c:HudBrackets Tint="Rust"/>
+                            </Grid>
                         </materialDesign:Card>
 
-                        <materialDesign:Card UniformCornerRadius="10" Margin="4" Padding="20" Cursor="Hand"
-                                             Background="{DynamicResource GlassBrush}"
+                        <materialDesign:Card Style="{StaticResource Hud.NavCard}"
                                              MouseLeftButtonUp="ModsCard_Click">
-                            <StackPanel>
-                                <materialDesign:PackIcon Kind="PuzzlePlus" Width="30" Height="30"
-                                                         Foreground="{DynamicResource MaterialDesign.Brush.Primary}"
-                                                         Margin="0,0,0,10"/>
-                                <TextBlock Text="Mod Management" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                            <Grid>
+                                <StackPanel Margin="18">
+                                <materialDesign:PackIcon Kind="PuzzlePlus" Style="{StaticResource Hud.NavCard.Icon}"/>
+                                <c:TrackedText Text="MOD MANAGEMENT" Style="{StaticResource Hud.NavCard.Title}"/>
                                 <TextBlock Text="Install, enable and manage server mods"
-                                           FontSize="12" Opacity="0.55" TextWrapping="Wrap"/>
+                                           Style="{StaticResource Hud.NavCard.Desc}"/>
                             </StackPanel>
+                                <c:HudBrackets Tint="Green"/>
+                            </Grid>
                         </materialDesign:Card>
 
-                        <materialDesign:Card UniformCornerRadius="10" Margin="4" Padding="20" Cursor="Hand"
-                                             Background="{DynamicResource GlassBrush}"
+                        <materialDesign:Card Style="{StaticResource Hud.NavCard}"
                                              MouseLeftButtonUp="ServerSettingsCard_Click">
-                            <StackPanel>
-                                <materialDesign:PackIcon Kind="Cog" Width="30" Height="30"
-                                                         Foreground="{DynamicResource MaterialDesign.Brush.Primary}"
-                                                         Margin="0,0,0,10"/>
-                                <TextBlock Text="Settings" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                            <Grid>
+                                <StackPanel Margin="18">
+                                <materialDesign:PackIcon Kind="Cog" Style="{StaticResource Hud.NavCard.Icon}"/>
+                                <c:TrackedText Text="SETTINGS" Style="{StaticResource Hud.NavCard.Title}"/>
                                 <TextBlock Text="Server settings, wipe options, danger zone"
-                                           FontSize="12" Opacity="0.55" TextWrapping="Wrap"/>
+                                           Style="{StaticResource Hud.NavCard.Desc}"/>
                             </StackPanel>
+                                <c:HudBrackets Tint="Neutral"/>
+                            </Grid>
                         </materialDesign:Card>
 
-                        <materialDesign:Card UniformCornerRadius="10" Margin="4" Padding="20" Cursor="Hand"
-                                             Background="{DynamicResource GlassBrush}"
-                                             MouseLeftButtonUp="InstallCard_Click">
+                        <materialDesign:Card MouseLeftButtonUp="InstallCard_Click">
                             <materialDesign:Card.Style>
-                                <Style TargetType="materialDesign:Card" BasedOn="{StaticResource {x:Type materialDesign:Card}}">
+                                <!-- NavCard look, plus: disabled + dimmed while the server runs -->
+                                <Style TargetType="materialDesign:Card" BasedOn="{StaticResource Hud.NavCard}">
                                     <Style.Triggers>
-                                        <!-- Block updating while the server is running -->
                                         <DataTrigger Binding="{Binding SelectedServerRunning}" Value="True">
                                             <Setter Property="IsEnabled" Value="False"/>
                                             <Setter Property="Opacity"   Value="0.5"/>
@@ -719,17 +853,18 @@
                                     </Style.Triggers>
                                 </Style>
                             </materialDesign:Card.Style>
-                            <StackPanel>
-                                <Grid Margin="0,0,0,10">
-                                    <materialDesign:PackIcon Kind="Download" Width="30" Height="30"
-                                                             Foreground="{DynamicResource MaterialDesign.Brush.Primary}"
-                                                             HorizontalAlignment="Left"/>
-                                    <!-- Status area top-right: spinner while checking, badge when done -->
+                            <Grid>
+                            <StackPanel Margin="18">
+                                <Grid Margin="0,0,0,12">
+                                    <materialDesign:PackIcon Kind="Download"
+                                                             Style="{StaticResource Hud.NavCard.Icon}"
+                                                             HorizontalAlignment="Left"
+                                                             Margin="0"/>
+                                    <!-- Status area top-right: spinner while checking, pill when done -->
                                     <Grid HorizontalAlignment="Right" VerticalAlignment="Top">
-                                        <!-- Checking spinner -->
-                                        <ProgressBar Width="18" Height="18"
+                                        <ProgressBar Width="16" Height="16"
                                                      IsIndeterminate="True" Value="0"
-                                                     Foreground="{DynamicResource MaterialDesign.Brush.Primary}">
+                                                     Foreground="{DynamicResource Hud.Accent}">
                                             <ProgressBar.Style>
                                                 <Style TargetType="ProgressBar" BasedOn="{StaticResource MaterialDesignCircularProgressBar}">
                                                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -741,14 +876,17 @@
                                                 </Style>
                                             </ProgressBar.Style>
                                         </ProgressBar>
-                                        <!-- Status badge -->
-                                        <Border CornerRadius="4" Padding="6,2">
+
+                                        <!-- Status pill: square, tinted fill + matching border -->
+                                        <Border Padding="6,2" BorderThickness="1">
                                             <Border.Style>
                                                 <Style TargetType="Border">
-                                                    <Setter Property="Background" Value="#33FF5722"/>
+                                                    <Setter Property="Background"  Value="{DynamicResource Hud.AmberSoft}"/>
+                                                    <Setter Property="BorderBrush" Value="{DynamicResource Hud.Amber}"/>
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding InstallIsUpToDate}" Value="True">
-                                                            <Setter Property="Background" Value="#334CAF50"/>
+                                                            <Setter Property="Background"  Value="{DynamicResource Hud.GreenSoft}"/>
+                                                            <Setter Property="BorderBrush" Value="{DynamicResource Hud.Green}"/>
                                                         </DataTrigger>
                                                         <DataTrigger Binding="{Binding InstallCheckBusy}" Value="True">
                                                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -757,13 +895,14 @@
                                                 </Style>
                                             </Border.Style>
                                             <TextBlock Text="{Binding InstallStatusLabel}"
-                                                       FontSize="10" FontWeight="SemiBold">
+                                                       FontFamily="{DynamicResource Hud.Mono}"
+                                                       FontSize="9" FontWeight="Bold">
                                                 <TextBlock.Style>
                                                     <Style TargetType="TextBlock">
-                                                        <Setter Property="Foreground" Value="#FF5722"/>
+                                                        <Setter Property="Foreground" Value="{DynamicResource Hud.Amber}"/>
                                                         <Style.Triggers>
                                                             <DataTrigger Binding="{Binding InstallIsUpToDate}" Value="True">
-                                                                <Setter Property="Foreground" Value="#4CAF50"/>
+                                                                <Setter Property="Foreground" Value="{DynamicResource Hud.Green}"/>
                                                             </DataTrigger>
                                                         </Style.Triggers>
                                                     </Style>
@@ -772,26 +911,29 @@
                                         </Border>
                                     </Grid>
                                 </Grid>
-                                <TextBlock Text="Install / Update" FontSize="15" FontWeight="SemiBold" Margin="0,0,0,4"/>
+
+                                <c:TrackedText Text="INSTALL / UPDATE" Style="{StaticResource Hud.NavCard.Title}"/>
                                 <TextBlock Text="{Binding InstallBuildLabel}"
-                                           FontSize="12" FontWeight="SemiBold"
-                                           Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"
-                                           Margin="0,0,0,4"/>
-                                <TextBlock FontSize="12" Opacity="0.55" TextWrapping="Wrap">
+                                           Style="{StaticResource Hud.Mono.Text}"
+                                           FontSize="11" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Hud.Accent}"
+                                           Margin="0,0,0,6"/>
+                                <TextBlock TextWrapping="Wrap">
                                     <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
+                                        <Style TargetType="TextBlock" BasedOn="{StaticResource Hud.NavCard.Desc}">
                                             <Setter Property="Text" Value="Click to install or update via SteamCMD"/>
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding SelectedServerRunning}" Value="True">
                                                     <Setter Property="Text" Value="⚠ Stop the server before updating"/>
-                                                    <Setter Property="Foreground" Value="#FFB300"/>
-                                                    <Setter Property="Opacity" Value="1"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource Hud.Amber}"/>
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </TextBlock.Style>
                                 </TextBlock>
                             </StackPanel>
+                            <c:HudBrackets Tint="Amber"/>
+                            </Grid>
                         </materialDesign:Card>
 
                     </UniformGrid>

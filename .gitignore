@@ -15,6 +15,14 @@ obj/
 # Claude internal
 .claude/
 
+# Internal working docs — this repo is public. These stay local:
+# the design spec describes RustPanel (a separate product), and images/
+# holds RustPanel reference screenshots.
+TACTICAL-HUD-DESIGN-SPEC.md
+TODO.md
+V3_Spec.md
+images/
+
 # Publish artifacts
 publish.binlog
 *.binlog

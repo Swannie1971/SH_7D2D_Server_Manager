@@ -45,7 +45,7 @@
                 <!-- ── Identity ─────────────────────────────────────────────── -->
                 <TextBlock Text="SERVER IDENTITY" FontSize="11" FontWeight="Bold"
                            Opacity="0.5" Margin="0,0,0,10"/>
-                <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,20">
+                <materialDesign:Card UniformCornerRadius="0" Padding="16" Margin="0,0,0,20">
                     <StackPanel>
                         <TextBox materialDesign:HintAssist.Hint="Server Name"
                                  Style="{StaticResource MaterialDesignOutlinedTextBox}"
@@ -71,7 +71,6 @@
                             <ComboBox Grid.Column="2"
                                       materialDesign:HintAssist.Hint="Visibility"
                                       Style="{StaticResource MaterialDesignOutlinedComboBox}"
-                                      DisplayMemberPath="Label"
                                       SelectedValuePath="Value"
                                       ItemsSource="{Binding VisibilityOptions}"
                                       SelectedValue="{Binding ServerVisibility}"/>
@@ -82,7 +81,7 @@
                 <!-- ── World ────────────────────────────────────────────────── -->
                 <TextBlock Text="WORLD" FontSize="11" FontWeight="Bold"
                            Opacity="0.5" Margin="0,0,0,10"/>
-                <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,20">
+                <materialDesign:Card UniformCornerRadius="0" Padding="16" Margin="0,0,0,20">
                     <StackPanel>
                         <Grid Margin="0,0,0,14">
                             <Grid.ColumnDefinitions>
@@ -121,7 +120,7 @@
                 <!-- ── Network ──────────────────────────────────────────────── -->
                 <TextBlock Text="NETWORK" FontSize="11" FontWeight="Bold"
                            Opacity="0.5" Margin="0,0,0,10"/>
-                <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,20">
+                <materialDesign:Card UniformCornerRadius="0" Padding="16" Margin="0,0,0,20">
                     <StackPanel>
                         <Grid Margin="0,0,0,14">
                             <Grid.ColumnDefinitions>
@@ -152,7 +151,7 @@
                 <!-- ── Options ──────────────────────────────────────────────── -->
                 <TextBlock Text="OPTIONS" FontSize="11" FontWeight="Bold"
                            Opacity="0.5" Margin="0,0,0,10"/>
-                <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,20">
+                <materialDesign:Card UniformCornerRadius="0" Padding="16" Margin="0,0,0,20">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -163,20 +162,20 @@
                             <TextBlock Text="Easy Anti-Cheat protection" FontSize="12" Opacity="0.6" Margin="0,2,0,0"/>
                         </StackPanel>
                         <ToggleButton Grid.Column="1"
-                                      Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                                      Style="{StaticResource Hud.Toggle}"
                                       IsChecked="{Binding EacEnabled}"
                                       VerticalAlignment="Center"/>
                     </Grid>
                 </materialDesign:Card>
 
                 <!-- Error -->
-                <Border CornerRadius="6" Background="#33F44336" Padding="12,8" Margin="0,0,0,12"
+                <Border CornerRadius="0" Background="#33F44336" Padding="12,8" Margin="0,0,0,12"
                         Visibility="{Binding HasSaveError, Converter={StaticResource BoolToVis}}">
                     <TextBlock Text="{Binding SaveError}" Foreground="#F44336" FontSize="13" TextWrapping="Wrap"/>
                 </Border>
 
                 <!-- Saved confirmation -->
-                <Border CornerRadius="6" Background="#334CAF50" Padding="12,8"
+                <Border CornerRadius="0" Background="#334CAF50" Padding="12,8"
                         Visibility="{Binding IsSaved, Converter={StaticResource BoolToVis}}"
                         Margin="0,0,0,12">
                     <StackPanel Orientation="Horizontal">

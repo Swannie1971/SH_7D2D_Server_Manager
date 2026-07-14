@@ -2,7 +2,8 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:models="clr-namespace:SevenDaysManager.Models">
+             xmlns:models="clr-namespace:SevenDaysManager.Models"
+             xmlns:c="clr-namespace:SevenDaysManager.Controls">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -10,72 +11,123 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- Output -->
-        <Border Grid.Row="0" Background="#CC0D0D0D">
+        <!-- ══ Output: phosphor terminal ══
+             Near-black bed + a scanline texture, so log text reads as a CRT readout. -->
+        <Grid Grid.Row="0">
+            <Rectangle Fill="{DynamicResource ConsoleBrush}"/>
+            <Rectangle Fill="{DynamicResource Hud.ScanlineTile}" IsHitTestVisible="False"/>
+
             <ScrollViewer x:Name="OutputScroll"
                           VerticalScrollBarVisibility="Auto"
-                          HorizontalScrollBarVisibility="Disabled">
-                <ItemsControl ItemsSource="{Binding Lines}" Padding="10,6">
+                          HorizontalScrollBarVisibility="Disabled"
+                          Background="Transparent">
+                <ItemsControl ItemsSource="{Binding Lines}" Padding="12,8">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="{x:Type models:ConsoleLine}">
-                            <TextBlock Text="{Binding Text}"
-                                       FontFamily="Consolas, Courier New"
-                                       FontSize="11.5"
-                                       TextWrapping="Wrap"
-                                       Padding="0,1">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="Foreground" Value="#CCCCCC"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Type}" Value="{x:Static models:ConsoleLineType.Error}">
-                                                <Setter Property="Foreground" Value="#EF5350"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Type}" Value="{x:Static models:ConsoleLineType.Warning}">
-                                                <Setter Property="Foreground" Value="#FFB300"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Type}" Value="{x:Static models:ConsoleLineType.Chat}">
-                                                <Setter Property="Foreground" Value="#4FC3F7"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding Type}" Value="{x:Static models:ConsoleLineType.System}">
-                                                <Setter Property="Foreground" Value="#666666"/>
-                                                <Setter Property="FontStyle" Value="Italic"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
+                            <!-- Hovering a line lights a 2px accent left edge.
+                                 The trigger must target the Grid's own IsMouseOver — binding to
+                                 RelativeSource Self inside a DataTemplate resolves to the data
+                                 item, not the element, and silently never fires. -->
+                            <Grid x:Name="Row" Background="Transparent">
+                                <Rectangle x:Name="Edge" Width="2" HorizontalAlignment="Left"
+                                           Fill="{DynamicResource Hud.Accent}" Visibility="Collapsed"/>
+                                <TextBlock Text="{Binding Text}"
+                                           FontFamily="{DynamicResource Hud.Mono}"
+                                           FontSize="11.5"
+                                           TextWrapping="Wrap"
+                                           Padding="8,1,0,1">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <!-- INFO: default phosphor grey -->
+                                            <Setter Property="Foreground" Value="{DynamicResource Hud.FgMuted}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Type}" Value="{x:Static models:ConsoleLineType.Error}">
+                                                    <Setter Property="Foreground" Value="{DynamicResource Hud.Red}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Type}" Value="{x:Static models:ConsoleLineType.Warning}">
+                                                    <Setter Property="Foreground" Value="{DynamicResource Hud.Amber}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Type}" Value="{x:Static models:ConsoleLineType.Chat}">
+                                                    <Setter Property="Foreground" Value="{DynamicResource Hud.Violet}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Type}" Value="{x:Static models:ConsoleLineType.System}">
+                                                    <Setter Property="Foreground" Value="{DynamicResource Hud.FgFaint}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+                            <DataTemplate.Triggers>
+                                <Trigger SourceName="Row" Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="Edge" Property="Visibility" Value="Visible"/>
+                                    <Setter TargetName="Row"  Property="Background" Value="#08C1F24A"/>
+                                </Trigger>
+                            </DataTemplate.Triggers>
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </ScrollViewer>
-        </Border>
+        </Grid>
 
-        <!-- Input bar -->
-        <Border Grid.Row="1" Background="#1A1A1A" Padding="10,7"
-                BorderThickness="0,1,0,0" BorderBrush="#333333">
+        <!-- ══ Input bar ══ -->
+        <Border Grid.Row="1"
+                Background="{DynamicResource Hud.BgElevated}"
+                BorderThickness="0,1,0,0"
+                BorderBrush="{DynamicResource Hud.Border}"
+                Padding="12,8">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Text=">" FontFamily="Consolas" FontSize="14"
-                           Foreground="#4CAF50" FontWeight="Bold"
-                           VerticalAlignment="Center" Margin="0,0,8,0"/>
+
+                <!-- Pulsing accent prompt -->
+                <TextBlock x:Name="Prompt" Text="›"
+                           FontFamily="{DynamicResource Hud.Mono}"
+                           FontSize="16" FontWeight="Bold"
+                           Foreground="{DynamicResource Hud.Accent}"
+                           VerticalAlignment="Center"
+                           Margin="2,0,10,0">
+                    <TextBlock.Triggers>
+                        <EventTrigger RoutedEvent="Loaded">
+                            <BeginStoryboard>
+                                <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                    <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                     From="1" To="0.25" Duration="0:0:0.9"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </EventTrigger>
+                    </TextBlock.Triggers>
+                </TextBlock>
+
+                <!-- Flush with the bar — a boxed input would break the terminal illusion -->
                 <TextBox x:Name="CommandBox" Grid.Column="1"
                          Text="{Binding CommandInput, UpdateSourceTrigger=PropertyChanged}"
-                         FontFamily="Consolas, Courier New" FontSize="12"
-                         Foreground="#E0E0E0" Background="Transparent" BorderThickness="0"
-                         CaretBrush="#4CAF50" VerticalAlignment="Center"
-                         materialDesign:HintAssist.Hint="Enter command…"
-                         materialDesign:TextFieldAssist.UnderlineBrush="Transparent"
-                         Style="{StaticResource MaterialDesignTextBox}"
+                         Style="{StaticResource Hud.TextBox}"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Padding="0"
+                         FontFamily="{DynamicResource Hud.Mono}" FontSize="12"
+                         VerticalAlignment="Center"
                          KeyDown="CommandBox_KeyDown"/>
-                <Button Grid.Column="2" Content="Send"
-                        Style="{StaticResource MaterialDesignRaisedButton}"
-                        materialDesign:ButtonAssist.CornerRadius="6"
-                        Height="32" Padding="14,0" Margin="8,0,0,0"
-                        Command="{Binding SendCommandCommand}"/>
+
+                <!-- SEND: chamfered accent — matches the primary action language -->
+                <Button Grid.Column="2"
+                        Style="{StaticResource Hud.Button.Primary}"
+                        Height="32" Padding="16,0" Margin="10,0,0,0"
+                        Command="{Binding SendCommandCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Send" Width="13" Height="13"
+                                                 VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <c:TrackedText Text="SEND" LetterSpacing="0.12"
+                                       FontFamily="{DynamicResource Hud.Mono}"
+                                       FontSize="10.5" FontWeight="Bold"
+                                       Foreground="{DynamicResource Hud.AccentInk}"
+                                       VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
             </Grid>
         </Border>
     </Grid>

@@ -1,36 +1,23 @@
 <UserControl x:Class="SevenDaysManager.Views.GameSettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:c="clr-namespace:SevenDaysManager.Controls">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-        <Style x:Key="SectionHeader" TargetType="TextBlock">
-            <Setter Property="FontSize"     Value="12"/>
-            <Setter Property="FontWeight"   Value="SemiBold"/>
-            <Setter Property="Opacity"      Value="0.65"/>
-        </Style>
-        <Style x:Key="SettingLabel" TargetType="TextBlock">
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Margin"     Value="0,0,0,3"/>
-        </Style>
-        <Style x:Key="SettingHint" TargetType="TextBlock">
-            <Setter Property="FontSize"   Value="11"/>
-            <Setter Property="Opacity"    Value="0.55"/>
-            <Setter Property="Margin"     Value="0,0,0,8"/>
-            <Setter Property="TextWrapping" Value="Wrap"/>
-        </Style>
+        <!-- Label/hint styles now come from the theme: Hud.SettingLabel / Hud.SettingHint -->
     </UserControl.Resources>
 
     <Grid>
-    <ScrollViewer VerticalScrollBarVisibility="Auto">
-        <StackPanel Margin="12,12,12,16">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Background="Transparent">
+        <StackPanel Margin="14,14,14,16">
+
+            <c:HudTitle Title="GAME SETTINGS" HorizontalAlignment="Left" Margin="2,0,0,14"/>
 
             <!-- ══ DIFFICULTY & PROGRESSION ══════════════════════════════════ -->
-            <materialDesign:Card UniformCornerRadius="10" Background="{DynamicResource GlassBrush}" Margin="0,0,0,8" Padding="0">
-                <Expander Header="DIFFICULTY &amp; PROGRESSION" IsExpanded="False"
-                          Background="Transparent"
-                          materialDesign:ExpanderAssist.HorizontalHeaderPadding="16,12,16,12">
+            <c:HudPanel Tint="Accent" Margin="0,0,0,8" Padding="0">
+                <Expander Header="DIFFICULTY &amp; PROGRESSION" IsExpanded="False" Style="{StaticResource Hud.Expander}">
                     <Grid Margin="16,4,16,16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -40,35 +27,33 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="Game Difficulty" Style="{StaticResource SettingLabel}"/>
-                            <TextBlock Text="Overall challenge level for all players" Style="{StaticResource SettingHint}"/>
-                            <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                            <c:TrackedText Text="Game Difficulty" Style="{StaticResource Hud.SettingLabel}"/>
+                            <TextBlock Text="Overall challenge level for all players" Style="{StaticResource Hud.SettingHint}"/>
+                            <ComboBox Style="{StaticResource Hud.ComboBox}"
                                       ItemsSource="{Binding DifficultyOptions}" SelectedValue="{Binding GameDifficulty}"
-                                      SelectedValuePath="Value" DisplayMemberPath="Label"/>
+                                      SelectedValuePath="Value"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="XP Multiplier" Style="{StaticResource SettingLabel}"/>
-                            <TextBlock Text="How fast players level up skills and perks" Style="{StaticResource SettingHint}"/>
-                            <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                            <c:TrackedText Text="XP Multiplier" Style="{StaticResource Hud.SettingLabel}"/>
+                            <TextBlock Text="How fast players level up skills and perks" Style="{StaticResource Hud.SettingHint}"/>
+                            <ComboBox Style="{StaticResource Hud.ComboBox}"
                                       ItemsSource="{Binding XpOptions}" SelectedValue="{Binding XpMultiplier}"
-                                      SelectedValuePath="Value" DisplayMemberPath="Label"/>
+                                      SelectedValuePath="Value"/>
                         </StackPanel>
                         <StackPanel Grid.Column="4">
-                            <TextBlock Text="Player Killing (PvP)" Style="{StaticResource SettingLabel}"/>
-                            <TextBlock Text="Controls whether players can attack each other" Style="{StaticResource SettingHint}"/>
-                            <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                            <c:TrackedText Text="Player Killing (PvP)" Style="{StaticResource Hud.SettingLabel}"/>
+                            <TextBlock Text="Controls whether players can attack each other" Style="{StaticResource Hud.SettingHint}"/>
+                            <ComboBox Style="{StaticResource Hud.ComboBox}"
                                       ItemsSource="{Binding PlayerKillingOptions}" SelectedValue="{Binding PlayerKillingMode}"
-                                      SelectedValuePath="Value" DisplayMemberPath="Label"/>
+                                      SelectedValuePath="Value"/>
                         </StackPanel>
                     </Grid>
                 </Expander>
-            </materialDesign:Card>
+            </c:HudPanel>
 
             <!-- ══ TIME & WORLD ══════════════════════════════════════════════ -->
-            <materialDesign:Card UniformCornerRadius="10" Background="{DynamicResource GlassBrush}" Margin="0,0,0,8" Padding="0">
-                <Expander Header="TIME &amp; WORLD" IsExpanded="False"
-                          Background="Transparent"
-                          materialDesign:ExpanderAssist.HorizontalHeaderPadding="16,12,16,12">
+            <c:HudPanel Tint="Blue" Margin="0,0,0,8" Padding="0">
+                <Expander Header="TIME &amp; WORLD" IsExpanded="False" Style="{StaticResource Hud.Expander}">
                     <Grid Margin="16,4,16,16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -76,28 +61,26 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="Game Day Length" Style="{StaticResource SettingLabel}"/>
-                            <TextBlock Text="Real-world minutes per in-game day" Style="{StaticResource SettingHint}"/>
-                            <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                            <c:TrackedText Text="Game Day Length" Style="{StaticResource Hud.SettingLabel}"/>
+                            <TextBlock Text="Real-world minutes per in-game day" Style="{StaticResource Hud.SettingHint}"/>
+                            <ComboBox Style="{StaticResource Hud.ComboBox}"
                                       ItemsSource="{Binding DayLengthOptions}" SelectedValue="{Binding DayNightLength}"
-                                      SelectedValuePath="Value" DisplayMemberPath="Label"/>
+                                      SelectedValuePath="Value"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="Daylight Hours" Style="{StaticResource SettingLabel}"/>
-                            <TextBlock Text="Hours of daylight (6–24). Fewer = longer, more dangerous nights" Style="{StaticResource SettingHint}"/>
-                            <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                            <c:TrackedText Text="Daylight Hours" Style="{StaticResource Hud.SettingLabel}"/>
+                            <TextBlock Text="Hours of daylight (6–24). Fewer = longer, more dangerous nights" Style="{StaticResource Hud.SettingHint}"/>
+                            <ComboBox Style="{StaticResource Hud.ComboBox}"
                                       ItemsSource="{Binding DayLightOptions}" SelectedValue="{Binding DayLightLength}"
-                                      SelectedValuePath="Value" DisplayMemberPath="Label"/>
+                                      SelectedValuePath="Value"/>
                         </StackPanel>
                     </Grid>
                 </Expander>
-            </materialDesign:Card>
+            </c:HudPanel>
 
             <!-- ══ ZOMBIES ════════════════════════════════════════════════════ -->
-            <materialDesign:Card UniformCornerRadius="10" Background="{DynamicResource GlassBrush}" Margin="0,0,0,8" Padding="0">
-                <Expander Header="ZOMBIES" IsExpanded="False"
-                          Background="Transparent"
-                          materialDesign:ExpanderAssist.HorizontalHeaderPadding="16,12,16,12">
+            <c:HudPanel Tint="Red" Margin="0,0,0,8" Padding="0">
+                <Expander Header="ZOMBIES" IsExpanded="False" Style="{StaticResource Hud.Expander}">
                     <StackPanel Margin="16,4,16,16">
                         <!-- Speeds row -->
                         <Grid Margin="0,0,0,12">
@@ -111,32 +94,32 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Speed (Day)" Style="{StaticResource SettingLabel}"/>
-                                <TextBlock Text="Regular zombies in daylight" Style="{StaticResource SettingHint}"/>
-                                <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                <c:TrackedText Text="Speed (Day)" Style="{StaticResource Hud.SettingLabel}"/>
+                                <TextBlock Text="Regular zombies in daylight" Style="{StaticResource Hud.SettingHint}"/>
+                                <ComboBox Style="{StaticResource Hud.ComboBox}"
                                           ItemsSource="{Binding ZombieSpeedOptions}" SelectedValue="{Binding ZombieMove}"
-                                          SelectedValuePath="Value" DisplayMemberPath="Label"/>
+                                          SelectedValuePath="Value"/>
                             </StackPanel>
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Speed (Night)" Style="{StaticResource SettingLabel}"/>
-                                <TextBlock Text="Regular zombies at night" Style="{StaticResource SettingHint}"/>
-                                <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                <c:TrackedText Text="Speed (Night)" Style="{StaticResource Hud.SettingLabel}"/>
+                                <TextBlock Text="Regular zombies at night" Style="{StaticResource Hud.SettingHint}"/>
+                                <ComboBox Style="{StaticResource Hud.ComboBox}"
                                           ItemsSource="{Binding ZombieSpeedOptions}" SelectedValue="{Binding ZombieMoveNight}"
-                                          SelectedValuePath="Value" DisplayMemberPath="Label"/>
+                                          SelectedValuePath="Value"/>
                             </StackPanel>
                             <StackPanel Grid.Column="4">
-                                <TextBlock Text="Feral Speed" Style="{StaticResource SettingLabel}"/>
-                                <TextBlock Text="Glowing-eye zombies (always active)" Style="{StaticResource SettingHint}"/>
-                                <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                <c:TrackedText Text="Feral Speed" Style="{StaticResource Hud.SettingLabel}"/>
+                                <TextBlock Text="Glowing-eye zombies (always active)" Style="{StaticResource Hud.SettingHint}"/>
+                                <ComboBox Style="{StaticResource Hud.ComboBox}"
                                           ItemsSource="{Binding ZombieSpeedOptions}" SelectedValue="{Binding ZombieFeralMove}"
-                                          SelectedValuePath="Value" DisplayMemberPath="Label"/>
+                                          SelectedValuePath="Value"/>
                             </StackPanel>
                             <StackPanel Grid.Column="6">
-                                <TextBlock Text="Blood Moon Speed" Style="{StaticResource SettingLabel}"/>
-                                <TextBlock Text="Zombie speed during Blood Moon hordes" Style="{StaticResource SettingHint}"/>
-                                <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                <c:TrackedText Text="Blood Moon Speed" Style="{StaticResource Hud.SettingLabel}"/>
+                                <TextBlock Text="Zombie speed during Blood Moon hordes" Style="{StaticResource Hud.SettingHint}"/>
+                                <ComboBox Style="{StaticResource Hud.ComboBox}"
                                           ItemsSource="{Binding ZombieSpeedOptions}" SelectedValue="{Binding ZombieBMMove}"
-                                          SelectedValuePath="Value" DisplayMemberPath="Label"/>
+                                          SelectedValuePath="Value"/>
                             </StackPanel>
                         </Grid>
                         <!-- Spawn caps row -->
@@ -147,8 +130,8 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Max Spawned Zombies (8–128)" Style="{StaticResource SettingLabel}"/>
-                                <TextBlock Text="Active zombies on the map at once — lower helps server performance" Style="{StaticResource SettingHint}"/>
+                                <c:TrackedText Text="Max Spawned Zombies (8–128)" Style="{StaticResource Hud.SettingLabel}"/>
+                                <TextBlock Text="Active zombies on the map at once — lower helps server performance" Style="{StaticResource Hud.SettingHint}"/>
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="50"/></Grid.ColumnDefinitions>
                                     <Slider Minimum="8" Maximum="128" TickFrequency="8" IsSnapToTickEnabled="True"
@@ -159,8 +142,8 @@
                                 </Grid>
                             </StackPanel>
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Max Spawned Animals (0–100)" Style="{StaticResource SettingLabel}"/>
-                                <TextBlock Text="Active animals on the map at once" Style="{StaticResource SettingHint}"/>
+                                <c:TrackedText Text="Max Spawned Animals (0–100)" Style="{StaticResource Hud.SettingLabel}"/>
+                                <TextBlock Text="Active animals on the map at once" Style="{StaticResource Hud.SettingHint}"/>
                                 <Grid>
                                     <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="50"/></Grid.ColumnDefinitions>
                                     <Slider Minimum="0" Maximum="100" TickFrequency="10" IsSnapToTickEnabled="True"
@@ -173,13 +156,11 @@
                         </Grid>
                     </StackPanel>
                 </Expander>
-            </materialDesign:Card>
+            </c:HudPanel>
 
             <!-- ══ BLOOD MOON ═════════════════════════════════════════════════ -->
-            <materialDesign:Card UniformCornerRadius="10" Background="{DynamicResource GlassBrush}" Margin="0,0,0,8" Padding="0">
-                <Expander Header="BLOOD MOON" IsExpanded="False"
-                          Background="Transparent"
-                          materialDesign:ExpanderAssist.HorizontalHeaderPadding="16,12,16,12">
+            <c:HudPanel Tint="Amber" Margin="0,0,0,8" Padding="0">
+                <Expander Header="BLOOD MOON" IsExpanded="False" Style="{StaticResource Hud.Expander}">
                     <Grid Margin="16,4,16,16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -189,8 +170,8 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="Frequency (every N days)" Style="{StaticResource SettingLabel}"/>
-                            <TextBlock Text="How often a Blood Moon horde attacks. 0 = disabled" Style="{StaticResource SettingHint}"/>
+                            <c:TrackedText Text="Frequency (every N days)" Style="{StaticResource Hud.SettingLabel}"/>
+                            <TextBlock Text="How often a Blood Moon horde attacks. 0 = disabled" Style="{StaticResource Hud.SettingHint}"/>
                             <Grid>
                                 <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="50"/></Grid.ColumnDefinitions>
                                 <Slider Minimum="0" Maximum="30" TickFrequency="1" IsSnapToTickEnabled="True"
@@ -211,8 +192,8 @@
                             </Grid>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="Day Variance (±)" Style="{StaticResource SettingLabel}"/>
-                            <TextBlock Text="Random ± days so Blood Moon doesn't always land on the same day" Style="{StaticResource SettingHint}"/>
+                            <c:TrackedText Text="Day Variance (±)" Style="{StaticResource Hud.SettingLabel}"/>
+                            <TextBlock Text="Random ± days so Blood Moon doesn't always land on the same day" Style="{StaticResource Hud.SettingHint}"/>
                             <Grid>
                                 <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="50"/></Grid.ColumnDefinitions>
                                 <Slider Minimum="0" Maximum="5" TickFrequency="1" IsSnapToTickEnabled="True"
@@ -233,8 +214,8 @@
                             </Grid>
                         </StackPanel>
                         <StackPanel Grid.Column="4">
-                            <TextBlock Text="Enemy Count (8–64)" Style="{StaticResource SettingLabel}"/>
-                            <TextBlock Text="Max zombies spawned during a Blood Moon wave" Style="{StaticResource SettingHint}"/>
+                            <c:TrackedText Text="Enemy Count (8–64)" Style="{StaticResource Hud.SettingLabel}"/>
+                            <TextBlock Text="Max zombies spawned during a Blood Moon wave" Style="{StaticResource Hud.SettingHint}"/>
                             <Grid>
                                 <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="50"/></Grid.ColumnDefinitions>
                                 <Slider Minimum="8" Maximum="64" TickFrequency="4" IsSnapToTickEnabled="True"
@@ -246,13 +227,11 @@
                         </StackPanel>
                     </Grid>
                 </Expander>
-            </materialDesign:Card>
+            </c:HudPanel>
 
             <!-- ══ LOOT & DROPS ═══════════════════════════════════════════════ -->
-            <materialDesign:Card UniformCornerRadius="10" Background="{DynamicResource GlassBrush}" Margin="0,0,0,8" Padding="0">
-                <Expander Header="LOOT &amp; DROPS" IsExpanded="False"
-                          Background="Transparent"
-                          materialDesign:ExpanderAssist.HorizontalHeaderPadding="16,12,16,12">
+            <c:HudPanel Tint="Green" Margin="0,0,0,8" Padding="0">
+                <Expander Header="LOOT &amp; DROPS" IsExpanded="False" Style="{StaticResource Hud.Expander}">
                     <StackPanel Margin="16,4,16,16">
                         <Grid Margin="0,0,0,12">
                             <Grid.ColumnDefinitions>
@@ -263,25 +242,25 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Loot Abundance" Style="{StaticResource SettingLabel}"/>
-                                <TextBlock Text="How much loot spawns in containers" Style="{StaticResource SettingHint}"/>
-                                <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                <c:TrackedText Text="Loot Abundance" Style="{StaticResource Hud.SettingLabel}"/>
+                                <TextBlock Text="How much loot spawns in containers" Style="{StaticResource Hud.SettingHint}"/>
+                                <ComboBox Style="{StaticResource Hud.ComboBox}"
                                           ItemsSource="{Binding LootAbundanceOptions}" SelectedValue="{Binding LootAbundance}"
-                                          SelectedValuePath="Value" DisplayMemberPath="Label"/>
+                                          SelectedValuePath="Value"/>
                             </StackPanel>
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Loot Respawn" Style="{StaticResource SettingLabel}"/>
-                                <TextBlock Text="Days before looted containers refill" Style="{StaticResource SettingHint}"/>
-                                <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                <c:TrackedText Text="Loot Respawn" Style="{StaticResource Hud.SettingLabel}"/>
+                                <TextBlock Text="Days before looted containers refill" Style="{StaticResource Hud.SettingHint}"/>
+                                <ComboBox Style="{StaticResource Hud.ComboBox}"
                                           ItemsSource="{Binding LootRespawnOptions}" SelectedValue="{Binding LootRespawnDays}"
-                                          SelectedValuePath="Value" DisplayMemberPath="Label"/>
+                                          SelectedValuePath="Value"/>
                             </StackPanel>
                             <StackPanel Grid.Column="4">
-                                <TextBlock Text="Air Drops" Style="{StaticResource SettingLabel}"/>
-                                <TextBlock Text="How often a supply airdrop lands on the map" Style="{StaticResource SettingHint}"/>
-                                <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                <c:TrackedText Text="Air Drops" Style="{StaticResource Hud.SettingLabel}"/>
+                                <TextBlock Text="How often a supply airdrop lands on the map" Style="{StaticResource Hud.SettingHint}"/>
+                                <ComboBox Style="{StaticResource Hud.ComboBox}"
                                           ItemsSource="{Binding AirDropOptions}" SelectedValue="{Binding AirDropFrequency}"
-                                          SelectedValuePath="Value" DisplayMemberPath="Label"/>
+                                          SelectedValuePath="Value"/>
                             </StackPanel>
                         </Grid>
                         <Grid>
@@ -291,29 +270,27 @@
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
-                                <TextBlock Text="Drop on Death" Style="{StaticResource SettingLabel}"/>
-                                <TextBlock Text="What a player drops when killed" Style="{StaticResource SettingHint}"/>
-                                <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                <c:TrackedText Text="Drop on Death" Style="{StaticResource Hud.SettingLabel}"/>
+                                <TextBlock Text="What a player drops when killed" Style="{StaticResource Hud.SettingHint}"/>
+                                <ComboBox Style="{StaticResource Hud.ComboBox}"
                                           ItemsSource="{Binding DropOnDeathOptions}" SelectedValue="{Binding DropOnDeath}"
-                                          SelectedValuePath="Value" DisplayMemberPath="Label"/>
+                                          SelectedValuePath="Value"/>
                             </StackPanel>
                             <StackPanel Grid.Column="2">
-                                <TextBlock Text="Drop on Quit" Style="{StaticResource SettingLabel}"/>
-                                <TextBlock Text="What a player drops when they disconnect" Style="{StaticResource SettingHint}"/>
-                                <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                <c:TrackedText Text="Drop on Quit" Style="{StaticResource Hud.SettingLabel}"/>
+                                <TextBlock Text="What a player drops when they disconnect" Style="{StaticResource Hud.SettingHint}"/>
+                                <ComboBox Style="{StaticResource Hud.ComboBox}"
                                           ItemsSource="{Binding DropOnQuitOptions}" SelectedValue="{Binding DropOnQuit}"
-                                          SelectedValuePath="Value" DisplayMemberPath="Label"/>
+                                          SelectedValuePath="Value"/>
                             </StackPanel>
                         </Grid>
                     </StackPanel>
                 </Expander>
-            </materialDesign:Card>
+            </c:HudPanel>
 
             <!-- ══ LAND CLAIMS ════════════════════════════════════════════════ -->
-            <materialDesign:Card UniformCornerRadius="10" Background="{DynamicResource GlassBrush}" Margin="0,0,0,8" Padding="0">
-                <Expander Header="LAND CLAIMS" IsExpanded="False"
-                          Background="Transparent"
-                          materialDesign:ExpanderAssist.HorizontalHeaderPadding="16,12,16,12">
+            <c:HudPanel Tint="Violet" Margin="0,0,0,8" Padding="0">
+                <Expander Header="LAND CLAIMS" IsExpanded="False" Style="{StaticResource Hud.Expander}">
                     <Grid Margin="16,4,16,16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -323,35 +300,33 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="Claim Size" Style="{StaticResource SettingLabel}"/>
-                            <TextBlock Text="Radius of land protected around a claim block" Style="{StaticResource SettingHint}"/>
-                            <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                            <c:TrackedText Text="Claim Size" Style="{StaticResource Hud.SettingLabel}"/>
+                            <TextBlock Text="Radius of land protected around a claim block" Style="{StaticResource Hud.SettingHint}"/>
+                            <ComboBox Style="{StaticResource Hud.ComboBox}"
                                       ItemsSource="{Binding LandClaimSizeOptions}" SelectedValue="{Binding LandClaimSize}"
-                                      SelectedValuePath="Value" DisplayMemberPath="Label"/>
+                                      SelectedValuePath="Value"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="Claim Expiry" Style="{StaticResource SettingLabel}"/>
-                            <TextBlock Text="Days before an offline player's unclaimed land disappears" Style="{StaticResource SettingHint}"/>
-                            <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                            <c:TrackedText Text="Claim Expiry" Style="{StaticResource Hud.SettingLabel}"/>
+                            <TextBlock Text="Days before an offline player's unclaimed land disappears" Style="{StaticResource Hud.SettingHint}"/>
+                            <ComboBox Style="{StaticResource Hud.ComboBox}"
                                       ItemsSource="{Binding LandClaimExpiryOptions}" SelectedValue="{Binding LandClaimExpiryTime}"
-                                      SelectedValuePath="Value" DisplayMemberPath="Label"/>
+                                      SelectedValuePath="Value"/>
                         </StackPanel>
                         <StackPanel Grid.Column="4">
-                            <TextBlock Text="Offline Raid Protection" Style="{StaticResource SettingLabel}"/>
-                            <TextBlock Text="How hard land claim blocks are to break while owner is offline" Style="{StaticResource SettingHint}"/>
-                            <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                            <c:TrackedText Text="Offline Raid Protection" Style="{StaticResource Hud.SettingLabel}"/>
+                            <TextBlock Text="How hard land claim blocks are to break while owner is offline" Style="{StaticResource Hud.SettingHint}"/>
+                            <ComboBox Style="{StaticResource Hud.ComboBox}"
                                       ItemsSource="{Binding LandClaimOfflineOptions}" SelectedValue="{Binding LandClaimOfflineDurabilityModifier}"
-                                      SelectedValuePath="Value" DisplayMemberPath="Label"/>
+                                      SelectedValuePath="Value"/>
                         </StackPanel>
                     </Grid>
                 </Expander>
-            </materialDesign:Card>
+            </c:HudPanel>
 
             <!-- ══ NEW PLAYER PROTECTION ══════════════════════════════════════ -->
-            <materialDesign:Card UniformCornerRadius="10" Background="{DynamicResource GlassBrush}" Margin="0,0,0,8" Padding="0">
-                <Expander Header="NEW PLAYER PROTECTION" IsExpanded="False"
-                          Background="Transparent"
-                          materialDesign:ExpanderAssist.HorizontalHeaderPadding="16,12,16,12">
+            <c:HudPanel Tint="Rust" Margin="0,0,0,8" Padding="0">
+                <Expander Header="NEW PLAYER PROTECTION" IsExpanded="False" Style="{StaticResource Hud.Expander}">
                     <Grid Margin="16,4,16,16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -359,28 +334,26 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="Safe Zone Level" Style="{StaticResource SettingLabel}"/>
-                            <TextBlock Text="New players are protected from PvP until they reach this level" Style="{StaticResource SettingHint}"/>
-                            <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                            <c:TrackedText Text="Safe Zone Level" Style="{StaticResource Hud.SettingLabel}"/>
+                            <TextBlock Text="New players are protected from PvP until they reach this level" Style="{StaticResource Hud.SettingHint}"/>
+                            <ComboBox Style="{StaticResource Hud.ComboBox}"
                                       ItemsSource="{Binding SafeZoneLevelOptions}" SelectedValue="{Binding PlayerSafeZoneLevel}"
-                                      SelectedValuePath="Value" DisplayMemberPath="Label"/>
+                                      SelectedValuePath="Value"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2">
-                            <TextBlock Text="Safe Zone Hours" Style="{StaticResource SettingLabel}"/>
-                            <TextBlock Text="New players are protected until this many in-game hours have passed" Style="{StaticResource SettingHint}"/>
-                            <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                            <c:TrackedText Text="Safe Zone Hours" Style="{StaticResource Hud.SettingLabel}"/>
+                            <TextBlock Text="New players are protected until this many in-game hours have passed" Style="{StaticResource Hud.SettingHint}"/>
+                            <ComboBox Style="{StaticResource Hud.ComboBox}"
                                       ItemsSource="{Binding SafeZoneHoursOptions}" SelectedValue="{Binding PlayerSafeZoneHours}"
-                                      SelectedValuePath="Value" DisplayMemberPath="Label"/>
+                                      SelectedValuePath="Value"/>
                         </StackPanel>
                     </Grid>
                 </Expander>
-            </materialDesign:Card>
+            </c:HudPanel>
 
             <!-- ══ PERFORMANCE ════════════════════════════════════════════════ -->
-            <materialDesign:Card UniformCornerRadius="10" Background="{DynamicResource GlassBrush}" Margin="0,0,0,16" Padding="0">
-                <Expander Header="PERFORMANCE" IsExpanded="False"
-                          Background="Transparent"
-                          materialDesign:ExpanderAssist.HorizontalHeaderPadding="16,12,16,12">
+            <c:HudPanel Tint="Blue" Margin="0,0,0,16" Padding="0">
+                <Expander Header="PERFORMANCE" IsExpanded="False" Style="{StaticResource Hud.Expander}">
                     <Grid Margin="16,4,16,16">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
@@ -388,18 +361,18 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
                         <StackPanel Grid.Column="0">
-                            <TextBlock Text="Max View Distance" Style="{StaticResource SettingLabel}"/>
-                            <TextBlock Text="Caps how far players can render. Lower = less server CPU and RAM" Style="{StaticResource SettingHint}"/>
-                            <ComboBox Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                            <c:TrackedText Text="Max View Distance" Style="{StaticResource Hud.SettingLabel}"/>
+                            <TextBlock Text="Caps how far players can render. Lower = less server CPU and RAM" Style="{StaticResource Hud.SettingHint}"/>
+                            <ComboBox Style="{StaticResource Hud.ComboBox}"
                                       ItemsSource="{Binding ViewDistanceOptions}" SelectedValue="{Binding ServerMaxAllowedViewDistance}"
-                                      SelectedValuePath="Value" DisplayMemberPath="Label"/>
+                                      SelectedValuePath="Value"/>
                         </StackPanel>
                     </Grid>
                 </Expander>
-            </materialDesign:Card>
+            </c:HudPanel>
 
             <!-- Save error -->
-            <Border CornerRadius="6" Background="#33F44336" Padding="12,8" Margin="0,0,0,8"
+            <Border CornerRadius="0" Background="#33F44336" Padding="12,8" Margin="0,0,0,8"
                     Visibility="{Binding HasSaveError, Converter={StaticResource BoolToVis}}">
                 <TextBlock Text="{Binding SaveError}" Foreground="#F44336" FontSize="12" TextWrapping="Wrap"/>
             </Border>
@@ -409,13 +382,23 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock VerticalAlignment="Center" FontSize="12" Opacity="0.55"
+                <TextBlock VerticalAlignment="Center"
+                           Style="{StaticResource Hud.Body}"
                            Text="Changes are written to serverconfig.xml — restart the server to apply."/>
                 <Button Grid.Column="1"
-                        Content="Save Changes"
-                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Style="{StaticResource Hud.Button.Primary}"
                         Command="{Binding RequestSaveCommand}"
-                        Width="140"/>
+                        Width="150" Height="32">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="ContentSave" Width="13" Height="13"
+                                                 VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <c:TrackedText Text="SAVE CHANGES" LetterSpacing="0.12"
+                                       FontFamily="{DynamicResource Hud.Mono}"
+                                       FontSize="10.5" FontWeight="Bold"
+                                       Foreground="{DynamicResource Hud.AccentInk}"
+                                       VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
             </Grid>
 
         </StackPanel>
@@ -424,43 +407,52 @@
     <!-- Confirmation overlay -->
     <Grid Panel.ZIndex="100"
           Visibility="{Binding ConfirmPending, Converter={StaticResource BoolToVis}}"
-          Background="#BB000000">
-        <materialDesign:Card UniformCornerRadius="14" Padding="0"
-                             Width="380"
-                             HorizontalAlignment="Center" VerticalAlignment="Center"
-                             materialDesign:ElevationAssist.Elevation="Dp8">
-            <materialDesign:Card.Background>
-                <SolidColorBrush Color="#1E1E1E"/>
-            </materialDesign:Card.Background>
+          Background="#CC000000">
+        <c:HudPanel Tint="Amber" Padding="0" Width="400"
+                    Background="{DynamicResource Hud.BgElevated}"
+                    HorizontalAlignment="Center" VerticalAlignment="Center">
             <StackPanel>
-                <Border CornerRadius="14,14,0,0"
-                        Background="{DynamicResource MaterialDesign.Brush.Primary.Dark}"
-                        Padding="20,14">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="ContentSave" Width="20" Height="20"
+                <!-- Hazard-stripe header -->
+                <Grid Height="56">
+                    <Rectangle Fill="{DynamicResource Hud.Surface2}"/>
+                    <Rectangle Fill="{DynamicResource Hud.HazardTile}" Opacity="0.35"/>
+                    <Border BorderBrush="{DynamicResource Hud.Border}" BorderThickness="0,0,0,1"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0">
+                        <materialDesign:PackIcon Kind="ContentSave" Width="18" Height="18"
+                                                 Foreground="{DynamicResource Hud.Amber}"
                                                  VerticalAlignment="Center" Margin="0,0,10,0"/>
-                        <TextBlock Text="Save Game Settings"
-                                   FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <c:TrackedText Text="SAVE GAME SETTINGS"
+                                       Style="{StaticResource Hud.PanelHeader}"
+                                       FontSize="12"
+                                       VerticalAlignment="Center"/>
                     </StackPanel>
-                </Border>
-                <StackPanel Margin="24,20,24,24">
+                </Grid>
+
+                <StackPanel Margin="24,20,24,22">
                     <TextBlock Text="Apply these settings to serverconfig.xml?"
-                               FontSize="13" TextWrapping="Wrap" Margin="0,0,0,6"/>
-                    <TextBlock Text="The server will need to be restarted before changes take effect."
-                               FontSize="12" Opacity="0.55" TextWrapping="Wrap" Margin="0,0,0,24"/>
+                               Style="{StaticResource Hud.Body}"
+                               FontSize="13" Foreground="{DynamicResource Hud.Fg}"
+                               Margin="0,0,0,6"/>
+                    <TextBlock Text="The server must be restarted before changes take effect."
+                               Style="{StaticResource Hud.Body}" Margin="0,0,0,22"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button Content="Cancel"
-                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                        <Button Content="CANCEL"
+                                Style="{StaticResource Hud.Button.Ghost}"
                                 Command="{Binding CancelSaveCommand}"
-                                Margin="0,0,12,0" Width="90"/>
-                        <Button Content="Save"
-                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                Margin="0,0,10,0" Width="100"/>
+                        <Button Style="{StaticResource Hud.Button.Primary}"
                                 Command="{Binding ConfirmSaveCommand}"
-                                Width="90"/>
+                                Width="100">
+                            <c:TrackedText Text="SAVE" LetterSpacing="0.12"
+                                           FontFamily="{DynamicResource Hud.Mono}"
+                                           FontSize="10.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource Hud.AccentInk}"
+                                           VerticalAlignment="Center"/>
+                        </Button>
                     </StackPanel>
                 </StackPanel>
             </StackPanel>
-        </materialDesign:Card>
+        </c:HudPanel>
     </Grid>
 
     </Grid>

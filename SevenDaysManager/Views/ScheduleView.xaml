@@ -1,150 +1,180 @@
 <UserControl x:Class="SevenDaysManager.Views.ScheduleView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:c="clr-namespace:SevenDaysManager.Controls">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-        <Style x:Key="SectionHeader" TargetType="TextBlock">
-            <Setter Property="FontSize" Value="11"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="Opacity" Value="0.5"/>
-            <Setter Property="Margin" Value="0,0,0,8"/>
-        </Style>
     </UserControl.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- ══ Header ══ -->
-        <Border Grid.Row="0" Background="{DynamicResource MaterialDesign.Brush.Primary.Dark}" Padding="16,10">
-            <Grid>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <materialDesign:PackIcon Kind="CalendarClock" Width="20" Height="20"
-                                             VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <TextBlock Text="Schedule" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                    <ToggleButton IsChecked="{Binding Enabled}"
-                                  Style="{StaticResource MaterialDesignSwitchToggleButton}"
-                                  Margin="20,0,0,0" VerticalAlignment="Center"/>
-                    <TextBlock VerticalAlignment="Center" Margin="8,0,0,0" FontSize="12" Opacity="0.7">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="Text" Value="Disabled"/>
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Enabled}" Value="True">
-                                        <Setter Property="Text" Value="Enabled"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-                    <Border Background="#33000000" CornerRadius="8" Padding="16,4" Margin="24,0,0,0"
-                            Visibility="{Binding Enabled, Converter={StaticResource BoolToVis}}">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Next restart in " FontSize="12" Opacity="0.6" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding Countdown, Mode=OneWay}" FontSize="14" FontWeight="Bold"
-                                       Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"
-                                       VerticalAlignment="Center" FontFamily="Consolas"/>
-                            <TextBlock Text=" at " FontSize="12" Opacity="0.6" VerticalAlignment="Center"/>
-                            <TextBlock Text="{Binding NextRestartAt, Mode=OneWay}" FontSize="12"
-                                       Opacity="0.8" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
+        <!-- ══ Title ══ -->
+        <c:HudTitle Grid.Row="0" Title="SCHEDULE" HorizontalAlignment="Left" Margin="16,14,0,12"/>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Button Command="{Binding RestartNowCommand}"
-                            Style="{StaticResource MaterialDesignOutlinedButton}"
-                            Height="30" Padding="14,0" FontSize="12" Margin="0,0,8,0">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="Restart" Width="15" Height="15"
-                                                     VerticalAlignment="Center" Margin="0,0,6,0"/>
-                            <TextBlock Text="Restart Now" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-                    <Button Command="{Binding ApplyScheduleCommand}"
-                            Style="{StaticResource MaterialDesignRaisedButton}"
-                            Height="30" Padding="14,0" FontSize="12">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="ContentSave" Width="15" Height="15"
-                                                     VerticalAlignment="Center" Margin="0,0,6,0"/>
-                            <TextBlock Text="Apply" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
-            </Grid>
-        </Border>
+        <!-- ══ Master switch + countdown + actions ══ -->
+        <Grid Grid.Row="1" Margin="16,0,16,12">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <ToggleButton IsChecked="{Binding Enabled}"
+                              Style="{StaticResource Hud.Toggle}"
+                              VerticalAlignment="Center"/>
+                <TextBlock VerticalAlignment="Center" Margin="12,0,0,0">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource Hud.Mono.Text}">
+                            <Setter Property="FontSize"   Value="11"/>
+                            <Setter Property="FontWeight" Value="Bold"/>
+                            <Setter Property="Text"       Value="SCHEDULE DISABLED"/>
+                            <Setter Property="Foreground" Value="{DynamicResource Hud.FgFaint}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Enabled}" Value="True">
+                                    <Setter Property="Text"       Value="SCHEDULE ARMED"/>
+                                    <Setter Property="Foreground" Value="{DynamicResource Hud.Accent}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <!-- Countdown to next restart -->
+                <Border Margin="20,0,0,0" Padding="11,4"
+                        Background="{DynamicResource Hud.AmberSoft}"
+                        BorderBrush="{DynamicResource Hud.Amber}" BorderThickness="1"
+                        VerticalAlignment="Center"
+                        Visibility="{Binding Enabled, Converter={StaticResource BoolToVis}}">
+                    <StackPanel Orientation="Horizontal">
+                        <c:TrackedText Text="NEXT RESTART" Style="{StaticResource Hud.StatCaption}"
+                                       Foreground="{DynamicResource Hud.Amber}"
+                                       VerticalAlignment="Center" Margin="0,0,9,0"/>
+                        <TextBlock Text="{Binding Countdown, Mode=OneWay}"
+                                   Style="{StaticResource Hud.Mono.Text}"
+                                   FontSize="14" FontWeight="Bold"
+                                   Foreground="{DynamicResource Hud.Amber}"
+                                   VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding NextRestartAt, Mode=OneWay}"
+                                   Style="{StaticResource Hud.Mono.Text}"
+                                   FontSize="10"
+                                   Foreground="{DynamicResource Hud.FgSubtle}"
+                                   VerticalAlignment="Center" Margin="9,0,0,0"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Command="{Binding RestartNowCommand}"
+                        Style="{StaticResource Hud.Button}"
+                        BorderBrush="{DynamicResource Hud.Amber}"
+                        Height="30" Padding="14,0" Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Restart" Width="13" Height="13"
+                                                 Foreground="{DynamicResource Hud.Amber}"
+                                                 VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <c:TrackedText Text="RESTART NOW" LetterSpacing="0.12"
+                                       FontFamily="{DynamicResource Hud.Mono}"
+                                       FontSize="10.5" FontWeight="Bold"
+                                       Foreground="{DynamicResource Hud.Amber}"
+                                       VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding ApplyScheduleCommand}"
+                        Style="{StaticResource Hud.Button.Primary}"
+                        Height="30" Padding="14,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="ContentSave" Width="13" Height="13"
+                                                 VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <c:TrackedText Text="APPLY" LetterSpacing="0.12"
+                                       FontFamily="{DynamicResource Hud.Mono}"
+                                       FontSize="10.5" FontWeight="Bold"
+                                       Foreground="{DynamicResource Hud.AccentInk}"
+                                       VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
 
         <!-- ══ Body ══ -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <Grid Margin="16">
+        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Background="Transparent">
+            <Grid Margin="16,0,16,16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="12"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <!-- ── Left: Schedule + Log ── -->
+                <!-- ── LEFT ── -->
                 <StackPanel Grid.Column="0">
-                    <materialDesign:Card Padding="16" Margin="0,0,0,12"
-                                         Background="{DynamicResource GlassBrush}">
+
+                    <!-- Restart schedule -->
+                    <c:HudPanel Tint="Accent" Header="RESTART SCHEDULE" Padding="16,4,16,16" Margin="0,0,0,12">
                         <StackPanel>
-                            <TextBlock Text="RESTART SCHEDULE" Style="{StaticResource SectionHeader}"/>
-
                             <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                                <RadioButton Content="Interval" IsChecked="{Binding ModeInterval}"
-                                             GroupName="schedMode" Margin="0,0,16,0"
-                                             Style="{StaticResource MaterialDesignRadioButton}"/>
-                                <RadioButton Content="Daily times" IsChecked="{Binding ModeDaily}"
+                                <RadioButton Content="INTERVAL" IsChecked="{Binding ModeInterval}"
+                                             GroupName="schedMode" Margin="0,0,20,0"
+                                             Style="{StaticResource Hud.RadioButton}"/>
+                                <RadioButton Content="DAILY TIMES" IsChecked="{Binding ModeDaily}"
                                              GroupName="schedMode"
-                                             Style="{StaticResource MaterialDesignRadioButton}"/>
+                                             Style="{StaticResource Hud.RadioButton}"/>
                             </StackPanel>
 
-                            <!-- Interval -->
+                            <!-- Interval mode -->
                             <StackPanel Visibility="{Binding ModeInterval, Converter={StaticResource BoolToVis}}">
+                                <c:TrackedText Text="RESTART EVERY" Style="{StaticResource Hud.FieldLabel}"/>
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="Every" VerticalAlignment="Center"
-                                               Opacity="0.6" Margin="0,0,10,0"/>
                                     <TextBox Text="{Binding IntervalHours, UpdateSourceTrigger=PropertyChanged}"
-                                             Width="60" materialDesign:HintAssist.Hint="hours"
-                                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                             FontSize="14" TextAlignment="Center"/>
-                                    <TextBlock Text="hours" VerticalAlignment="Center"
-                                               Margin="10,0,0,0" Opacity="0.6"/>
+                                             Style="{StaticResource Hud.TextBox}"
+                                             Width="70" TextAlignment="Center" FontSize="13"/>
+                                    <c:TrackedText Text="HOURS" Style="{StaticResource Hud.StatCaption}"
+                                                   VerticalAlignment="Center" Margin="10,0,0,0"/>
                                 </StackPanel>
                             </StackPanel>
 
-                            <!-- Daily times -->
+                            <!-- Daily times mode -->
                             <StackPanel Visibility="{Binding ModeDaily, Converter={StaticResource BoolToVis}}">
-                                <TextBlock Text="Restart times (HH:mm, 24h)" FontSize="11"
-                                           Opacity="0.5" Margin="0,0,0,8"/>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                <c:TrackedText Text="RESTART TIMES (HH:MM, 24H)" Style="{StaticResource Hud.FieldLabel}"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
                                     <TextBox Text="{Binding NewDailyTime, UpdateSourceTrigger=PropertyChanged}"
-                                             Width="80" materialDesign:HintAssist.Hint="HH:mm"
-                                             Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                             FontSize="13"/>
+                                             Style="{StaticResource Hud.TextBox}"
+                                             Width="90" TextAlignment="Center"/>
                                     <Button Command="{Binding AddDailyTimeCommand}"
-                                            Style="{StaticResource MaterialDesignOutlinedButton}"
-                                            Height="32" Padding="10,0" Margin="8,0,0,0" FontSize="12">Add</Button>
+                                            Style="{StaticResource Hud.Button}"
+                                            Height="34" Padding="14,0" Margin="8,0,0,0">
+                                        <c:TrackedText Text="ADD" LetterSpacing="0.12"
+                                                       FontFamily="{DynamicResource Hud.Mono}"
+                                                       FontSize="10.5" FontWeight="Bold"
+                                                       Foreground="{DynamicResource Hud.Fg}"
+                                                       VerticalAlignment="Center"/>
+                                    </Button>
                                 </StackPanel>
+
                                 <ItemsControl ItemsSource="{Binding DailyTimes}">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border Background="#22FFFFFF" CornerRadius="4"
-                                                    Padding="10,4" Margin="0,0,0,4">
+                                            <Border Background="{DynamicResource Hud.Surface2}"
+                                                    BorderBrush="{DynamicResource Hud.Border}"
+                                                    BorderThickness="1"
+                                                    Padding="11,5" Margin="0,0,0,5">
                                                 <Grid>
-                                                    <TextBlock Text="{Binding}" FontSize="13"
-                                                               FontFamily="Consolas" VerticalAlignment="Center"/>
+                                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                        <Rectangle Width="5" Height="5"
+                                                                   Fill="{DynamicResource Hud.Accent}"
+                                                                   VerticalAlignment="Center" Margin="0,0,9,0"/>
+                                                        <TextBlock Text="{Binding}"
+                                                                   Style="{StaticResource Hud.Mono.Text}"
+                                                                   FontSize="12.5" FontWeight="Bold"
+                                                                   VerticalAlignment="Center"/>
+                                                    </StackPanel>
                                                     <Button HorizontalAlignment="Right"
                                                             Command="{Binding DataContext.RemoveDailyTimeCommand,
                                                                 RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                             CommandParameter="{Binding}"
-                                                            Style="{StaticResource MaterialDesignIconButton}"
-                                                            Width="24" Height="24">
-                                                        <materialDesign:PackIcon Kind="Close" Width="12" Height="12"/>
+                                                            Style="{StaticResource Hud.Button.Icon}"
+                                                            Width="22" Height="22">
+                                                        <materialDesign:PackIcon Kind="Close" Width="11" Height="11"/>
                                                     </Button>
                                                 </Grid>
                                             </Border>
@@ -153,66 +183,77 @@
                                 </ItemsControl>
                             </StackPanel>
                         </StackPanel>
-                    </materialDesign:Card>
+                    </c:HudPanel>
 
-                    <!-- Activity log -->
-                    <materialDesign:Card Padding="16" Background="{DynamicResource GlassBrush}">
-                        <StackPanel>
-                            <TextBlock Text="ACTIVITY LOG" Style="{StaticResource SectionHeader}"/>
-                            <Border Background="#CC0D0D0D" CornerRadius="4" Padding="10" Height="200">
-                                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                    <ItemsControl ItemsSource="{Binding ActivityLog}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate>
-                                                <TextBlock Text="{Binding}" FontSize="11" FontFamily="Consolas"
-                                                           Opacity="0.7" Margin="0,1"/>
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </ScrollViewer>
-                            </Border>
-                        </StackPanel>
-                    </materialDesign:Card>
+                    <!-- Activity log — phosphor terminal, same treatment as the console -->
+                    <c:HudPanel Tint="Blue" Header="ACTIVITY LOG" Padding="16,4,16,16">
+                        <Grid Height="200">
+                            <Rectangle Fill="{DynamicResource ConsoleBrush}"/>
+                            <Rectangle Fill="{DynamicResource Hud.ScanlineTile}" IsHitTestVisible="False"/>
+                            <Border BorderBrush="{DynamicResource Hud.Border}" BorderThickness="1"/>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="10,8">
+                                <ItemsControl ItemsSource="{Binding ActivityLog}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding}"
+                                                       Style="{StaticResource Hud.Mono.Text}"
+                                                       FontSize="10.5"
+                                                       Foreground="{DynamicResource Hud.FgMuted}"
+                                                       TextWrapping="Wrap"
+                                                       Margin="0,1"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Grid>
+                    </c:HudPanel>
                 </StackPanel>
 
-                <!-- ── Right: Warnings ── -->
-                <materialDesign:Card Grid.Column="2" Padding="16" Background="{DynamicResource GlassBrush}">
+                <!-- ── RIGHT: in-game warnings ── -->
+                <c:HudPanel Grid.Column="2" Tint="Amber" Header="IN-GAME WARNINGS" Padding="16,4,16,16">
                     <StackPanel>
-                        <TextBlock Text="IN-GAME WARNINGS" Style="{StaticResource SectionHeader}"/>
-                        <TextBlock Text="Send in-game messages before restart:"
-                                   FontSize="12" Opacity="0.6" Margin="0,0,0,12"/>
+                        <TextBlock Style="{StaticResource Hud.Body}" Margin="0,0,0,12"
+                                   Text="Broadcast a countdown to players before the server restarts."/>
+
+                        <c:TrackedText Text="WARN AT" Style="{StaticResource Hud.FieldLabel}"/>
                         <WrapPanel Margin="0,0,0,16">
-                            <CheckBox Content="60 min" IsChecked="{Binding Warn60}"
-                                      Style="{StaticResource MaterialDesignCheckBox}" Margin="0,0,16,8"/>
-                            <CheckBox Content="30 min" IsChecked="{Binding Warn30}"
-                                      Style="{StaticResource MaterialDesignCheckBox}" Margin="0,0,16,8"/>
-                            <CheckBox Content="15 min" IsChecked="{Binding Warn15}"
-                                      Style="{StaticResource MaterialDesignCheckBox}" Margin="0,0,16,8"/>
-                            <CheckBox Content="10 min" IsChecked="{Binding Warn10}"
-                                      Style="{StaticResource MaterialDesignCheckBox}" Margin="0,0,16,8"/>
-                            <CheckBox Content="5 min"  IsChecked="{Binding Warn5}"
-                                      Style="{StaticResource MaterialDesignCheckBox}" Margin="0,0,16,8"/>
-                            <CheckBox Content="1 min"  IsChecked="{Binding Warn1}"
-                                      Style="{StaticResource MaterialDesignCheckBox}" Margin="0,0,16,8"/>
+                            <CheckBox Content="60 MIN" IsChecked="{Binding Warn60}"
+                                      Style="{StaticResource Hud.CheckBox}" Margin="0,0,18,9"/>
+                            <CheckBox Content="30 MIN" IsChecked="{Binding Warn30}"
+                                      Style="{StaticResource Hud.CheckBox}" Margin="0,0,18,9"/>
+                            <CheckBox Content="15 MIN" IsChecked="{Binding Warn15}"
+                                      Style="{StaticResource Hud.CheckBox}" Margin="0,0,18,9"/>
+                            <CheckBox Content="10 MIN" IsChecked="{Binding Warn10}"
+                                      Style="{StaticResource Hud.CheckBox}" Margin="0,0,18,9"/>
+                            <CheckBox Content="5 MIN"  IsChecked="{Binding Warn5}"
+                                      Style="{StaticResource Hud.CheckBox}" Margin="0,0,18,9"/>
+                            <CheckBox Content="1 MIN"  IsChecked="{Binding Warn1}"
+                                      Style="{StaticResource Hud.CheckBox}" Margin="0,0,18,9"/>
                         </WrapPanel>
 
-                        <TextBlock Text="WARNING MESSAGE" FontSize="10" FontWeight="SemiBold"
-                                   Opacity="0.5" Margin="0,0,0,4"/>
-                        <TextBlock Text="{}{TIMEMIN} = minutes remaining" FontSize="10"
-                                   Opacity="0.35" Margin="0,0,0,6"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
+                            <c:TrackedText Text="WARNING MESSAGE" Style="{StaticResource Hud.StatCaption}"/>
+                            <TextBlock Text="{}{TIMEMIN} = minutes remaining"
+                                       Style="{StaticResource Hud.Mono.Text}"
+                                       FontSize="9.5"
+                                       Foreground="{DynamicResource Hud.FgFaint}"
+                                       VerticalAlignment="Center" Margin="8,0,0,0"/>
+                        </StackPanel>
                         <TextBox Text="{Binding InGameWarning, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                 FontSize="12" TextWrapping="Wrap" MinHeight="60"
-                                 AcceptsReturn="True" Margin="0,0,0,16"/>
+                                 Style="{StaticResource Hud.TextBox}"
+                                 TextWrapping="Wrap" MinHeight="62"
+                                 AcceptsReturn="True"
+                                 VerticalContentAlignment="Top"
+                                 Margin="0,0,0,16"/>
 
-                        <TextBlock Text="FINAL MESSAGE (AT RESTART)" FontSize="10" FontWeight="SemiBold"
-                                   Opacity="0.5" Margin="0,0,0,4"/>
+                        <c:TrackedText Text="FINAL MESSAGE (AT RESTART)" Style="{StaticResource Hud.FieldLabel}"/>
                         <TextBox Text="{Binding InGameNow, UpdateSourceTrigger=PropertyChanged}"
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                 FontSize="12" TextWrapping="Wrap" MinHeight="60"
-                                 AcceptsReturn="True"/>
+                                 Style="{StaticResource Hud.TextBox}"
+                                 TextWrapping="Wrap" MinHeight="62"
+                                 AcceptsReturn="True"
+                                 VerticalContentAlignment="Top"/>
                     </StackPanel>
-                </materialDesign:Card>
+                </c:HudPanel>
 
             </Grid>
         </ScrollViewer>

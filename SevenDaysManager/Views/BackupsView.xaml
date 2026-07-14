@@ -2,12 +2,23 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-             xmlns:conv="clr-namespace:SevenDaysManager.Converters">
+             xmlns:conv="clr-namespace:SevenDaysManager.Converters"
+             xmlns:c="clr-namespace:SevenDaysManager.Controls">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <conv:InverseBoolToVisibilityConverter x:Key="InvBoolToVis"/>
 
+        <!-- Label column in the diagnostics panel -->
+        <Style x:Key="InfoKey" TargetType="c:TrackedText" BasedOn="{StaticResource Hud.StatCaption}">
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment"   Value="Center"/>
+        </Style>
+        <Style x:Key="InfoVal" TargetType="TextBlock" BasedOn="{StaticResource Hud.Mono.Text}">
+            <Setter Property="FontSize"     Value="11"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
     </UserControl.Resources>
 
     <Grid>
@@ -16,116 +27,128 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- ══ Header ══ -->
-        <Border Grid.Row="0" Background="{DynamicResource MaterialDesign.Brush.Primary.Dark}" Padding="16,10">
-            <Grid>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                    <materialDesign:PackIcon Kind="Archive" Width="20" Height="20"
-                                             VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <TextBlock Text="Backups" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                    <Border Background="#33000000" CornerRadius="10" Padding="10,2" Margin="12,0,0,0"
-                            VerticalAlignment="Center">
-                        <TextBlock FontSize="12">
-                            <Run Text="{Binding Backups.Count, Mode=OneWay}"/>
-                            <Run Text=" backup(s)"/>
-                        </TextBlock>
-                    </Border>
-                </StackPanel>
+        <!-- ══ Title ══ -->
+        <c:HudTitle Grid.Row="0" Title="BACKUPS" HorizontalAlignment="Left" Margin="16,14,0,12"/>
 
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Button Command="{Binding RefreshCommand}"
-                            Style="{StaticResource MaterialDesignOutlinedButton}"
-                            Height="30" Padding="12,0" FontSize="12" Margin="0,0,8,0">
-                        <materialDesign:PackIcon Kind="Refresh" Width="16" Height="16"/>
-                    </Button>
-                    <Button Command="{Binding OpenBackupFolderCommand}"
-                            Style="{StaticResource MaterialDesignOutlinedButton}"
-                            Height="30" Padding="12,0" FontSize="12" Margin="0,0,8,0"
-                            ToolTip="Open backup folder in Explorer">
-                        <materialDesign:PackIcon Kind="FolderOpen" Width="16" Height="16"/>
-                    </Button>
-                    <Button Command="{Binding CreateBackupCommand}"
-                            Style="{StaticResource MaterialDesignRaisedButton}"
-                            Height="30" Padding="14,0" FontSize="12">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="ArchivePlus" Width="15" Height="15"
-                                                     VerticalAlignment="Center" Margin="0,0,6,0"/>
-                            <TextBlock Text="Create Backup" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
-            </Grid>
-        </Border>
+        <!-- ══ Toolbar ══ -->
+        <Grid Grid.Row="1" Margin="16,0,16,12">
+            <Border HorizontalAlignment="Left" VerticalAlignment="Center"
+                    Background="{DynamicResource Hud.AccentSoft}"
+                    BorderBrush="{DynamicResource Hud.Accent}" BorderThickness="1"
+                    Padding="9,3">
+                <TextBlock Style="{StaticResource Hud.Mono.Text}" FontSize="10" FontWeight="Bold"
+                           Foreground="{DynamicResource Hud.Accent}">
+                    <Run Text="{Binding Backups.Count, Mode=OneWay}"/><Run Text=" ARCHIVED"/>
+                </TextBlock>
+            </Border>
 
-        <!-- ══ Server running warning ══ -->
-        <Border Grid.Row="1" Background="#44FF5722" Padding="16,8"
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Command="{Binding RefreshCommand}"
+                        Style="{StaticResource Hud.Button.Icon}"
+                        ToolTip="Refresh" Margin="0,0,6,0">
+                    <materialDesign:PackIcon Kind="Refresh" Width="15" Height="15"/>
+                </Button>
+                <Button Command="{Binding OpenBackupFolderCommand}"
+                        Style="{StaticResource Hud.Button.Icon}"
+                        ToolTip="Open backup folder in Explorer" Margin="0,0,10,0">
+                    <materialDesign:PackIcon Kind="FolderOpen" Width="15" Height="15"/>
+                </Button>
+                <Button Command="{Binding CreateBackupCommand}"
+                        Style="{StaticResource Hud.Button.Primary}"
+                        Height="30" Padding="14,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="ArchivePlus" Width="13" Height="13"
+                                                 VerticalAlignment="Center" Margin="0,0,6,0"/>
+                        <c:TrackedText Text="CREATE BACKUP" LetterSpacing="0.12"
+                                       FontFamily="{DynamicResource Hud.Mono}"
+                                       FontSize="10.5" FontWeight="Bold"
+                                       Foreground="{DynamicResource Hud.AccentInk}"
+                                       VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- ══ Server-running warning ══ -->
+        <Border Grid.Row="2" Margin="16,0,16,10"
+                Background="{DynamicResource Hud.AmberSoft}"
+                BorderBrush="{DynamicResource Hud.Amber}" BorderThickness="1"
+                Padding="12,8"
                 Visibility="{Binding IsServerRunning, Converter={StaticResource BoolToVis}}">
             <StackPanel Orientation="Horizontal">
-                <materialDesign:PackIcon Kind="AlertCircle" Width="16" Height="16"
-                                         Foreground="#FF5722" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                <TextBlock Foreground="#FF5722" FontSize="12" VerticalAlignment="Center">
-                    Server is running — backups created now may miss unsaved in-memory data. Stop the server first for a clean backup.
-                </TextBlock>
+                <materialDesign:PackIcon Kind="AlertCircle" Width="15" Height="15"
+                                         Foreground="{DynamicResource Hud.Amber}"
+                                         VerticalAlignment="Center" Margin="0,0,9,0"/>
+                <TextBlock Style="{StaticResource Hud.Body}"
+                           Foreground="{DynamicResource Hud.Amber}"
+                           VerticalAlignment="Center"
+                           Text="Server is running — a backup taken now may miss unsaved in-memory data. Stop the server first for a clean backup."/>
             </StackPanel>
         </Border>
 
-        <!-- ══ Path info + missing save warning ══ -->
-        <materialDesign:Card Grid.Row="2" UniformCornerRadius="0" Padding="16,12"
-                             Background="{DynamicResource GlassBrush}">
+        <!-- ══ Paths / diagnostics ══ -->
+        <c:HudPanel Grid.Row="3" Tint="Blue" Header="PATHS" Padding="16,12" Margin="16,0,16,10">
             <StackPanel>
-                <Grid Margin="0,0,0,6">
+
+                <!-- Save folder -->
+                <Grid Margin="0,0,0,8">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Save folder" FontSize="11" Opacity="0.5" VerticalAlignment="Center"/>
+                    <c:TrackedText Grid.Column="0" Text="SAVE FOLDER" Style="{StaticResource InfoKey}"/>
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="{Binding SaveFolderPath, Mode=OneWay}"
-                                   FontSize="11" TextTrimming="CharacterEllipsis"
-                                   Foreground="{DynamicResource MaterialDesign.Brush.Primary}"
+                                   Style="{StaticResource InfoVal}"
+                                   Foreground="{DynamicResource Hud.Accent}"
                                    MaxWidth="340"/>
-                        <Border Background="#22FFFFFF" CornerRadius="4" Padding="5,1" Margin="6,0,0,0"
-                                VerticalAlignment="Center">
+                        <Border Background="{DynamicResource Hud.Surface2}"
+                                BorderBrush="{DynamicResource Hud.Border}" BorderThickness="1"
+                                Padding="5,1" Margin="8,0,0,0" VerticalAlignment="Center">
                             <TextBlock Text="{Binding SaveFolderSource, Mode=OneWay}"
-                                       FontSize="9" Opacity="0.5"/>
+                                       Style="{StaticResource Hud.Mono.Text}"
+                                       FontSize="9"
+                                       Foreground="{DynamicResource Hud.FgSubtle}"/>
                         </Border>
                     </StackPanel>
                     <Button Grid.Column="2" Command="{Binding ResetSaveFolderCommand}"
-                            Style="{StaticResource MaterialDesignOutlinedButton}"
-                            Height="24" Padding="6,0" FontSize="11" Margin="8,0,4,0"
+                            Style="{StaticResource Hud.Button.Icon}"
+                            Width="26" Height="26" Margin="8,0,4,0"
                             ToolTip="Clear manual override — revert to auto-detect"
                             Visibility="{Binding HasManualSaveDir, Converter={StaticResource BoolToVis}}">
-                        <materialDesign:PackIcon Kind="Close" Width="13" Height="13"/>
+                        <materialDesign:PackIcon Kind="Close" Width="12" Height="12"/>
                     </Button>
                     <Button Grid.Column="3" Command="{Binding BrowseSaveFolderCommand}"
-                            Style="{StaticResource MaterialDesignOutlinedButton}"
-                            Height="24" Padding="8,0" FontSize="11"
+                            Style="{StaticResource Hud.Button.Icon}"
+                            Width="26" Height="26"
                             ToolTip="Browse to save folder manually">
-                        <materialDesign:PackIcon Kind="FolderSearch" Width="14" Height="14"/>
+                        <materialDesign:PackIcon Kind="FolderSearch" Width="13" Height="13"/>
                     </Button>
                 </Grid>
-                <!-- World name row -->
-                <Grid Margin="0,4,0,4">
+
+                <!-- World name -->
+                <Grid Margin="0,0,0,8">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="World name" FontSize="11" Opacity="0.5" VerticalAlignment="Center"/>
-                    <TextBlock Grid.Column="1" FontSize="11" VerticalAlignment="Center"
-                               Foreground="{DynamicResource MaterialDesign.Brush.Secondary}">
+                    <c:TrackedText Grid.Column="0" Text="WORLD NAME" Style="{StaticResource InfoKey}"/>
+                    <TextBlock Grid.Column="1">
                         <TextBlock.Style>
-                            <Style TargetType="TextBlock">
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource InfoVal}">
                                 <Setter Property="Text" Value="{Binding WorldName, Mode=OneWay}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource Hud.Rust}"/>
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding WorldName}" Value="">
                                         <Setter Property="Text" Value="Not detected yet — start the server first"/>
-                                        <Setter Property="Opacity" Value="0.4"/>
+                                        <Setter Property="Foreground" Value="{DynamicResource Hud.FgFaint}"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -133,31 +156,36 @@
                     </TextBlock>
                 </Grid>
 
-                <!-- Generated world row -->
-                <Grid Margin="0,0,0,4" Visibility="{Binding HasGeneratedWorld, Converter={StaticResource BoolToVis}}">
+                <!-- Generated world (only when present) -->
+                <Grid Margin="0,0,0,8"
+                      Visibility="{Binding HasGeneratedWorld, Converter={StaticResource BoolToVis}}">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="World data" FontSize="11" Opacity="0.5" VerticalAlignment="Center"/>
+                    <c:TrackedText Grid.Column="0" Text="WORLD DATA" Style="{StaticResource InfoKey}"/>
                     <TextBlock Grid.Column="1" Text="{Binding GeneratedWorldPath, Mode=OneWay}"
-                               FontSize="11" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
-                               Opacity="0.7" ToolTip="GeneratedWorlds folder — included in backup"/>
+                               Style="{StaticResource InfoVal}"
+                               Foreground="{DynamicResource Hud.FgSubtle}"
+                               ToolTip="GeneratedWorlds folder — included in backup"/>
                 </Grid>
 
+                <!-- Backup folder -->
                 <Grid>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="90"/>
+                        <ColumnDefinition Width="100"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Backup folder" FontSize="11" Opacity="0.5" VerticalAlignment="Center"/>
+                    <c:TrackedText Grid.Column="0" Text="BACKUP FOLDER" Style="{StaticResource InfoKey}"/>
                     <TextBlock Grid.Column="1" Text="{Binding BackupFolderPath, Mode=OneWay}"
-                               FontSize="11" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
-                               Opacity="0.7"/>
+                               Style="{StaticResource InfoVal}"
+                               Foreground="{DynamicResource Hud.FgSubtle}"/>
                 </Grid>
 
-                <!-- AppData warning — shown when UserDataFolder not configured -->
-                <Border Background="#33FF9800" CornerRadius="6" Padding="10,8" Margin="0,10,0,0"
+                <!-- %APPDATA% warning -->
+                <Border Background="{DynamicResource Hud.AmberSoft}"
+                        BorderBrush="{DynamicResource Hud.Amber}" BorderThickness="1"
+                        Padding="11,9" Margin="0,12,0,0"
                         Visibility="{Binding IsUsingAppData, Converter={StaticResource BoolToVis}}">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -165,109 +193,119 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <materialDesign:PackIcon Grid.Column="0" Kind="AlertCircleOutline" Width="16" Height="16"
-                                                 Foreground="#FF9800" VerticalAlignment="Top" Margin="0,1,8,0"/>
+                        <materialDesign:PackIcon Grid.Column="0" Kind="AlertCircleOutline"
+                                                 Width="15" Height="15"
+                                                 Foreground="{DynamicResource Hud.Amber}"
+                                                 VerticalAlignment="Top" Margin="0,1,9,0"/>
                         <StackPanel Grid.Column="1">
-                            <TextBlock Foreground="#FF9800" FontSize="11" FontWeight="SemiBold">
-                                Server saves to %APPDATA% — this is the default but not recommended for dedicated servers.
-                            </TextBlock>
-                            <TextBlock Foreground="#CCFF9800" FontSize="11" Margin="0,2,0,0" TextWrapping="Wrap">
-                                Set UserDataFolder to keep all server data in one place and make backups reliable.
-                            </TextBlock>
+                            <c:TrackedText Text="SERVER SAVES TO %APPDATA%"
+                                           Style="{StaticResource Hud.StatCaption}"
+                                           Foreground="{DynamicResource Hud.Amber}"/>
+                            <TextBlock Style="{StaticResource Hud.Body}" Margin="0,4,0,0"
+                                       Foreground="{DynamicResource Hud.Amber}"
+                                       Text="This is the default, but not recommended for dedicated servers. Set UserDataFolder to keep all server data in one place and make backups reliable."/>
                         </StackPanel>
                         <Button Grid.Column="2" Command="{Binding SetUserDataFolderCommand}"
-                                Style="{StaticResource MaterialDesignOutlinedButton}"
-                                BorderBrush="#FF9800" Foreground="#FF9800"
-                                Height="28" Padding="10,0" FontSize="11" Margin="12,0,0,0"
+                                Style="{StaticResource Hud.Button}"
+                                BorderBrush="{DynamicResource Hud.Amber}"
+                                Height="28" Padding="12,0" Margin="12,0,0,0"
                                 VerticalAlignment="Center">
-                            Fix it
+                            <c:TrackedText Text="FIX IT" LetterSpacing="0.12"
+                                           FontFamily="{DynamicResource Hud.Mono}"
+                                           FontSize="10" FontWeight="Bold"
+                                           Foreground="{DynamicResource Hud.Amber}"
+                                           VerticalAlignment="Center"/>
                         </Button>
                     </Grid>
                 </Border>
 
-                <!-- Save folder not found warning -->
-                <Border Background="#44FF9800" CornerRadius="6" Padding="10,6" Margin="0,6,0,0"
+                <!-- Save folder missing -->
+                <Border Background="{DynamicResource Hud.RedSoft}"
+                        BorderBrush="{DynamicResource Hud.Red}" BorderThickness="1"
+                        Padding="11,8" Margin="0,8,0,0"
                         Visibility="{Binding SaveFolderExists, Converter={StaticResource InvBoolToVis}}">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="FolderAlert" Width="16" Height="16"
-                                                 Foreground="#FF9800" VerticalAlignment="Center" Margin="0,0,8,0"/>
-                        <TextBlock Foreground="#FF9800" FontSize="11" VerticalAlignment="Center" TextWrapping="Wrap">
-                            Save folder not found. Start the server first so the world generates, then click Refresh.
-                        </TextBlock>
+                        <materialDesign:PackIcon Kind="FolderAlert" Width="15" Height="15"
+                                                 Foreground="{DynamicResource Hud.Red}"
+                                                 VerticalAlignment="Center" Margin="0,0,9,0"/>
+                        <TextBlock Style="{StaticResource Hud.Body}"
+                                   Foreground="{DynamicResource Hud.Red}"
+                                   VerticalAlignment="Center"
+                                   Text="Save folder not found. Start the server so the world generates, then Refresh."/>
                     </StackPanel>
                 </Border>
             </StackPanel>
-        </materialDesign:Card>
+        </c:HudPanel>
 
-        <!-- ══ Status bar (errors / info) ══ -->
-        <Border Grid.Row="3" Background="#331E1E1E" Padding="16,8"
+        <!-- ══ Status line ══ -->
+        <Border Grid.Row="4" Margin="16,0,16,10"
+                Background="{DynamicResource Hud.Surface2}"
+                BorderBrush="{DynamicResource Hud.Border}" BorderThickness="1"
+                Padding="12,8"
                 Visibility="{Binding HasStatusText, Converter={StaticResource BoolToVis}}">
             <TextBlock Text="{Binding StatusText, Mode=OneWay}"
-                       FontSize="12" TextWrapping="Wrap"
-                       Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"/>
+                       Style="{StaticResource Hud.Mono.Text}"
+                       FontSize="11"
+                       Foreground="{DynamicResource Hud.Accent}"
+                       TextWrapping="Wrap"/>
         </Border>
 
-        <!-- ══ Backup list ══ -->
-        <Grid Grid.Row="4" Background="#CC0D0D0D">
-            <!-- List -->
-            <DataGrid ItemsSource="{Binding Backups}"
-                      SelectedItem="{Binding SelectedBackup}"
-                      Style="{StaticResource MaterialDesignDataGrid}"
-                      materialDesign:DataGridAssist.CellPadding="14,10"
-                      AutoGenerateColumns="False"
-                      CanUserAddRows="False"
-                      CanUserDeleteRows="False"
-                      IsReadOnly="True"
-                      SelectionMode="Single"
-                      Background="Transparent"
-                      BorderThickness="0"
-                      RowBackground="Transparent"
-                      AlternatingRowBackground="#0AFFFFFF"
-                      GridLinesVisibility="Horizontal"
-                      HorizontalGridLinesBrush="#18FFFFFF"
-                      Visibility="{Binding IsBusy, Converter={StaticResource InvBoolToVis}}">
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="File"     Binding="{Binding FileName}"                                  Width="*"   MinWidth="160"/>
-                    <DataGridTextColumn Header="Created"  Binding="{Binding CreatedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Width="145"/>
-                    <DataGridTextColumn Header="Size"     Binding="{Binding SizeLabel}"                                 Width="80"/>
-                </DataGrid.Columns>
-            </DataGrid>
+        <!-- ══ Archive list ══ -->
+        <c:HudPanel Grid.Row="5" Tint="Accent" Header="ARCHIVE" Margin="16,0,16,10">
+            <Grid>
+                <DataGrid ItemsSource="{Binding Backups}"
+                          SelectedItem="{Binding SelectedBackup}"
+                          Style="{StaticResource Hud.DataGrid}"
+                          Margin="1,0,1,1"
+                          Visibility="{Binding IsBusy, Converter={StaticResource InvBoolToVis}}">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="FILE"    Binding="{Binding FileName}" Width="*" MinWidth="160"/>
+                        <DataGridTextColumn Header="CREATED" Binding="{Binding CreatedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Width="*"/>
+                        <DataGridTextColumn Header="SIZE"    Binding="{Binding SizeLabel}" Width="*"/>
+                    </DataGrid.Columns>
+                </DataGrid>
 
-            <!-- Empty state -->
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
-                        Visibility="{Binding IsBusy, Converter={StaticResource InvBoolToVis}}">
-                <StackPanel.Style>
-                    <Style TargetType="StackPanel">
-                        <Setter Property="Visibility" Value="Collapsed"/>
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Backups.Count}" Value="0">
-                                <Setter Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </StackPanel.Style>
-                <materialDesign:PackIcon Kind="ArchiveOff" Width="52" Height="52"
-                                         HorizontalAlignment="Center" Opacity="0.2"/>
-                <TextBlock Text="No backups yet — create one above"
-                           HorizontalAlignment="Center" Opacity="0.4" Margin="0,12,0,0" FontSize="14"/>
-            </StackPanel>
+                <!-- Empty state -->
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Visibility="{Binding IsBusy, Converter={StaticResource InvBoolToVis}}">
+                    <StackPanel.Style>
+                        <Style TargetType="StackPanel">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Backups.Count}" Value="0">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </StackPanel.Style>
+                    <materialDesign:PackIcon Kind="ArchiveOff" Width="44" Height="44"
+                                             HorizontalAlignment="Center"
+                                             Foreground="{DynamicResource Hud.FgFaint}"/>
+                    <c:TrackedText Text="NO BACKUPS YET"
+                                   Style="{StaticResource Hud.SectionLabel}"
+                                   Foreground="{DynamicResource Hud.FgFaint}"
+                                   HorizontalAlignment="Center" Margin="0,14,0,0"/>
+                </StackPanel>
 
-            <!-- Busy overlay -->
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
-                        Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}">
-                <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
-                             IsIndeterminate="True" Width="48" Height="48"
-                             Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
-                <TextBlock Text="{Binding StatusText, Mode=OneWay}"
-                           HorizontalAlignment="Center" Opacity="0.7" Margin="0,16,0,0"
-                           FontSize="13" TextWrapping="Wrap" MaxWidth="400" TextAlignment="Center"/>
-            </StackPanel>
-        </Grid>
+                <!-- Busy -->
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}">
+                    <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}"
+                                 IsIndeterminate="True" Width="44" Height="44"
+                                 Foreground="{DynamicResource Hud.Accent}"/>
+                    <TextBlock Text="{Binding StatusText, Mode=OneWay}"
+                               Style="{StaticResource Hud.Mono.Text}"
+                               FontSize="11.5"
+                               Foreground="{DynamicResource Hud.FgMuted}"
+                               HorizontalAlignment="Center" Margin="0,16,0,0"
+                               TextWrapping="Wrap" MaxWidth="400" TextAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </c:HudPanel>
 
-        <!-- ══ Action panel (shown when backup selected) ══ -->
-        <materialDesign:Card Grid.Row="5" UniformCornerRadius="0" Padding="16,12"
-                             Background="#CC1A1A1A"
-                             Visibility="{Binding IsBackupSelected, Converter={StaticResource BoolToVis}}">
+        <!-- ══ Action panel (a backup is selected) ══ -->
+        <c:HudPanel Grid.Row="6" Tint="Red" Padding="14,12" Margin="16,0,16,14"
+                    Visibility="{Binding IsBackupSelected, Converter={StaticResource BoolToVis}}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -276,42 +314,54 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                    <TextBlock Text="Selected backup" FontSize="10" Opacity="0.5"/>
+                    <c:TrackedText Text="SELECTED ARCHIVE" Style="{StaticResource Hud.StatCaption}"/>
                     <TextBlock Text="{Binding SelectedBackup.FileName, Mode=OneWay}"
-                               FontSize="13" FontWeight="SemiBold"
-                               Foreground="{DynamicResource MaterialDesign.Brush.Primary}"/>
-                    <TextBlock FontSize="11" Opacity="0.5">
-                        <Run Text="{Binding SelectedBackup.SizeLabel, Mode=OneWay}"/>
-                        <Run Text=" · "/>
-                        <Run Text="{Binding SelectedBackup.CreatedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm}', Mode=OneWay}"/>
+                               Style="{StaticResource Hud.Mono.Text}"
+                               FontSize="12.5" FontWeight="Bold"
+                               Foreground="{DynamicResource Hud.Accent}"
+                               Margin="0,3,0,0"/>
+                    <TextBlock Style="{StaticResource Hud.Mono.Text}" FontSize="10"
+                               Foreground="{DynamicResource Hud.FgSubtle}" Margin="0,2,0,0">
+                        <Run Text="{Binding SelectedBackup.SizeLabel, Mode=OneWay}"/><Run Text="  ·  "/><Run Text="{Binding SelectedBackup.CreatedAt, StringFormat='{}{0:yyyy-MM-dd HH:mm}', Mode=OneWay}"/>
                     </TextBlock>
                 </StackPanel>
 
+                <!-- Delete: amber outline -->
                 <Button Grid.Column="1"
                         Command="{Binding DeleteBackupCommand}"
-                        Style="{StaticResource MaterialDesignOutlinedButton}"
-                        BorderBrush="{DynamicResource MaterialDesign.Brush.Secondary}"
-                        Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"
-                        Height="38" Padding="16,0" Margin="0,0,8,0">
+                        Style="{StaticResource Hud.Button}"
+                        BorderBrush="{DynamicResource Hud.Amber}"
+                        Height="34" Padding="16,0" Margin="0,0,8,0">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="Delete" Width="16" Height="16"
+                        <materialDesign:PackIcon Kind="Delete" Width="13" Height="13"
+                                                 Foreground="{DynamicResource Hud.Amber}"
                                                  VerticalAlignment="Center" Margin="0,0,6,0"/>
-                        <TextBlock Text="Delete" VerticalAlignment="Center"/>
+                        <c:TrackedText Text="DELETE" LetterSpacing="0.12"
+                                       FontFamily="{DynamicResource Hud.Mono}"
+                                       FontSize="10.5" FontWeight="Bold"
+                                       Foreground="{DynamicResource Hud.Amber}"
+                                       VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
 
+                <!-- Restore: chamfered red — it overwrites the live world -->
                 <Button Grid.Column="2"
                         Command="{Binding RestoreBackupCommand}"
-                        Style="{StaticResource MaterialDesignRaisedButton}"
-                        Height="38" Padding="16,0">
+                        Style="{StaticResource Hud.Button.Stop}"
+                        Height="34" Padding="16,0">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="ArchiveArrowDown" Width="16" Height="16"
+                        <materialDesign:PackIcon Kind="ArchiveArrowDown" Width="13" Height="13"
+                                                 Foreground="#12060A"
                                                  VerticalAlignment="Center" Margin="0,0,6,0"/>
-                        <TextBlock Text="Restore" VerticalAlignment="Center"/>
+                        <c:TrackedText Text="RESTORE" LetterSpacing="0.12"
+                                       FontFamily="{DynamicResource Hud.Mono}"
+                                       FontSize="10.5" FontWeight="Bold"
+                                       Foreground="#12060A"
+                                       VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
             </Grid>
-        </materialDesign:Card>
+        </c:HudPanel>
 
     </Grid>
 </UserControl>

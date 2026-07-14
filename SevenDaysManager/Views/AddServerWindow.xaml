@@ -33,7 +33,7 @@
 
             <!-- ── Server Banner Image ──────────────────────────────────── -->
             <TextBlock Text="SERVER BANNER" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
-            <materialDesign:Card UniformCornerRadius="10" Margin="0,0,0,20" Height="160">
+            <materialDesign:Card UniformCornerRadius="0" Margin="0,0,0,20" Height="160">
                 <Grid>
                     <!-- Base always-visible background -->
                     <Image Source="pack://application:,,,/Assets/bg.jpg"
@@ -47,7 +47,7 @@
                            Margin="12"/>
                     <!-- Choose button overlaid bottom-right -->
                     <Button Style="{StaticResource MaterialDesignRaisedButton}"
-                            materialDesign:ButtonAssist.CornerRadius="20"
+                            materialDesign:ButtonAssist.CornerRadius="0"
                             Command="{Binding BrowseLogoCommand}"
                             HorizontalAlignment="Right" VerticalAlignment="Bottom"
                             Margin="0,0,12,12" Height="36" Padding="14,0"
@@ -63,7 +63,7 @@
 
             <!-- ── General ──────────────────────────────────────────────── -->
             <TextBlock Text="GENERAL" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
-            <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,20">
+            <materialDesign:Card UniformCornerRadius="0" Padding="16" Margin="0,0,0,20">
                 <StackPanel>
                     <TextBox materialDesign:HintAssist.Hint="Server Name"
                              Style="{StaticResource MaterialDesignOutlinedTextBox}"
@@ -73,7 +73,7 @@
 
             <!-- ── World ────────────────────────────────────────────────── -->
             <TextBlock Text="WORLD" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
-            <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,20">
+            <materialDesign:Card UniformCornerRadius="0" Padding="16" Margin="0,0,0,20">
                 <StackPanel>
                     <Grid Margin="0,0,0,16">
                         <Grid.ColumnDefinitions>
@@ -112,7 +112,7 @@
 
             <!-- ── Network ──────────────────────────────────────────────── -->
             <TextBlock Text="NETWORK" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
-            <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,20">
+            <materialDesign:Card UniformCornerRadius="0" Padding="16" Margin="0,0,0,20">
                 <StackPanel>
                     <Grid Margin="0,0,0,16">
                         <Grid.ColumnDefinitions>
@@ -153,7 +153,7 @@
 
             <!-- ── Options ──────────────────────────────────────────────── -->
             <TextBlock Text="OPTIONS" FontSize="11" FontWeight="Bold" Opacity="0.5" Margin="0,0,0,10"/>
-            <materialDesign:Card UniformCornerRadius="10" Padding="16" Margin="0,0,0,24">
+            <materialDesign:Card UniformCornerRadius="0" Padding="16" Margin="0,0,0,24">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"/>
@@ -164,7 +164,7 @@
                         <TextBlock Text="Easy Anti-Cheat protection" FontSize="12" Opacity="0.6" Margin="0,2,0,0"/>
                     </StackPanel>
                     <ToggleButton Grid.Column="1"
-                                  Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                                  Style="{StaticResource Hud.Toggle}"
                                   IsChecked="{Binding EacEnabled}"
                                   VerticalAlignment="Center"/>
                 </Grid>

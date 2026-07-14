@@ -155,10 +155,10 @@ public partial class MainWindow : Window
         // Don't allow install/update while the server is running — SteamCMD would fight file locks.
         if (_vm.SelectedServerRunning)
         {
-            MessageBox.Show(this,
+            HudDialog.Show(
                 "The server is currently running. Stop it before installing or updating.",
                 "Server is running",
-                MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBoxButton.OK, MessageBoxImage.Warning, owner: this);
             return;
         }
 
