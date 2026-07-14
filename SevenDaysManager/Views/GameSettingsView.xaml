@@ -1,10 +1,12 @@
 <UserControl x:Class="SevenDaysManager.Views.GameSettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:c="clr-namespace:SevenDaysManager.Controls">
+             xmlns:c="clr-namespace:SevenDaysManager.Controls"
+             xmlns:conv="clr-namespace:SevenDaysManager.Converters">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+        <conv:SeverityToBrushConverter x:Key="SeverityToBrush"/>
 
         <!-- One sandbox option = label + dropdown. The dropdown's items come from the game's
              own list of allowed values for that option, so the UI structurally cannot produce
@@ -84,10 +86,16 @@
             <!-- ══ DIFFICULTY ════════════════════════════════════════════════ -->
             <c:HudPanel Header="DIFFICULTY" Tint="Rust" Margin="0,0,0,8">
                 <StackPanel>
-                    <TextBlock Style="{StaticResource Hud.SettingHint}"
+                    <!-- Hud.Body, not Hud.SettingHint: this is explanatory copy, not a sub-label.
+                         SettingHint is FgFaint (#4D545B), the palette's "disabled/timestamp"
+                         grey — unreadable for a paragraph, especially over the background image. -->
+                    <TextBlock Style="{StaticResource Hud.Body}"
                                TextWrapping="Wrap"
-                               Margin="0,0,0,10"
+                               Margin="0,0,0,12"
                                Text="In V3.0 difficulty is a preset over the damage multipliers — there is no longer a difficulty setting of its own. Applying one replaces every gameplay option below."/>
+                    <!-- Buttons run green -> red across the difficulty ramp, so the scale reads
+                         at a glance. The colour comes from the game's own difficulty rank
+                         (Severity), not from list position. -->
                     <ItemsControl ItemsSource="{Binding DifficultyPresets}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
@@ -95,14 +103,17 @@
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Button Style="{StaticResource Hud.Button}"
-                                        Height="30" MinWidth="130" Margin="0,0,8,8"
+                                        Height="32" MinWidth="140" Margin="0,0,8,8"
+                                        BorderBrush="{Binding Severity, Converter={StaticResource SeverityToBrush}}"
+                                        Background="{Binding Severity, Converter={StaticResource SeverityToBrush},
+                                                             ConverterParameter=fill}"
                                         Command="{Binding DataContext.ApplyPresetCommand,
                                                   RelativeSource={RelativeSource AncestorType=UserControl}}"
                                         CommandParameter="{Binding}">
                                     <c:TrackedText Text="{Binding Name}" LetterSpacing="0.1"
                                                    FontFamily="{DynamicResource Hud.Mono}"
                                                    FontSize="10.5" FontWeight="Bold"
-                                                   Foreground="{DynamicResource Hud.Fg}"
+                                                   Foreground="{Binding Severity, Converter={StaticResource SeverityToBrush}}"
                                                    VerticalAlignment="Center"/>
                                 </Button>
                             </DataTemplate>
@@ -165,7 +176,7 @@
             <c:HudPanel Tint="Violet" Margin="0,0,0,8" Padding="0">
                 <Expander Header="SERVER &amp; PERFORMANCE" IsExpanded="False" Style="{StaticResource Hud.Expander}">
                     <StackPanel Margin="16,4,16,12">
-                        <TextBlock Style="{StaticResource Hud.SettingHint}"
+                        <TextBlock Style="{StaticResource Hud.Body}"
                                    TextWrapping="Wrap" Margin="0,0,0,12"
                                    Text="These are still individual serverconfig.xml properties — they were never part of the sandbox system."/>
                         <UniformGrid Columns="2">
@@ -243,7 +254,7 @@
                     <StackPanel Margin="16,4,16,14">
 
                         <c:TrackedText Text="GENERATED CODE" Style="{StaticResource Hud.StatCaption}"/>
-                        <TextBlock Style="{StaticResource Hud.SettingHint}"
+                        <TextBlock Style="{StaticResource Hud.Body}"
                                    TextWrapping="Wrap" Margin="0,4,0,8"
                                    Text="This is what gets written to serverconfig.xml. It updates as you change the options above."/>
                         <Border Background="{DynamicResource ConsoleBrush}"
@@ -263,7 +274,7 @@
                         <Rectangle Fill="{DynamicResource Hud.DashRule}" Height="1" Margin="0,16,0,14"/>
 
                         <c:TrackedText Text="IMPORT A CODE" Style="{StaticResource Hud.StatCaption}"/>
-                        <TextBlock Style="{StaticResource Hud.SettingHint}"
+                        <TextBlock Style="{StaticResource Hud.Body}"
                                    TextWrapping="Wrap" Margin="0,4,0,8"
                                    Text="Built a config in the game? Paste its code here. It gets decoded into the controls above so you can see exactly what it contains — nothing is written until you Save."/>
                         <Grid>
@@ -307,7 +318,7 @@
                         <Rectangle Fill="{DynamicResource Hud.DashRule}" Height="1" Margin="0,16,0,14"/>
 
                         <c:TrackedText Text="THEME PRESETS" Style="{StaticResource Hud.StatCaption}"/>
-                        <TextBlock Style="{StaticResource Hud.SettingHint}"
+                        <TextBlock Style="{StaticResource Hud.Body}"
                                    TextWrapping="Wrap" Margin="0,4,0,8"
                                    Text="The game's built-in scenario presets. Applying one replaces every gameplay option."/>
                         <ItemsControl ItemsSource="{Binding ThemePresets}">

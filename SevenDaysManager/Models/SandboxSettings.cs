@@ -388,12 +388,13 @@ public static class SandboxSettings
     /// <summary>The stock presets, with the exact codes the game ships.</summary>
     public static readonly IReadOnlyList<SandboxPreset> Presets = new SandboxPreset[]
     {
-        new("Scavenger", "AAAKABKACKADKARDBNB", true),
-        new("Adventurer", "AAAJABJACJADJARFBNC", true),
-        new("Nomad", "", true),
-        new("Warrior", "AAAGABGACGADGARJBND", true),
-        new("True Survivalist", "AAAEABEACEADEARKBNE", true),
-        new("Insane", "AAADABDACDADDARLBNF", true),
+        // Rank is the game's own difficulty scale (2..7), in ascending order of difficulty.
+        new("Scavenger",        "AAAKABKACKADKARDBNB", true, 2),
+        new("Adventurer",       "AAAJABJACJADJARFBNC", true, 3),
+        new("Nomad",            "",                    true, 4),   // all defaults — the 1x baseline
+        new("Warrior",          "AAAGABGACGADGARJBND", true, 5),
+        new("True Survivalist", "AAAEABEACEADEARKBNE", true, 6),
+        new("Insane",           "AAADABDACDADDARLBNF", true, 7),
         new("Almost Creative", "ABEABTBBWADFN", false),
         new("Chibi Mode", "AAAJABJACJADJAEIARFAGIAHJAFJAIEAKEAJDASGENDBAAAYBAZBBBABDCAUBAMJBUEBSEBTEAQBBIBBKEBLEBMBBNCCVHBZDCACCLDCMDCXBCYCDMJDAIDXIDNIDOIDYIDPGDTGEBGEEGAVCEXFCNDETFFLGFMJFOGFQCFRBFSBFUB", false),
         new("Dumpster Diver", "AAUABUCCVLCABCXBDMKDALDFJDKDDXADNADOADYBEABDVGDZFEXFFKA", false),
@@ -410,4 +411,17 @@ public static class SandboxSettings
 
 /// <param name="Code">The exact code string the game ships for this preset. Empty = all defaults.</param>
 /// <param name="IsDifficulty">True for the six difficulty levels (Scavenger…Insane).</param>
-public sealed record SandboxPreset(string Name, string Code, bool IsDifficulty);
+/// <param name="Rank">
+/// The game's own difficulty rank, 2 (Scavenger) … 7 (Insane); 0 for theme presets.
+/// Taken from the game data rather than inferred from list order, so it stays right if the
+/// presets are ever reordered. It tracks the damage curve exactly — Scavenger deals 2x and
+/// takes 0.5x; Insane deals 0.5x and takes 2.5x; Nomad is the 1x/1x baseline.
+/// </param>
+public sealed record SandboxPreset(string Name, string Code, bool IsDifficulty, int Rank = 0)
+{
+    private const int MinRank = 2, MaxRank = 7;
+
+    /// <summary>Difficulty as 0 (easiest) … 1 (hardest). Used to ramp the button colour.</summary>
+    public double Severity =>
+        Rank <= 0 ? 0 : Math.Clamp((Rank - MinRank) / (double)(MaxRank - MinRank), 0, 1);
+}
