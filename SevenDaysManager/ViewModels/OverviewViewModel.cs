@@ -68,9 +68,8 @@ public partial class OverviewViewModel : ObservableObject, IAsyncDisposable
 
         ServerIp = ResolveLocalIp();
 
-        // Pull game mode / difficulty out of ExtraConfig if present
-        GameMode      = server.ExtraConfig.FirstOrDefault(p => p.Name == "GameMode")?.Value      ?? "Survival";
-        GameDifficulty = server.ExtraConfig.FirstOrDefault(p => p.Name == "GameDifficulty")?.Value ?? "Adventurer";
+        GameMode       = server.ExtraConfig.FirstOrDefault(p => p.Name == "GameMode")?.Value ?? "Survival";
+        GameDifficulty = DescribeDifficulty(server.SandboxCode);
 
         // System info
         DeviceName     = Environment.MachineName;
@@ -135,6 +134,39 @@ public partial class OverviewViewModel : ObservableObject, IAsyncDisposable
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Name the difficulty behind a sandbox code.
+    ///
+    /// V3.0 has no GameDifficulty property any more — the six difficulty levels are just
+    /// presets over the damage multipliers. So we match on those six fields rather than the
+    /// whole code: a config that picked "Warrior" and then changed the loot rate is still
+    /// Warrior difficulty, and should say so.
+    /// </summary>
+    private static string DescribeDifficulty(string? sandboxCode)
+    {
+        var mine = SandboxCodeService.Decode(sandboxCode);
+        if (mine.Count == 0) return "Adventurer";   // empty code = the game's default
+
+        var keyIds = SandboxSettings.AlwaysWritten
+            .Select(SandboxSettings.ByName)
+            .Where(o => o is not null)
+            .Select(o => o!.Id)
+            .ToList();
+
+        foreach (var preset in SandboxSettings.Presets.Where(p => p.IsDifficulty))
+        {
+            var theirs = SandboxCodeService.Decode(preset.Code);
+            var match = keyIds.All(id =>
+                mine.TryGetValue(id, out var a) &&
+                theirs.TryGetValue(id, out var b) &&
+                a == b);
+
+            if (match) return preset.Name;
+        }
+
+        return "Custom";
+    }
 
     private static string ResolveLocalIp()
     {

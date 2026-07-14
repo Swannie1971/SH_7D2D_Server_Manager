@@ -8,55 +8,102 @@ namespace SevenDaysManager.ViewModels;
 
 public record LabeledValue(int Value, string Label);
 
+/// <summary>
+/// Game Settings for V3.0.
+///
+/// <para>Gameplay is no longer a set of XML properties — it's the single <c>SandboxCode</c>
+/// string. So this VM keeps the FULL decoded code (all 150 options), surfaces the ~20 that
+/// admins actually tune as dropdowns, and re-encodes everything on save. Options we don't
+/// show still round-trip untouched, which is what lets someone import a code from the game
+/// client without us quietly discarding the parts our UI doesn't know about.</para>
+///
+/// <para>Every dropdown's choices come from the game's own value list for that option, so the
+/// UI cannot construct a code the game would reject.</para>
+/// </summary>
 public partial class GameSettingsViewModel : ObservableObject
 {
-    private readonly Server             _server;
+    private readonly Server              _server;
     private readonly ServerConfigService _configService = new();
 
-    // ── Difficulty & Progression ──────────────────────────────────────────────
-    [ObservableProperty] private int _gameDifficulty;
-    [ObservableProperty] private int _xpMultiplier;
+    /// <summary>Full decoded sandbox state: option id -> value index. The source of truth.</summary>
+    private Dictionary<int, int> _sandbox = new();
+
+    /// <summary>The options we surface as dropdowns, in display order.</summary>
+    public List<SandboxOptionViewModel> Options { get; } = new();
+
+    // Grouped for the UI.
+    public IEnumerable<SandboxOptionViewModel> CombatOptions   => Group("Combat");
+    public IEnumerable<SandboxOptionViewModel> ZombieOptions   => Group("Zombies");
+    public IEnumerable<SandboxOptionViewModel> BloodMoonOptions=> Group("Blood Moon");
+    public IEnumerable<SandboxOptionViewModel> LootOptions     => Group("Loot & Drops");
+    public IEnumerable<SandboxOptionViewModel> WorldOptions    => Group("World & Time");
+
+    private readonly Dictionary<string, List<SandboxOptionViewModel>> _groups = new();
+    private IEnumerable<SandboxOptionViewModel> Group(string name) =>
+        _groups.TryGetValue(name, out var g) ? g : Enumerable.Empty<SandboxOptionViewModel>();
+
+    /// <summary>
+    /// The ~20 sandbox options worth exposing, grouped. Chosen because these are what server
+    /// admins actually change; the other 130 stay at whatever the imported code says.
+    /// </summary>
+    private static readonly (string Group, string Option)[] Surfaced =
+    {
+        ("Combat",      "XPMultiplier"),
+        ("Combat",      "IncomingDamage"),
+        ("Combat",      "RangedDamage"),
+        ("Combat",      "MeleeDamage"),
+        ("Combat",      "BlockDamage"),
+        ("Combat",      "DeathPenalty"),
+
+        ("Zombies",     "ZombieMove"),
+        ("Zombies",     "ZombieMoveNight"),
+        ("Zombies",     "ZombieFeralMove"),
+        ("Zombies",     "ZombieBMMove"),
+        ("Zombies",     "ZombieFeralSense"),
+        ("Zombies",     "AISmellMode"),
+        ("Zombies",     "EnemyDifficulty"),
+
+        ("Blood Moon",  "BloodMoonFrequency"),
+        ("Blood Moon",  "BloodMoonRange"),
+        ("Blood Moon",  "BloodMoonEnemyCount"),
+        ("Blood Moon",  "BloodMoonWarning"),
+
+        ("Loot & Drops","GlobalLootCount"),
+        ("Loot & Drops","LootRespawnDays"),
+        ("Loot & Drops","AirDropFrequency"),
+        ("Loot & Drops","AirDropMarker"),
+        ("Loot & Drops","DropOnDeath"),
+        ("Loot & Drops","DropOnQuit"),
+
+        ("World & Time","DayNightLength"),
+        ("World & Time","DayLightLength"),
+        ("World & Time","BiomeProgression"),
+        ("World & Time","StormFreq"),
+    };
+
+    // ── Server-level settings that are STILL plain XML properties in V3.0 ──────
     [ObservableProperty] private int _playerKillingMode;
-
-    // ── Time ─────────────────────────────────────────────────────────────────
-    [ObservableProperty] private int _dayNightLength;
-    [ObservableProperty] private int _dayLightLength;
-
-    // ── Zombies ───────────────────────────────────────────────────────────────
-    [ObservableProperty] private int _zombieMove;
-    [ObservableProperty] private int _zombieMoveNight;
-    [ObservableProperty] private int _zombieFeralMove;
-
-    // ── Blood Moon ────────────────────────────────────────────────────────────
-    [ObservableProperty] private int _bloodMoonFrequency;
-    [ObservableProperty] private int _bloodMoonEnemyCount;
-
-    // ── Loot & Drops ─────────────────────────────────────────────────────────
-    [ObservableProperty] private int _lootAbundance;
-    [ObservableProperty] private int _lootRespawnDays;
-    [ObservableProperty] private int _airDropFrequency;
-    [ObservableProperty] private int _dropOnDeath;
-    [ObservableProperty] private int _dropOnQuit;
-
-    // ── Zombies (extra) ───────────────────────────────────────────────────────
-    [ObservableProperty] private int _zombieBMMove;
     [ObservableProperty] private int _maxSpawnedZombies;
     [ObservableProperty] private int _maxSpawnedAnimals;
-
-    // ── Blood Moon (extra) ────────────────────────────────────────────────────
-    [ObservableProperty] private int _bloodMoonRange;
-
-    // ── Land Claims ───────────────────────────────────────────────────────────
+    [ObservableProperty] private int _serverMaxAllowedViewDistance;
     [ObservableProperty] private int _landClaimSize;
     [ObservableProperty] private int _landClaimExpiryTime;
     [ObservableProperty] private int _landClaimOfflineDurabilityModifier;
-
-    // ── New Player Protection ─────────────────────────────────────────────────
     [ObservableProperty] private int _playerSafeZoneLevel;
     [ObservableProperty] private int _playerSafeZoneHours;
 
-    // ── Performance ───────────────────────────────────────────────────────────
-    [ObservableProperty] private int _serverMaxAllowedViewDistance;
+    // ── Sandbox code ──────────────────────────────────────────────────────────
+    [ObservableProperty] private string _sandboxCode = "";
+
+    /// <summary>What the user typed into the import box (never written to disk unvalidated).</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanImport))]
+    private string _importCode = "";
+
+    [ObservableProperty] private string _importStatus = "";
+    [ObservableProperty] private bool   _importFailed;
+
+    public bool CanImport => !string.IsNullOrWhiteSpace(ImportCode);
 
     // ── Save state ────────────────────────────────────────────────────────────
     [ObservableProperty] private bool _confirmPending;
@@ -66,32 +113,19 @@ public partial class GameSettingsViewModel : ObservableObject
     [ObservableProperty] private bool _isSaved;
     public bool HasSaveError => !string.IsNullOrEmpty(SaveError);
 
-    public string ServerName  => _server.Name;
-    public string InstallDir  => _server.InstallDir;
+    public string ServerName   => _server.Name;
+    public string InstallDir   => _server.InstallDir;
     public bool   ConfigExists => _configService.ConfigExists(_server.InstallDir);
 
-    // ── Options lists ─────────────────────────────────────────────────────────
+    /// <summary>The six stock difficulty presets, as one-click buttons.</summary>
+    public IReadOnlyList<SandboxPreset> DifficultyPresets { get; } =
+        SandboxSettings.Presets.Where(p => p.IsDifficulty).ToList();
 
-    public IReadOnlyList<LabeledValue> DifficultyOptions { get; } = new[]
-    {
-        new LabeledValue(0, "Scavenger — very easy"),
-        new LabeledValue(1, "Adventurer — easy"),
-        new LabeledValue(2, "Warrior — medium (default)"),
-        new LabeledValue(3, "Survivalist — hard"),
-        new LabeledValue(4, "Nomad — very hard"),
-        new LabeledValue(5, "Insane — extreme"),
-    };
+    /// <summary>The themed presets (Caveman Life, Dying World…).</summary>
+    public IReadOnlyList<SandboxPreset> ThemePresets { get; } =
+        SandboxSettings.Presets.Where(p => !p.IsDifficulty).ToList();
 
-    public IReadOnlyList<LabeledValue> XpOptions { get; } = new[]
-    {
-        new LabeledValue(25,  "25% — very slow"),
-        new LabeledValue(50,  "50%"),
-        new LabeledValue(75,  "75%"),
-        new LabeledValue(100, "100% — default"),
-        new LabeledValue(150, "150%"),
-        new LabeledValue(200, "200%"),
-        new LabeledValue(300, "300% — very fast"),
-    };
+    // ── Still-valid XML option lists ──────────────────────────────────────────
 
     public IReadOnlyList<LabeledValue> PlayerKillingOptions { get; } = new[]
     {
@@ -99,77 +133,6 @@ public partial class GameSettingsViewModel : ObservableObject
         new LabeledValue(1, "Kill Allies Only"),
         new LabeledValue(2, "Kill Strangers Only"),
         new LabeledValue(3, "Always — full PvP"),
-    };
-
-    public IReadOnlyList<LabeledValue> DayLengthOptions { get; } = new[]
-    {
-        new LabeledValue(10,  "10 min — very short"),
-        new LabeledValue(20,  "20 min"),
-        new LabeledValue(30,  "30 min"),
-        new LabeledValue(40,  "40 min"),
-        new LabeledValue(50,  "50 min"),
-        new LabeledValue(60,  "60 min — default"),
-        new LabeledValue(80,  "80 min"),
-        new LabeledValue(100, "100 min"),
-        new LabeledValue(120, "120 min — long"),
-    };
-
-    public IReadOnlyList<LabeledValue> DayLightOptions { get; } =
-        Enumerable.Range(6, 19).Select(h => new LabeledValue(h, h == 18 ? $"{h}h — default" : $"{h}h")).ToList();
-
-    public IReadOnlyList<LabeledValue> ZombieSpeedOptions { get; } = new[]
-    {
-        new LabeledValue(0, "Walk"),
-        new LabeledValue(1, "Jog"),
-        new LabeledValue(2, "Run"),
-        new LabeledValue(3, "Sprint"),
-        new LabeledValue(4, "Nightmare"),
-    };
-
-    public IReadOnlyList<LabeledValue> LootAbundanceOptions { get; } = new[]
-    {
-        new LabeledValue(25,  "25% — scarce"),
-        new LabeledValue(50,  "50%"),
-        new LabeledValue(75,  "75%"),
-        new LabeledValue(100, "100% — default"),
-        new LabeledValue(150, "150%"),
-        new LabeledValue(200, "200% — plenty"),
-    };
-
-    public IReadOnlyList<LabeledValue> LootRespawnOptions { get; } = new[]
-    {
-        new LabeledValue(0,  "Never"),
-        new LabeledValue(3,  "3 days"),
-        new LabeledValue(5,  "5 days"),
-        new LabeledValue(7,  "7 days — default"),
-        new LabeledValue(10, "10 days"),
-        new LabeledValue(14, "14 days"),
-        new LabeledValue(30, "30 days"),
-    };
-
-    public IReadOnlyList<LabeledValue> AirDropOptions { get; } = new[]
-    {
-        new LabeledValue(0,  "Never"),
-        new LabeledValue(24, "Every day"),
-        new LabeledValue(48, "Every 2 days"),
-        new LabeledValue(72, "Every 3 days — default"),
-    };
-
-    public IReadOnlyList<LabeledValue> DropOnDeathOptions { get; } = new[]
-    {
-        new LabeledValue(0, "Nothing"),
-        new LabeledValue(1, "Everything — default"),
-        new LabeledValue(2, "Toolbelt only"),
-        new LabeledValue(3, "Backpack only"),
-        new LabeledValue(4, "Delete all"),
-    };
-
-    public IReadOnlyList<LabeledValue> DropOnQuitOptions { get; } = new[]
-    {
-        new LabeledValue(0, "Nothing — default"),
-        new LabeledValue(1, "Everything"),
-        new LabeledValue(2, "Toolbelt only"),
-        new LabeledValue(3, "Backpack only"),
     };
 
     public IReadOnlyList<LabeledValue> LandClaimSizeOptions { get; } = new[]
@@ -231,6 +194,25 @@ public partial class GameSettingsViewModel : ObservableObject
         new LabeledValue(16, "16 chunks — highest"),
     };
 
+    public IReadOnlyList<LabeledValue> MaxZombieOptions { get; } = new[]
+    {
+        new LabeledValue(16, "16 — low-end host"),
+        new LabeledValue(32, "32"),
+        new LabeledValue(48, "48"),
+        new LabeledValue(64, "64 — default"),
+        new LabeledValue(80, "80"),
+        new LabeledValue(100, "100 — heavy"),
+    };
+
+    public IReadOnlyList<LabeledValue> MaxAnimalOptions { get; } = new[]
+    {
+        new LabeledValue(10, "10"),
+        new LabeledValue(25, "25"),
+        new LabeledValue(50, "50 — default"),
+        new LabeledValue(75, "75"),
+        new LabeledValue(100, "100"),
+    };
+
     public GameSettingsViewModel(Server server)
     {
         _server = server;
@@ -239,23 +221,16 @@ public partial class GameSettingsViewModel : ObservableObject
 
     private void Load()
     {
-        GameDifficulty      = _server.GameDifficulty;
-        XpMultiplier        = _server.XPMultiplier;
+        // Prefer what's actually on disk — the file is the truth; the DB is a cache.
+        var code = _server.SandboxCode;
+        if (string.IsNullOrWhiteSpace(code) && _configService.ConfigExists(_server.InstallDir))
+            code = _configService.ReadConfig(_server.InstallDir).SandboxCode;
+
+        _sandbox = SandboxCodeService.Decode(code);
+        BuildOptions();
+        RefreshCode();
+
         PlayerKillingMode   = _server.PlayerKillingMode;
-        DayNightLength      = _server.DayNightLength;
-        DayLightLength      = _server.DayLightLength;
-        ZombieMove          = _server.ZombieMove;
-        ZombieMoveNight     = _server.ZombieMoveNight;
-        ZombieFeralMove     = _server.ZombieFeralMove;
-        BloodMoonFrequency  = _server.BloodMoonFrequency;
-        BloodMoonEnemyCount = _server.BloodMoonEnemyCount;
-        LootAbundance       = _server.LootAbundance;
-        LootRespawnDays     = _server.LootRespawnDays;
-        AirDropFrequency    = _server.AirDropFrequency;
-        DropOnDeath         = _server.DropOnDeath;
-        DropOnQuit          = _server.DropOnQuit;
-        ZombieBMMove        = _server.ZombieBMMove;
-        BloodMoonRange      = _server.BloodMoonRange;
         MaxSpawnedZombies   = _server.MaxSpawnedZombies;
         MaxSpawnedAnimals   = _server.MaxSpawnedAnimals;
         ServerMaxAllowedViewDistance = _server.ServerMaxAllowedViewDistance;
@@ -264,6 +239,88 @@ public partial class GameSettingsViewModel : ObservableObject
         LandClaimOfflineDurabilityModifier = _server.LandClaimOfflineDurabilityModifier;
         PlayerSafeZoneLevel = _server.PlayerSafeZoneLevel;
         PlayerSafeZoneHours = _server.PlayerSafeZoneHours;
+    }
+
+    private void BuildOptions()
+    {
+        Options.Clear();
+        _groups.Clear();
+
+        foreach (var (group, name) in Surfaced)
+        {
+            var opt = SandboxSettings.ByName(name);
+            if (opt is null) continue;   // table changed under us — skip rather than crash
+
+            var idx = _sandbox.TryGetValue(opt.Id, out var v) ? v : opt.DefaultIndex;
+            var vm  = new SandboxOptionViewModel(opt, idx);
+
+            // Any change re-encodes, so the code preview always matches the dropdowns.
+            vm.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName != nameof(SandboxOptionViewModel.Selected)) return;
+                _sandbox[vm.Option.Id] = vm.SelectedIndex;
+                RefreshCode();
+            };
+
+            Options.Add(vm);
+            if (!_groups.TryGetValue(group, out var list))
+                _groups[group] = list = new List<SandboxOptionViewModel>();
+            list.Add(vm);
+        }
+
+        OnPropertyChanged(nameof(CombatOptions));
+        OnPropertyChanged(nameof(ZombieOptions));
+        OnPropertyChanged(nameof(BloodMoonOptions));
+        OnPropertyChanged(nameof(LootOptions));
+        OnPropertyChanged(nameof(WorldOptions));
+    }
+
+    /// <summary>Re-encode the full sandbox state (not just the options we show).</summary>
+    private void RefreshCode() => SandboxCode = SandboxCodeService.Encode(_sandbox);
+
+    /// <summary>Apply a stock preset — this is what "difficulty" now means in V3.0.</summary>
+    [RelayCommand]
+    private void ApplyPreset(SandboxPreset? preset)
+    {
+        if (preset is null) return;
+
+        // A preset REPLACES the whole sandbox state, exactly as picking it in-game would.
+        _sandbox = SandboxCodeService.Decode(preset.Code);
+        BuildOptions();
+        RefreshCode();
+
+        ImportStatus = $"Applied preset: {preset.Name}";
+        ImportFailed = false;
+        IsSaved      = false;
+    }
+
+    /// <summary>
+    /// Import a code from the game client. It is DECODED into the dropdowns — never written
+    /// through to the config as-is. If it doesn't parse, nothing changes.
+    /// </summary>
+    [RelayCommand]
+    private void Import()
+    {
+        var code = (ImportCode ?? "").Trim();
+
+        if (!SandboxCodeService.IsValid(code))
+        {
+            ImportStatus = "That isn't a valid sandbox code. Copy it from the game's " +
+                           "Sandbox Options screen using the Copy Code button.";
+            ImportFailed = true;
+            return;
+        }
+
+        _sandbox = SandboxCodeService.Decode(code);
+        BuildOptions();
+        RefreshCode();
+
+        var shown = _sandbox.Count;
+        ImportStatus = $"Imported — {shown} option{(shown == 1 ? "" : "s")} set. " +
+                       "Review below, then Save.";
+        ImportFailed = false;
+        ImportCode   = "";
+        IsSaved      = false;
     }
 
     [RelayCommand]
@@ -278,23 +335,9 @@ public partial class GameSettingsViewModel : ObservableObject
         ConfirmPending = false;
         try
         {
-            _server.GameDifficulty      = GameDifficulty;
-            _server.XPMultiplier        = XpMultiplier;
+            _server.SandboxCode = SandboxCode;
+
             _server.PlayerKillingMode   = PlayerKillingMode;
-            _server.DayNightLength      = DayNightLength;
-            _server.DayLightLength      = DayLightLength;
-            _server.ZombieMove          = ZombieMove;
-            _server.ZombieMoveNight     = ZombieMoveNight;
-            _server.ZombieFeralMove     = ZombieFeralMove;
-            _server.BloodMoonFrequency  = BloodMoonFrequency;
-            _server.BloodMoonEnemyCount = BloodMoonEnemyCount;
-            _server.LootAbundance       = LootAbundance;
-            _server.LootRespawnDays     = LootRespawnDays;
-            _server.AirDropFrequency    = AirDropFrequency;
-            _server.DropOnDeath         = DropOnDeath;
-            _server.DropOnQuit          = DropOnQuit;
-            _server.ZombieBMMove        = ZombieBMMove;
-            _server.BloodMoonRange      = BloodMoonRange;
             _server.MaxSpawnedZombies   = MaxSpawnedZombies;
             _server.MaxSpawnedAnimals   = MaxSpawnedAnimals;
             _server.ServerMaxAllowedViewDistance = ServerMaxAllowedViewDistance;

@@ -48,24 +48,19 @@ public class Server
     // Behaviour
     public bool AutoStart { get; set; } = false;
 
-    // Game settings
-    public int GameDifficulty      { get; set; } = 2;   // Warrior
-    public int XPMultiplier        { get; set; } = 100;
-    public int DayNightLength      { get; set; } = 60;  // minutes per game day
-    public int DayLightLength      { get; set; } = 18;  // daylight hours
-    public int DropOnDeath         { get; set; } = 1;   // Everything
-    public int DropOnQuit          { get; set; } = 0;   // Nothing
-    public int BloodMoonFrequency  { get; set; } = 7;
-    public int BloodMoonEnemyCount { get; set; } = 8;
-    public int ZombieMove          { get; set; } = 0;   // Walk
-    public int ZombieMoveNight     { get; set; } = 3;   // Sprint
-    public int ZombieFeralMove     { get; set; } = 3;   // Sprint
-    public int LootAbundance       { get; set; } = 100;
-    public int LootRespawnDays     { get; set; } = 7;
-    public int PlayerKillingMode   { get; set; } = 0;   // No killing
-    public int AirDropFrequency    { get; set; } = 72;
-    public int ZombieBMMove                    { get; set; } = 3;   // Blood Moon zombie speed
-    public int BloodMoonRange                  { get; set; } = 0;   // ± day variance
+    // ── Gameplay: the V3.0 sandbox code ───────────────────────────────────────
+    //
+    // V3.0 ("Dead Hot Summer") removed the individual gameplay properties from
+    // serverconfig.xml — GameDifficulty, XPMultiplier, ZombieMove, BloodMoonFrequency,
+    // LootAbundance and ~24 others. The game reads this one string instead. Writing the
+    // old properties has no effect whatsoever; the server silently runs the sandbox code.
+    //
+    // Empty = the game's default (Adventurer). See SandboxCodeService.
+    public string SandboxCode { get; set; } = "";
+
+    // ── Server settings that are STILL individual properties in V3.0 ──────────
+    // These were never part of the sandbox system and continue to work as normal XML.
+    public int PlayerKillingMode               { get; set; } = 0;   // No killing
     public int MaxSpawnedZombies               { get; set; } = 64;
     public int MaxSpawnedAnimals               { get; set; } = 50;
     public int ServerMaxAllowedViewDistance    { get; set; } = 12;  // chunks
@@ -74,6 +69,28 @@ public class Server
     public int LandClaimOfflineDurabilityModifier { get; set; } = 0; // 0 = indestructible
     public int PlayerSafeZoneLevel             { get; set; } = 5;
     public int PlayerSafeZoneHours             { get; set; } = 5;
+
+    // ── Dead in V3.0 ──────────────────────────────────────────────────────────
+    // Retained ONLY so existing LiteDB documents still deserialize. The game ignores
+    // these; they are no longer written to serverconfig.xml. Do not use them — set the
+    // corresponding sandbox option in SandboxCode instead.
+    [Obsolete("V3.0: folded into SandboxCode. Not written to serverconfig.xml.")]
+    public int GameDifficulty      { get; set; } = 2;
+    [Obsolete("V3.0: folded into SandboxCode.")] public int XPMultiplier        { get; set; } = 100;
+    [Obsolete("V3.0: folded into SandboxCode.")] public int DayNightLength      { get; set; } = 60;
+    [Obsolete("V3.0: folded into SandboxCode.")] public int DayLightLength      { get; set; } = 18;
+    [Obsolete("V3.0: folded into SandboxCode.")] public int DropOnDeath         { get; set; } = 1;
+    [Obsolete("V3.0: folded into SandboxCode.")] public int DropOnQuit          { get; set; } = 0;
+    [Obsolete("V3.0: folded into SandboxCode.")] public int BloodMoonFrequency  { get; set; } = 7;
+    [Obsolete("V3.0: folded into SandboxCode.")] public int BloodMoonEnemyCount { get; set; } = 8;
+    [Obsolete("V3.0: folded into SandboxCode.")] public int ZombieMove          { get; set; } = 0;
+    [Obsolete("V3.0: folded into SandboxCode.")] public int ZombieMoveNight     { get; set; } = 3;
+    [Obsolete("V3.0: folded into SandboxCode.")] public int ZombieFeralMove     { get; set; } = 3;
+    [Obsolete("V3.0: folded into SandboxCode.")] public int ZombieBMMove        { get; set; } = 3;
+    [Obsolete("V3.0: folded into SandboxCode.")] public int LootAbundance       { get; set; } = 100;
+    [Obsolete("V3.0: folded into SandboxCode.")] public int LootRespawnDays     { get; set; } = 7;
+    [Obsolete("V3.0: folded into SandboxCode.")] public int AirDropFrequency    { get; set; } = 72;
+    [Obsolete("V3.0: folded into SandboxCode.")] public int BloodMoonRange      { get; set; } = 0;
 
     // Schedule
     public ScheduleConfig Schedule { get; set; } = new();

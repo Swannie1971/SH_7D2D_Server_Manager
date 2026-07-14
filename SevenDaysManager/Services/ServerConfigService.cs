@@ -45,24 +45,20 @@ public class ServerConfigService
         Set(root, "TelnetPort",            server.TelnetPort);
         Set(root, "TelnetPassword",        server.TelnetPassword);
 
-        // Game settings
-        Set(root, "GameDifficulty",      server.GameDifficulty);
-        Set(root, "XPMultiplier",        server.XPMultiplier);
-        Set(root, "DayNightLength",      server.DayNightLength);
-        Set(root, "DayLightLength",      server.DayLightLength);
-        Set(root, "DropOnDeath",         server.DropOnDeath);
-        Set(root, "DropOnQuit",          server.DropOnQuit);
-        Set(root, "BloodMoonFrequency",  server.BloodMoonFrequency);
-        Set(root, "BloodMoonEnemyCount", server.BloodMoonEnemyCount);
-        Set(root, "ZombieMove",          server.ZombieMove);
-        Set(root, "ZombieMoveNight",     server.ZombieMoveNight);
-        Set(root, "ZombieFeralMove",     server.ZombieFeralMove);
-        Set(root, "LootAbundance",       server.LootAbundance);
-        Set(root, "LootRespawnDays",     server.LootRespawnDays);
+        // ── Gameplay (V3.0) ──────────────────────────────────────────────────
+        // One string carries every gameplay setting now. Empty = leave whatever is in the
+        // file (the game ships a default), rather than writing an empty value the game
+        // would then have to interpret.
+        if (!string.IsNullOrWhiteSpace(server.SandboxCode))
+            Set(root, "SandboxCode", server.SandboxCode.Trim());
+
+        // Purge the pre-V3.0 gameplay properties. The game ignores them, but an admin
+        // reading the file would reasonably assume "GameDifficulty=0" meant something —
+        // and earlier versions of THIS app wrote them, so real configs are full of them.
+        RemoveDeadV3Properties(root);
+
+        // ── Settings that are still individual properties in V3.0 ────────────
         Set(root, "PlayerKillingMode",   server.PlayerKillingMode);
-        Set(root, "AirDropFrequency",    server.AirDropFrequency);
-        Set(root, "ZombieBMMove",        server.ZombieBMMove);
-        Set(root, "BloodMoonRange",      server.BloodMoonRange);
         Set(root, "MaxSpawnedZombies",   server.MaxSpawnedZombies);
         Set(root, "MaxSpawnedAnimals",   server.MaxSpawnedAnimals);
         Set(root, "ServerMaxAllowedViewDistance", server.ServerMaxAllowedViewDistance);
@@ -108,23 +104,11 @@ public class ServerConfigService
             TelnetPort       = GetInt(root, "TelnetPort",           8081),
             TelnetPassword   = Get(root,  "TelnetPassword"),
             WebDashboardPort = GetInt(root, "WebDashboardPort",     8080),
-            GameDifficulty      = GetInt(root, "GameDifficulty",      2),
-            XPMultiplier        = GetInt(root, "XPMultiplier",        100),
-            DayNightLength      = GetInt(root, "DayNightLength",      60),
-            DayLightLength      = GetInt(root, "DayLightLength",      18),
-            DropOnDeath         = GetInt(root, "DropOnDeath",         1),
-            DropOnQuit          = GetInt(root, "DropOnQuit",          0),
-            BloodMoonFrequency  = GetInt(root, "BloodMoonFrequency",  7),
-            BloodMoonEnemyCount = GetInt(root, "BloodMoonEnemyCount", 8),
-            ZombieMove          = GetInt(root, "ZombieMove",          0),
-            ZombieMoveNight     = GetInt(root, "ZombieMoveNight",     3),
-            ZombieFeralMove     = GetInt(root, "ZombieFeralMove",     3),
-            LootAbundance       = GetInt(root, "LootAbundance",       100),
-            LootRespawnDays     = GetInt(root, "LootRespawnDays",     7),
+
+            // V3.0: every gameplay setting lives in this one string.
+            SandboxCode      = Get(root, "SandboxCode"),
+
             PlayerKillingMode   = GetInt(root, "PlayerKillingMode",   0),
-            AirDropFrequency    = GetInt(root, "AirDropFrequency",    72),
-            ZombieBMMove        = GetInt(root, "ZombieBMMove",        3),
-            BloodMoonRange      = GetInt(root, "BloodMoonRange",      0),
             MaxSpawnedZombies   = GetInt(root, "MaxSpawnedZombies",   64),
             MaxSpawnedAnimals   = GetInt(root, "MaxSpawnedAnimals",   50),
             ServerMaxAllowedViewDistance = GetInt(root, "ServerMaxAllowedViewDistance", 12),
@@ -140,6 +124,31 @@ public class ServerConfigService
 
     public static string ConfigPath(string installDir) =>
         Path.Combine(installDir, "serverconfig.xml");
+
+    /// <summary>
+    /// Gameplay properties that V3.0 folded into <c>SandboxCode</c>. The game no longer reads
+    /// any of them. We strip them on save so the file doesn't lie about what's in effect —
+    /// earlier builds of this app wrote them, so most existing configs contain a stale block.
+    /// </summary>
+    private static readonly string[] DeadInV3 =
+    {
+        "GameDifficulty", "XPMultiplier", "DayNightLength", "DayLightLength",
+        "DropOnDeath", "DropOnQuit", "BloodMoonFrequency", "BloodMoonRange",
+        "BloodMoonEnemyCount", "BloodMoonWarning", "ZombieMove", "ZombieMoveNight",
+        "ZombieFeralMove", "ZombieBMMove", "ZombieFeralSense", "AISmellMode",
+        "LootAbundance", "LootRespawnDays", "AirDropFrequency", "AirDropMarker",
+        "BlockDamagePlayer", "BlockDamageAI", "BlockDamageAIBM", "BiomeProgression",
+        "StormFreq", "DeathPenalty", "JarRefund", "EnemySpawnMode", "EnemyDifficulty",
+        "QuestProgressionDailyLimit",
+    };
+
+    private static void RemoveDeadV3Properties(XElement root)
+    {
+        root.Elements("property")
+            .Where(e => DeadInV3.Contains(e.Attribute("name")?.Value))
+            .ToList()                       // materialise before removing
+            .ForEach(e => e.Remove());
+    }
 
     // ── XML helpers ───────────────────────────────────────────────────────────
 

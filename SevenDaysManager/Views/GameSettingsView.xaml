@@ -1,389 +1,359 @@
 <UserControl x:Class="SevenDaysManager.Views.GameSettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              xmlns:c="clr-namespace:SevenDaysManager.Controls">
 
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
-        <!-- Label/hint styles now come from the theme: Hud.SettingLabel / Hud.SettingHint -->
+
+        <!-- One sandbox option = label + dropdown. The dropdown's items come from the game's
+             own list of allowed values for that option, so the UI structurally cannot produce
+             a value the game would reject. -->
+        <DataTemplate x:Key="SandboxOptionTemplate">
+            <StackPanel Margin="0,0,10,12">
+                <c:TrackedText Text="{Binding Display}" Style="{StaticResource Hud.SettingLabel}"/>
+                <ComboBox Style="{StaticResource Hud.ComboBox}"
+                          ItemsSource="{Binding Choices}"
+                          SelectedItem="{Binding Selected}"
+                          Margin="0,4,0,0">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Label}"
+                                       FontFamily="{DynamicResource Hud.Mono}"
+                                       FontSize="12"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </StackPanel>
+        </DataTemplate>
+
+        <ItemsPanelTemplate x:Key="TwoColumn">
+            <UniformGrid Columns="2"/>
+        </ItemsPanelTemplate>
     </UserControl.Resources>
 
     <Grid>
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Background="Transparent">
+    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                  HorizontalScrollBarVisibility="Disabled"
+                  Background="Transparent">
         <StackPanel Margin="14,14,14,16">
 
-            <c:HudTitle Title="GAME SETTINGS" HorizontalAlignment="Left" Margin="2,0,0,14"/>
+            <c:HudTitle Title="GAME SETTINGS" HorizontalAlignment="Left" Margin="2,0,0,10"/>
 
-            <!-- ══ DIFFICULTY & PROGRESSION ══════════════════════════════════ -->
-            <c:HudPanel Tint="Accent" Margin="0,0,0,8" Padding="0">
-                <Expander Header="DIFFICULTY &amp; PROGRESSION" IsExpanded="False" Style="{StaticResource Hud.Expander}">
-                    <Grid Margin="16,4,16,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <c:TrackedText Text="Game Difficulty" Style="{StaticResource Hud.SettingLabel}"/>
-                            <TextBlock Text="Overall challenge level for all players" Style="{StaticResource Hud.SettingHint}"/>
-                            <ComboBox Style="{StaticResource Hud.ComboBox}"
-                                      ItemsSource="{Binding DifficultyOptions}" SelectedValue="{Binding GameDifficulty}"
-                                      SelectedValuePath="Value"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="2">
-                            <c:TrackedText Text="XP Multiplier" Style="{StaticResource Hud.SettingLabel}"/>
-                            <TextBlock Text="How fast players level up skills and perks" Style="{StaticResource Hud.SettingHint}"/>
-                            <ComboBox Style="{StaticResource Hud.ComboBox}"
-                                      ItemsSource="{Binding XpOptions}" SelectedValue="{Binding XpMultiplier}"
-                                      SelectedValuePath="Value"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="4">
-                            <c:TrackedText Text="Player Killing (PvP)" Style="{StaticResource Hud.SettingLabel}"/>
-                            <TextBlock Text="Controls whether players can attack each other" Style="{StaticResource Hud.SettingHint}"/>
-                            <ComboBox Style="{StaticResource Hud.ComboBox}"
-                                      ItemsSource="{Binding PlayerKillingOptions}" SelectedValue="{Binding PlayerKillingMode}"
-                                      SelectedValuePath="Value"/>
-                        </StackPanel>
-                    </Grid>
-                </Expander>
-            </c:HudPanel>
-
-            <!-- ══ TIME & WORLD ══════════════════════════════════════════════ -->
-            <c:HudPanel Tint="Blue" Margin="0,0,0,8" Padding="0">
-                <Expander Header="TIME &amp; WORLD" IsExpanded="False" Style="{StaticResource Hud.Expander}">
-                    <Grid Margin="16,4,16,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <c:TrackedText Text="Game Day Length" Style="{StaticResource Hud.SettingLabel}"/>
-                            <TextBlock Text="Real-world minutes per in-game day" Style="{StaticResource Hud.SettingHint}"/>
-                            <ComboBox Style="{StaticResource Hud.ComboBox}"
-                                      ItemsSource="{Binding DayLengthOptions}" SelectedValue="{Binding DayNightLength}"
-                                      SelectedValuePath="Value"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="2">
-                            <c:TrackedText Text="Daylight Hours" Style="{StaticResource Hud.SettingLabel}"/>
-                            <TextBlock Text="Hours of daylight (6–24). Fewer = longer, more dangerous nights" Style="{StaticResource Hud.SettingHint}"/>
-                            <ComboBox Style="{StaticResource Hud.ComboBox}"
-                                      ItemsSource="{Binding DayLightOptions}" SelectedValue="{Binding DayLightLength}"
-                                      SelectedValuePath="Value"/>
-                        </StackPanel>
-                    </Grid>
-                </Expander>
-            </c:HudPanel>
-
-            <!-- ══ ZOMBIES ════════════════════════════════════════════════════ -->
-            <c:HudPanel Tint="Red" Margin="0,0,0,8" Padding="0">
-                <Expander Header="ZOMBIES" IsExpanded="False" Style="{StaticResource Hud.Expander}">
-                    <StackPanel Margin="16,4,16,16">
-                        <!-- Speeds row -->
-                        <Grid Margin="0,0,0,12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="16"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="16"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="16"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <c:TrackedText Text="Speed (Day)" Style="{StaticResource Hud.SettingLabel}"/>
-                                <TextBlock Text="Regular zombies in daylight" Style="{StaticResource Hud.SettingHint}"/>
-                                <ComboBox Style="{StaticResource Hud.ComboBox}"
-                                          ItemsSource="{Binding ZombieSpeedOptions}" SelectedValue="{Binding ZombieMove}"
-                                          SelectedValuePath="Value"/>
-                            </StackPanel>
-                            <StackPanel Grid.Column="2">
-                                <c:TrackedText Text="Speed (Night)" Style="{StaticResource Hud.SettingLabel}"/>
-                                <TextBlock Text="Regular zombies at night" Style="{StaticResource Hud.SettingHint}"/>
-                                <ComboBox Style="{StaticResource Hud.ComboBox}"
-                                          ItemsSource="{Binding ZombieSpeedOptions}" SelectedValue="{Binding ZombieMoveNight}"
-                                          SelectedValuePath="Value"/>
-                            </StackPanel>
-                            <StackPanel Grid.Column="4">
-                                <c:TrackedText Text="Feral Speed" Style="{StaticResource Hud.SettingLabel}"/>
-                                <TextBlock Text="Glowing-eye zombies (always active)" Style="{StaticResource Hud.SettingHint}"/>
-                                <ComboBox Style="{StaticResource Hud.ComboBox}"
-                                          ItemsSource="{Binding ZombieSpeedOptions}" SelectedValue="{Binding ZombieFeralMove}"
-                                          SelectedValuePath="Value"/>
-                            </StackPanel>
-                            <StackPanel Grid.Column="6">
-                                <c:TrackedText Text="Blood Moon Speed" Style="{StaticResource Hud.SettingLabel}"/>
-                                <TextBlock Text="Zombie speed during Blood Moon hordes" Style="{StaticResource Hud.SettingHint}"/>
-                                <ComboBox Style="{StaticResource Hud.ComboBox}"
-                                          ItemsSource="{Binding ZombieSpeedOptions}" SelectedValue="{Binding ZombieBMMove}"
-                                          SelectedValuePath="Value"/>
-                            </StackPanel>
-                        </Grid>
-                        <!-- Spawn caps row -->
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="16"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <c:TrackedText Text="Max Spawned Zombies (8–128)" Style="{StaticResource Hud.SettingLabel}"/>
-                                <TextBlock Text="Active zombies on the map at once — lower helps server performance" Style="{StaticResource Hud.SettingHint}"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="50"/></Grid.ColumnDefinitions>
-                                    <Slider Minimum="8" Maximum="128" TickFrequency="8" IsSnapToTickEnabled="True"
-                                            Value="{Binding MaxSpawnedZombies}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding MaxSpawnedZombies}" VerticalAlignment="Center"
-                                               HorizontalAlignment="Center" FontWeight="SemiBold"
-                                               Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"/>
-                                </Grid>
-                            </StackPanel>
-                            <StackPanel Grid.Column="2">
-                                <c:TrackedText Text="Max Spawned Animals (0–100)" Style="{StaticResource Hud.SettingLabel}"/>
-                                <TextBlock Text="Active animals on the map at once" Style="{StaticResource Hud.SettingHint}"/>
-                                <Grid>
-                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="50"/></Grid.ColumnDefinitions>
-                                    <Slider Minimum="0" Maximum="100" TickFrequency="10" IsSnapToTickEnabled="True"
-                                            Value="{Binding MaxSpawnedAnimals}" VerticalAlignment="Center"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding MaxSpawnedAnimals}" VerticalAlignment="Center"
-                                               HorizontalAlignment="Center" FontWeight="SemiBold"
-                                               Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"/>
-                                </Grid>
-                            </StackPanel>
-                        </Grid>
+            <!-- ══ V3 NOTICE ══════════════════════════════════════════════════ -->
+            <Border Background="{DynamicResource Hud.BlueSoft}"
+                    BorderBrush="{DynamicResource Hud.Blue}"
+                    BorderThickness="1"
+                    Padding="14,11" Margin="0,0,0,10">
+                <StackPanel Orientation="Horizontal">
+                    <c:HudIcon Kind="AlertCircleOutline" Width="16" Height="16"
+                               Foreground="{DynamicResource Hud.Blue}"
+                               VerticalAlignment="Top" Margin="0,1,10,0"/>
+                    <StackPanel>
+                        <c:TrackedText Text="V3.0 — SANDBOX CODE"
+                                       Style="{StaticResource Hud.StatCaption}"
+                                       Foreground="{DynamicResource Hud.Blue}"/>
+                        <TextBlock Style="{StaticResource Hud.Body}"
+                                   Margin="0,5,0,0"
+                                   TextWrapping="Wrap"
+                                   Text="Dead Hot Summer replaced the individual gameplay properties with a single Sandbox Code. These controls build that code for you — every choice comes from the game's own list of allowed values, so what gets written is always valid."/>
                     </StackPanel>
-                </Expander>
-            </c:HudPanel>
-
-            <!-- ══ BLOOD MOON ═════════════════════════════════════════════════ -->
-            <c:HudPanel Tint="Amber" Margin="0,0,0,8" Padding="0">
-                <Expander Header="BLOOD MOON" IsExpanded="False" Style="{StaticResource Hud.Expander}">
-                    <Grid Margin="16,4,16,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <c:TrackedText Text="Frequency (every N days)" Style="{StaticResource Hud.SettingLabel}"/>
-                            <TextBlock Text="How often a Blood Moon horde attacks. 0 = disabled" Style="{StaticResource Hud.SettingHint}"/>
-                            <Grid>
-                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="50"/></Grid.ColumnDefinitions>
-                                <Slider Minimum="0" Maximum="30" TickFrequency="1" IsSnapToTickEnabled="True"
-                                        Value="{Binding BloodMoonFrequency}" VerticalAlignment="Center"/>
-                                <TextBlock Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center"
-                                           FontWeight="SemiBold" Foreground="{DynamicResource MaterialDesign.Brush.Secondary}">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="{Binding BloodMoonFrequency, StringFormat='Day {0}'}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding BloodMoonFrequency}" Value="0">
-                                                    <Setter Property="Text" Value="Off"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </Grid>
-                        </StackPanel>
-                        <StackPanel Grid.Column="2">
-                            <c:TrackedText Text="Day Variance (±)" Style="{StaticResource Hud.SettingLabel}"/>
-                            <TextBlock Text="Random ± days so Blood Moon doesn't always land on the same day" Style="{StaticResource Hud.SettingHint}"/>
-                            <Grid>
-                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="50"/></Grid.ColumnDefinitions>
-                                <Slider Minimum="0" Maximum="5" TickFrequency="1" IsSnapToTickEnabled="True"
-                                        Value="{Binding BloodMoonRange}" VerticalAlignment="Center"/>
-                                <TextBlock Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center"
-                                           FontWeight="SemiBold" Foreground="{DynamicResource MaterialDesign.Brush.Secondary}">
-                                    <TextBlock.Style>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="Text" Value="{Binding BloodMoonRange, StringFormat='±{0}'}"/>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding BloodMoonRange}" Value="0">
-                                                    <Setter Property="Text" Value="None"/>
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
-                            </Grid>
-                        </StackPanel>
-                        <StackPanel Grid.Column="4">
-                            <c:TrackedText Text="Enemy Count (8–64)" Style="{StaticResource Hud.SettingLabel}"/>
-                            <TextBlock Text="Max zombies spawned during a Blood Moon wave" Style="{StaticResource Hud.SettingHint}"/>
-                            <Grid>
-                                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="50"/></Grid.ColumnDefinitions>
-                                <Slider Minimum="8" Maximum="64" TickFrequency="4" IsSnapToTickEnabled="True"
-                                        Value="{Binding BloodMoonEnemyCount}" VerticalAlignment="Center"/>
-                                <TextBlock Grid.Column="1" Text="{Binding BloodMoonEnemyCount}" VerticalAlignment="Center"
-                                           HorizontalAlignment="Center" FontWeight="SemiBold"
-                                           Foreground="{DynamicResource MaterialDesign.Brush.Secondary}"/>
-                            </Grid>
-                        </StackPanel>
-                    </Grid>
-                </Expander>
-            </c:HudPanel>
-
-            <!-- ══ LOOT & DROPS ═══════════════════════════════════════════════ -->
-            <c:HudPanel Tint="Green" Margin="0,0,0,8" Padding="0">
-                <Expander Header="LOOT &amp; DROPS" IsExpanded="False" Style="{StaticResource Hud.Expander}">
-                    <StackPanel Margin="16,4,16,16">
-                        <Grid Margin="0,0,0,12">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="16"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="16"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <c:TrackedText Text="Loot Abundance" Style="{StaticResource Hud.SettingLabel}"/>
-                                <TextBlock Text="How much loot spawns in containers" Style="{StaticResource Hud.SettingHint}"/>
-                                <ComboBox Style="{StaticResource Hud.ComboBox}"
-                                          ItemsSource="{Binding LootAbundanceOptions}" SelectedValue="{Binding LootAbundance}"
-                                          SelectedValuePath="Value"/>
-                            </StackPanel>
-                            <StackPanel Grid.Column="2">
-                                <c:TrackedText Text="Loot Respawn" Style="{StaticResource Hud.SettingLabel}"/>
-                                <TextBlock Text="Days before looted containers refill" Style="{StaticResource Hud.SettingHint}"/>
-                                <ComboBox Style="{StaticResource Hud.ComboBox}"
-                                          ItemsSource="{Binding LootRespawnOptions}" SelectedValue="{Binding LootRespawnDays}"
-                                          SelectedValuePath="Value"/>
-                            </StackPanel>
-                            <StackPanel Grid.Column="4">
-                                <c:TrackedText Text="Air Drops" Style="{StaticResource Hud.SettingLabel}"/>
-                                <TextBlock Text="How often a supply airdrop lands on the map" Style="{StaticResource Hud.SettingHint}"/>
-                                <ComboBox Style="{StaticResource Hud.ComboBox}"
-                                          ItemsSource="{Binding AirDropOptions}" SelectedValue="{Binding AirDropFrequency}"
-                                          SelectedValuePath="Value"/>
-                            </StackPanel>
-                        </Grid>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="16"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <c:TrackedText Text="Drop on Death" Style="{StaticResource Hud.SettingLabel}"/>
-                                <TextBlock Text="What a player drops when killed" Style="{StaticResource Hud.SettingHint}"/>
-                                <ComboBox Style="{StaticResource Hud.ComboBox}"
-                                          ItemsSource="{Binding DropOnDeathOptions}" SelectedValue="{Binding DropOnDeath}"
-                                          SelectedValuePath="Value"/>
-                            </StackPanel>
-                            <StackPanel Grid.Column="2">
-                                <c:TrackedText Text="Drop on Quit" Style="{StaticResource Hud.SettingLabel}"/>
-                                <TextBlock Text="What a player drops when they disconnect" Style="{StaticResource Hud.SettingHint}"/>
-                                <ComboBox Style="{StaticResource Hud.ComboBox}"
-                                          ItemsSource="{Binding DropOnQuitOptions}" SelectedValue="{Binding DropOnQuit}"
-                                          SelectedValuePath="Value"/>
-                            </StackPanel>
-                        </Grid>
-                    </StackPanel>
-                </Expander>
-            </c:HudPanel>
-
-            <!-- ══ LAND CLAIMS ════════════════════════════════════════════════ -->
-            <c:HudPanel Tint="Violet" Margin="0,0,0,8" Padding="0">
-                <Expander Header="LAND CLAIMS" IsExpanded="False" Style="{StaticResource Hud.Expander}">
-                    <Grid Margin="16,4,16,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <c:TrackedText Text="Claim Size" Style="{StaticResource Hud.SettingLabel}"/>
-                            <TextBlock Text="Radius of land protected around a claim block" Style="{StaticResource Hud.SettingHint}"/>
-                            <ComboBox Style="{StaticResource Hud.ComboBox}"
-                                      ItemsSource="{Binding LandClaimSizeOptions}" SelectedValue="{Binding LandClaimSize}"
-                                      SelectedValuePath="Value"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="2">
-                            <c:TrackedText Text="Claim Expiry" Style="{StaticResource Hud.SettingLabel}"/>
-                            <TextBlock Text="Days before an offline player's unclaimed land disappears" Style="{StaticResource Hud.SettingHint}"/>
-                            <ComboBox Style="{StaticResource Hud.ComboBox}"
-                                      ItemsSource="{Binding LandClaimExpiryOptions}" SelectedValue="{Binding LandClaimExpiryTime}"
-                                      SelectedValuePath="Value"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="4">
-                            <c:TrackedText Text="Offline Raid Protection" Style="{StaticResource Hud.SettingLabel}"/>
-                            <TextBlock Text="How hard land claim blocks are to break while owner is offline" Style="{StaticResource Hud.SettingHint}"/>
-                            <ComboBox Style="{StaticResource Hud.ComboBox}"
-                                      ItemsSource="{Binding LandClaimOfflineOptions}" SelectedValue="{Binding LandClaimOfflineDurabilityModifier}"
-                                      SelectedValuePath="Value"/>
-                        </StackPanel>
-                    </Grid>
-                </Expander>
-            </c:HudPanel>
-
-            <!-- ══ NEW PLAYER PROTECTION ══════════════════════════════════════ -->
-            <c:HudPanel Tint="Rust" Margin="0,0,0,8" Padding="0">
-                <Expander Header="NEW PLAYER PROTECTION" IsExpanded="False" Style="{StaticResource Hud.Expander}">
-                    <Grid Margin="16,4,16,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <c:TrackedText Text="Safe Zone Level" Style="{StaticResource Hud.SettingLabel}"/>
-                            <TextBlock Text="New players are protected from PvP until they reach this level" Style="{StaticResource Hud.SettingHint}"/>
-                            <ComboBox Style="{StaticResource Hud.ComboBox}"
-                                      ItemsSource="{Binding SafeZoneLevelOptions}" SelectedValue="{Binding PlayerSafeZoneLevel}"
-                                      SelectedValuePath="Value"/>
-                        </StackPanel>
-                        <StackPanel Grid.Column="2">
-                            <c:TrackedText Text="Safe Zone Hours" Style="{StaticResource Hud.SettingLabel}"/>
-                            <TextBlock Text="New players are protected until this many in-game hours have passed" Style="{StaticResource Hud.SettingHint}"/>
-                            <ComboBox Style="{StaticResource Hud.ComboBox}"
-                                      ItemsSource="{Binding SafeZoneHoursOptions}" SelectedValue="{Binding PlayerSafeZoneHours}"
-                                      SelectedValuePath="Value"/>
-                        </StackPanel>
-                    </Grid>
-                </Expander>
-            </c:HudPanel>
-
-            <!-- ══ PERFORMANCE ════════════════════════════════════════════════ -->
-            <c:HudPanel Tint="Blue" Margin="0,0,0,16" Padding="0">
-                <Expander Header="PERFORMANCE" IsExpanded="False" Style="{StaticResource Hud.Expander}">
-                    <Grid Margin="16,4,16,16">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="16"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <StackPanel Grid.Column="0">
-                            <c:TrackedText Text="Max View Distance" Style="{StaticResource Hud.SettingLabel}"/>
-                            <TextBlock Text="Caps how far players can render. Lower = less server CPU and RAM" Style="{StaticResource Hud.SettingHint}"/>
-                            <ComboBox Style="{StaticResource Hud.ComboBox}"
-                                      ItemsSource="{Binding ViewDistanceOptions}" SelectedValue="{Binding ServerMaxAllowedViewDistance}"
-                                      SelectedValuePath="Value"/>
-                        </StackPanel>
-                    </Grid>
-                </Expander>
-            </c:HudPanel>
-
-            <!-- Save error -->
-            <Border CornerRadius="0" Background="#33F44336" Padding="12,8" Margin="0,0,0,8"
-                    Visibility="{Binding HasSaveError, Converter={StaticResource BoolToVis}}">
-                <TextBlock Text="{Binding SaveError}" Foreground="#F44336" FontSize="12" TextWrapping="Wrap"/>
+                </StackPanel>
             </Border>
 
-            <Grid>
+            <!-- ══ DIFFICULTY ════════════════════════════════════════════════ -->
+            <c:HudPanel Header="DIFFICULTY" Tint="Rust" Margin="0,0,0,8">
+                <StackPanel>
+                    <TextBlock Style="{StaticResource Hud.SettingHint}"
+                               TextWrapping="Wrap"
+                               Margin="0,0,0,10"
+                               Text="In V3.0 difficulty is a preset over the damage multipliers — there is no longer a difficulty setting of its own. Applying one replaces every gameplay option below."/>
+                    <ItemsControl ItemsSource="{Binding DifficultyPresets}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button Style="{StaticResource Hud.Button}"
+                                        Height="30" MinWidth="130" Margin="0,0,8,8"
+                                        Command="{Binding DataContext.ApplyPresetCommand,
+                                                  RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}">
+                                    <c:TrackedText Text="{Binding Name}" LetterSpacing="0.1"
+                                                   FontFamily="{DynamicResource Hud.Mono}"
+                                                   FontSize="10.5" FontWeight="Bold"
+                                                   Foreground="{DynamicResource Hud.Fg}"
+                                                   VerticalAlignment="Center"/>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </c:HudPanel>
+
+            <!-- ══ COMBAT ════════════════════════════════════════════════════ -->
+            <c:HudPanel Tint="Red" Margin="0,0,0,8" Padding="0">
+                <Expander Header="COMBAT &amp; PROGRESSION" IsExpanded="True" Style="{StaticResource Hud.Expander}">
+                    <ItemsControl Margin="16,4,16,8"
+                                  ItemsSource="{Binding CombatOptions}"
+                                  ItemTemplate="{StaticResource SandboxOptionTemplate}"
+                                  ItemsPanel="{StaticResource TwoColumn}"/>
+                </Expander>
+            </c:HudPanel>
+
+            <!-- ══ ZOMBIES ═══════════════════════════════════════════════════ -->
+            <c:HudPanel Tint="Green" Margin="0,0,0,8" Padding="0">
+                <Expander Header="ZOMBIES" IsExpanded="True" Style="{StaticResource Hud.Expander}">
+                    <ItemsControl Margin="16,4,16,8"
+                                  ItemsSource="{Binding ZombieOptions}"
+                                  ItemTemplate="{StaticResource SandboxOptionTemplate}"
+                                  ItemsPanel="{StaticResource TwoColumn}"/>
+                </Expander>
+            </c:HudPanel>
+
+            <!-- ══ BLOOD MOON ════════════════════════════════════════════════ -->
+            <c:HudPanel Tint="Rust" Margin="0,0,0,8" Padding="0">
+                <Expander Header="BLOOD MOON" IsExpanded="True" Style="{StaticResource Hud.Expander}">
+                    <ItemsControl Margin="16,4,16,8"
+                                  ItemsSource="{Binding BloodMoonOptions}"
+                                  ItemTemplate="{StaticResource SandboxOptionTemplate}"
+                                  ItemsPanel="{StaticResource TwoColumn}"/>
+                </Expander>
+            </c:HudPanel>
+
+            <!-- ══ LOOT ══════════════════════════════════════════════════════ -->
+            <c:HudPanel Tint="Amber" Margin="0,0,0,8" Padding="0">
+                <Expander Header="LOOT &amp; DROPS" IsExpanded="True" Style="{StaticResource Hud.Expander}">
+                    <ItemsControl Margin="16,4,16,8"
+                                  ItemsSource="{Binding LootOptions}"
+                                  ItemTemplate="{StaticResource SandboxOptionTemplate}"
+                                  ItemsPanel="{StaticResource TwoColumn}"/>
+                </Expander>
+            </c:HudPanel>
+
+            <!-- ══ WORLD & TIME ══════════════════════════════════════════════ -->
+            <c:HudPanel Tint="Blue" Margin="0,0,0,8" Padding="0">
+                <Expander Header="WORLD &amp; TIME" IsExpanded="True" Style="{StaticResource Hud.Expander}">
+                    <ItemsControl Margin="16,4,16,8"
+                                  ItemsSource="{Binding WorldOptions}"
+                                  ItemTemplate="{StaticResource SandboxOptionTemplate}"
+                                  ItemsPanel="{StaticResource TwoColumn}"/>
+                </Expander>
+            </c:HudPanel>
+
+            <!-- ══ SERVER — still plain XML properties in V3 ═════════════════ -->
+            <c:HudPanel Tint="Violet" Margin="0,0,0,8" Padding="0">
+                <Expander Header="SERVER &amp; PERFORMANCE" IsExpanded="False" Style="{StaticResource Hud.Expander}">
+                    <StackPanel Margin="16,4,16,12">
+                        <TextBlock Style="{StaticResource Hud.SettingHint}"
+                                   TextWrapping="Wrap" Margin="0,0,0,12"
+                                   Text="These are still individual serverconfig.xml properties — they were never part of the sandbox system."/>
+                        <UniformGrid Columns="2">
+                            <StackPanel Margin="0,0,10,12">
+                                <c:TrackedText Text="PvP Mode" Style="{StaticResource Hud.SettingLabel}"/>
+                                <ComboBox Style="{StaticResource Hud.ComboBox}" Margin="0,4,0,0"
+                                          SelectedValuePath="Value"
+                                          ItemsSource="{Binding PlayerKillingOptions}"
+                                          SelectedValue="{Binding PlayerKillingMode}"/>
+                            </StackPanel>
+                            <StackPanel Margin="0,0,10,12">
+                                <c:TrackedText Text="Max Spawned Zombies" Style="{StaticResource Hud.SettingLabel}"/>
+                                <ComboBox Style="{StaticResource Hud.ComboBox}" Margin="0,4,0,0"
+                                          SelectedValuePath="Value"
+                                          ItemsSource="{Binding MaxZombieOptions}"
+                                          SelectedValue="{Binding MaxSpawnedZombies}"/>
+                            </StackPanel>
+                            <StackPanel Margin="0,0,10,12">
+                                <c:TrackedText Text="Max Spawned Animals" Style="{StaticResource Hud.SettingLabel}"/>
+                                <ComboBox Style="{StaticResource Hud.ComboBox}" Margin="0,4,0,0"
+                                          SelectedValuePath="Value"
+                                          ItemsSource="{Binding MaxAnimalOptions}"
+                                          SelectedValue="{Binding MaxSpawnedAnimals}"/>
+                            </StackPanel>
+                            <StackPanel Margin="0,0,10,12">
+                                <c:TrackedText Text="View Distance" Style="{StaticResource Hud.SettingLabel}"/>
+                                <ComboBox Style="{StaticResource Hud.ComboBox}" Margin="0,4,0,0"
+                                          SelectedValuePath="Value"
+                                          ItemsSource="{Binding ViewDistanceOptions}"
+                                          SelectedValue="{Binding ServerMaxAllowedViewDistance}"/>
+                            </StackPanel>
+                            <StackPanel Margin="0,0,10,12">
+                                <c:TrackedText Text="Land Claim Size" Style="{StaticResource Hud.SettingLabel}"/>
+                                <ComboBox Style="{StaticResource Hud.ComboBox}" Margin="0,4,0,0"
+                                          SelectedValuePath="Value"
+                                          ItemsSource="{Binding LandClaimSizeOptions}"
+                                          SelectedValue="{Binding LandClaimSize}"/>
+                            </StackPanel>
+                            <StackPanel Margin="0,0,10,12">
+                                <c:TrackedText Text="Land Claim Expiry" Style="{StaticResource Hud.SettingLabel}"/>
+                                <ComboBox Style="{StaticResource Hud.ComboBox}" Margin="0,4,0,0"
+                                          SelectedValuePath="Value"
+                                          ItemsSource="{Binding LandClaimExpiryOptions}"
+                                          SelectedValue="{Binding LandClaimExpiryTime}"/>
+                            </StackPanel>
+                            <StackPanel Margin="0,0,10,12">
+                                <c:TrackedText Text="Offline Claim Durability" Style="{StaticResource Hud.SettingLabel}"/>
+                                <ComboBox Style="{StaticResource Hud.ComboBox}" Margin="0,4,0,0"
+                                          SelectedValuePath="Value"
+                                          ItemsSource="{Binding LandClaimOfflineOptions}"
+                                          SelectedValue="{Binding LandClaimOfflineDurabilityModifier}"/>
+                            </StackPanel>
+                            <StackPanel Margin="0,0,10,12">
+                                <c:TrackedText Text="New Player Safe Level" Style="{StaticResource Hud.SettingLabel}"/>
+                                <ComboBox Style="{StaticResource Hud.ComboBox}" Margin="0,4,0,0"
+                                          SelectedValuePath="Value"
+                                          ItemsSource="{Binding SafeZoneLevelOptions}"
+                                          SelectedValue="{Binding PlayerSafeZoneLevel}"/>
+                            </StackPanel>
+                            <StackPanel Margin="0,0,10,12">
+                                <c:TrackedText Text="New Player Safe Hours" Style="{StaticResource Hud.SettingLabel}"/>
+                                <ComboBox Style="{StaticResource Hud.ComboBox}" Margin="0,4,0,0"
+                                          SelectedValuePath="Value"
+                                          ItemsSource="{Binding SafeZoneHoursOptions}"
+                                          SelectedValue="{Binding PlayerSafeZoneHours}"/>
+                            </StackPanel>
+                        </UniformGrid>
+                    </StackPanel>
+                </Expander>
+            </c:HudPanel>
+
+            <!-- ══ SANDBOX CODE ══════════════════════════════════════════════ -->
+            <c:HudPanel Tint="Accent" Margin="0,0,0,8" Padding="0">
+                <Expander Header="SANDBOX CODE" IsExpanded="False" Style="{StaticResource Hud.Expander}">
+                    <StackPanel Margin="16,4,16,14">
+
+                        <c:TrackedText Text="GENERATED CODE" Style="{StaticResource Hud.StatCaption}"/>
+                        <TextBlock Style="{StaticResource Hud.SettingHint}"
+                                   TextWrapping="Wrap" Margin="0,4,0,8"
+                                   Text="This is what gets written to serverconfig.xml. It updates as you change the options above."/>
+                        <Border Background="{DynamicResource ConsoleBrush}"
+                                BorderBrush="{DynamicResource Hud.Border}"
+                                BorderThickness="1"
+                                Padding="12,10">
+                            <TextBox Text="{Binding SandboxCode, Mode=OneWay}"
+                                     IsReadOnly="True"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     TextWrapping="Wrap"
+                                     FontFamily="{DynamicResource Hud.Mono}"
+                                     FontSize="11.5"
+                                     Foreground="{DynamicResource Hud.Accent}"/>
+                        </Border>
+
+                        <Rectangle Fill="{DynamicResource Hud.DashRule}" Height="1" Margin="0,16,0,14"/>
+
+                        <c:TrackedText Text="IMPORT A CODE" Style="{StaticResource Hud.StatCaption}"/>
+                        <TextBlock Style="{StaticResource Hud.SettingHint}"
+                                   TextWrapping="Wrap" Margin="0,4,0,8"
+                                   Text="Built a config in the game? Paste its code here. It gets decoded into the controls above so you can see exactly what it contains — nothing is written until you Save."/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Style="{StaticResource Hud.TextBox}"
+                                     Text="{Binding ImportCode, UpdateSourceTrigger=PropertyChanged}"
+                                     FontFamily="{DynamicResource Hud.Mono}"/>
+                            <Button Grid.Column="1"
+                                    Style="{StaticResource Hud.Button}"
+                                    Command="{Binding ImportCommand}"
+                                    IsEnabled="{Binding CanImport}"
+                                    Height="34" Width="110" Margin="8,0,0,0">
+                                <c:TrackedText Text="IMPORT" LetterSpacing="0.12"
+                                               FontFamily="{DynamicResource Hud.Mono}"
+                                               FontSize="10.5" FontWeight="Bold"
+                                               Foreground="{DynamicResource Hud.Accent}"
+                                               VerticalAlignment="Center"/>
+                            </Button>
+                        </Grid>
+
+                        <TextBlock Text="{Binding ImportStatus}"
+                                   TextWrapping="Wrap"
+                                   FontFamily="{DynamicResource Hud.Mono}"
+                                   FontSize="11"
+                                   Margin="0,10,0,0">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Foreground" Value="{DynamicResource Hud.Green}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ImportFailed}" Value="True">
+                                            <Setter Property="Foreground" Value="{DynamicResource Hud.Red}"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+
+                        <Rectangle Fill="{DynamicResource Hud.DashRule}" Height="1" Margin="0,16,0,14"/>
+
+                        <c:TrackedText Text="THEME PRESETS" Style="{StaticResource Hud.StatCaption}"/>
+                        <TextBlock Style="{StaticResource Hud.SettingHint}"
+                                   TextWrapping="Wrap" Margin="0,4,0,8"
+                                   Text="The game's built-in scenario presets. Applying one replaces every gameplay option."/>
+                        <ItemsControl ItemsSource="{Binding ThemePresets}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Style="{StaticResource Hud.Button.Ghost}"
+                                            Height="28" MinWidth="140" Margin="0,0,8,8"
+                                            Command="{Binding DataContext.ApplyPresetCommand,
+                                                      RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}">
+                                        <c:TrackedText Text="{Binding Name}" LetterSpacing="0.08"
+                                                       FontFamily="{DynamicResource Hud.Mono}"
+                                                       FontSize="10" FontWeight="Bold"
+                                                       Foreground="{DynamicResource Hud.FgMuted}"
+                                                       VerticalAlignment="Center"/>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Expander>
+            </c:HudPanel>
+
+            <!-- ══ SAVE ERROR ════════════════════════════════════════════════ -->
+            <Border Background="{DynamicResource Hud.RedSoft}"
+                    BorderBrush="{DynamicResource Hud.Red}"
+                    BorderThickness="1"
+                    Padding="12,9" Margin="0,4,0,8"
+                    Visibility="{Binding HasSaveError, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="{Binding SaveError}"
+                           Style="{StaticResource Hud.Mono.Text}"
+                           FontSize="11"
+                           Foreground="{DynamicResource Hud.Red}"
+                           TextWrapping="Wrap"/>
+            </Border>
+
+            <!-- ══ SAVED ═════════════════════════════════════════════════════ -->
+            <Border Background="{DynamicResource Hud.GreenSoft}"
+                    BorderBrush="{DynamicResource Hud.Green}"
+                    BorderThickness="1"
+                    Padding="12,9" Margin="0,4,0,8"
+                    Visibility="{Binding IsSaved, Converter={StaticResource BoolToVis}}">
+                <StackPanel Orientation="Horizontal">
+                    <c:HudIcon Kind="CheckCircle" Width="15" Height="15"
+                               Foreground="{DynamicResource Hud.Green}"
+                               VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBlock Text="Saved — SandboxCode written to serverconfig.xml. Restart the server to apply."
+                               Style="{StaticResource Hud.Mono.Text}"
+                               FontSize="11"
+                               Foreground="{DynamicResource Hud.Green}"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ══ SAVE BAR ══════════════════════════════════════════════════ -->
+            <Grid Margin="0,6,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock VerticalAlignment="Center"
                            Style="{StaticResource Hud.Body}"
+                           TextWrapping="Wrap"
                            Text="Changes are written to serverconfig.xml — restart the server to apply."/>
                 <Button Grid.Column="1"
                         Style="{StaticResource Hud.Button.Primary}"
@@ -391,7 +361,7 @@
                         Width="150" Height="32">
                     <StackPanel Orientation="Horizontal">
                         <c:HudIcon Kind="ContentSave" Width="13" Height="13"
-                                                 VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                   VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <c:TrackedText Text="SAVE CHANGES" LetterSpacing="0.12"
                                        FontFamily="{DynamicResource Hud.Mono}"
                                        FontSize="10.5" FontWeight="Bold"
@@ -404,23 +374,22 @@
         </StackPanel>
     </ScrollViewer>
 
-    <!-- Confirmation overlay -->
+    <!-- Confirmation overlay — shows the exact code before it's written -->
     <Grid Panel.ZIndex="100"
           Visibility="{Binding ConfirmPending, Converter={StaticResource BoolToVis}}"
           Background="#CC000000">
-        <c:HudPanel Tint="Amber" Padding="0" Width="400"
+        <c:HudPanel Tint="Amber" Padding="0" Width="460"
                     Background="{DynamicResource Hud.BgElevated}"
                     HorizontalAlignment="Center" VerticalAlignment="Center">
             <StackPanel>
-                <!-- Hazard-stripe header -->
                 <Grid Height="56">
                     <Rectangle Fill="{DynamicResource Hud.Surface2}"/>
                     <Rectangle Fill="{DynamicResource Hud.HazardTile}" Opacity="0.35"/>
                     <Border BorderBrush="{DynamicResource Hud.Border}" BorderThickness="0,0,0,1"/>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0">
                         <c:HudIcon Kind="ContentSave" Width="18" Height="18"
-                                                 Foreground="{DynamicResource Hud.Amber}"
-                                                 VerticalAlignment="Center" Margin="0,0,10,0"/>
+                                   Foreground="{DynamicResource Hud.Amber}"
+                                   VerticalAlignment="Center" Margin="0,0,10,0"/>
                         <c:TrackedText Text="SAVE GAME SETTINGS"
                                        Style="{StaticResource Hud.PanelHeader}"
                                        FontSize="12"
@@ -429,12 +398,24 @@
                 </Grid>
 
                 <StackPanel Margin="24,20,24,22">
-                    <TextBlock Text="Apply these settings to serverconfig.xml?"
+                    <TextBlock Text="Write this Sandbox Code to serverconfig.xml?"
                                Style="{StaticResource Hud.Body}"
                                FontSize="13" Foreground="{DynamicResource Hud.Fg}"
-                               Margin="0,0,0,6"/>
+                               Margin="0,0,0,10"/>
+
+                    <Border Background="{DynamicResource ConsoleBrush}"
+                            BorderBrush="{DynamicResource Hud.Border}"
+                            BorderThickness="1"
+                            Padding="10,8" Margin="0,0,0,12">
+                        <TextBlock Text="{Binding SandboxCode}"
+                                   FontFamily="{DynamicResource Hud.Mono}"
+                                   FontSize="11"
+                                   Foreground="{DynamicResource Hud.Accent}"
+                                   TextWrapping="Wrap"/>
+                    </Border>
+
                     <TextBlock Text="The server must be restarted before changes take effect."
-                               Style="{StaticResource Hud.Body}" Margin="0,0,0,22"/>
+                               Style="{StaticResource Hud.Body}" Margin="0,0,0,20"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                         <Button Content="CANCEL"
                                 Style="{StaticResource Hud.Button.Ghost}"
