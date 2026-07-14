@@ -11,9 +11,9 @@
 
     <!-- Keep in step with UpdateService.CurrentVersion — that's the source of truth, and the
          GitHub release must be tagged "v{that}". These only stamp the exe's file properties. -->
-    <Version>0.3.0</Version>
-    <AssemblyVersion>0.3.0.0</AssemblyVersion>
-    <FileVersion>0.3.0.0</FileVersion>
+    <Version>0.3.1</Version>
+    <AssemblyVersion>0.3.1.0</AssemblyVersion>
+    <FileVersion>0.3.1.0</FileVersion>
     <Product>7 Days to Die — Server Manager</Product>
 
     <!-- Publish as ONE portable .exe. The in-app updater downloads the .exe asset from the

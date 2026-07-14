@@ -160,7 +160,7 @@ if ($doPush) {
 }
 
 # ---- 4. GitHub release ------------------------------------------------------
-$doRelease = Ask "4. Create GitHub release $tag (uploads both exes)?"
+$doRelease = Ask "4. Create GitHub release $tag (uploads the bare exe)?"
 if ($doRelease) {
     Write-Step "gh release create $tag"
 
@@ -173,15 +173,10 @@ if ($doRelease) {
         exit 1
     }
 
-    # ORDER MATTERS. The in-app updater takes the FIRST .exe asset on the release and
-    # copies it over the running file - so the bare exe must come before the installer,
-    # or an existing install would "update" itself into the setup wizard.
+    # ONLY the bare updater exe goes on GitHub. The installer is for distribution
+    # (you hand it out yourself); it deliberately stays OFF the release so the in-app
+    # updater can never download it by mistake and launch a setup wizard mid-update.
     $assets = @($publishExe)
-    if (Test-Path $setupExe) {
-        $assets += $setupExe
-    } else {
-        Write-Warn "no installer built - releasing the bare exe only"
-    }
 
     # Does the tag already exist? gh writes "release not found" to STDERR when it
     # doesn't - and with ErrorActionPreference=Stop, PowerShell turns a native
@@ -199,9 +194,12 @@ if ($doRelease) {
         & $gh release delete $tag --repo $releaseRepo --yes
     }
 
+    # NB: this release carries the bare updater exe only, so the notes must NOT tell
+    # people to download a Setup file from here - it isn't attached. First-time users
+    # get the installer from you directly.
     $notes = Read-Host "Release notes (blank = default)"
     if ([string]::IsNullOrWhiteSpace($notes)) {
-        $notes = "Install: download SevenDaysManager-Setup-$issVer.exe`n`nExisting installs update themselves."
+        $notes = "Auto-update payload for existing installs. Existing installs update themselves on launch."
     }
 
     # Build the argument list explicitly. Passing @($a,$b) as a bare token hands gh ONE

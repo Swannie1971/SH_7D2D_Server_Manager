@@ -20,7 +20,7 @@
 
 #define MyAppName      "7 Days to Die Server Manager"
 #define MyAppShortName "SevenDaysManager"
-#define MyAppVersion   "0.3.0"
+#define MyAppVersion   "0.3.1"
 #define MyAppPublisher "Swannie"
 #define MyAppURL       "https://github.com/Swannie1971/SH_7D2D_Manager-releases"
 #define MyAppExe       "SevenDaysManager.exe"
