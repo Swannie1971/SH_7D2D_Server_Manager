@@ -183,8 +183,16 @@ if ($doRelease) {
         Write-Warn "no installer built - releasing the bare exe only"
     }
 
-    $existing = & $gh release view $tag --repo $releaseRepo 2>$null
-    if ($LASTEXITCODE -eq 0 -and $existing) {
+    # Does the tag already exist? gh writes "release not found" to STDERR when it
+    # doesn't - and with ErrorActionPreference=Stop, PowerShell turns a native
+    # command's stderr into a terminating error. So the "not found" case (the normal
+    # one!) would kill the script. Swallow stderr and judge purely by the exit code.
+    $ErrorActionPreference = 'Continue'
+    & $gh release view $tag --repo $releaseRepo *> $null
+    $exists = ($LASTEXITCODE -eq 0)
+    $ErrorActionPreference = 'Stop'
+
+    if ($exists) {
         Write-Warn "release $tag already exists on $releaseRepo"
         $recreate = Ask "  Delete and recreate it?"
         if (-not $recreate) { exit 0 }
@@ -196,7 +204,16 @@ if ($doRelease) {
         $notes = "Install: download SevenDaysManager-Setup-$issVer.exe`n`nExisting installs update themselves."
     }
 
-    & $gh release create $tag $assets --repo $releaseRepo --title $tag --notes $notes
+    # Build the argument list explicitly. Passing @($a,$b) as a bare token hands gh ONE
+    # argument containing both paths, so only the first asset ever got uploaded.
+    $ghArgs = @('release', 'create', $tag)
+    $ghArgs += $assets
+    $ghArgs += @('--repo', $releaseRepo, '--title', $tag, '--notes', $notes)
+
+    Write-Host "  uploading $($assets.Count) asset(s):"
+    $assets | ForEach-Object { Write-Host "    - $(Split-Path $_ -Leaf)" }
+
+    & $gh @ghArgs
     if ($LASTEXITCODE -ne 0) { Write-Fail "gh release create failed"; exit 1 }
 
     Write-Ok "https://github.com/$releaseRepo/releases/tag/$tag"
