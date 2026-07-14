@@ -141,7 +141,7 @@
                         Command="{Binding SendCommandCommand}"
                         IsDefault="True">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="Send" Width="13" Height="13"
+                        <c:HudIcon Kind="Send" Width="13" Height="13"
                                                  VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <c:TrackedText Text="SEND" LetterSpacing="0.12"
                                        FontFamily="{DynamicResource Hud.Mono}"

@@ -35,7 +35,7 @@
                                Fill="{DynamicResource Hud.HazardTile}" Opacity="0.35"/>
                     <Border BorderBrush="{DynamicResource Hud.Border}" BorderThickness="0,0,0,1"/>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="18,0">
-                        <materialDesign:PackIcon x:Name="TitleIcon"
+                        <c:HudIcon x:Name="TitleIcon"
                                                  Width="17" Height="17"
                                                  VerticalAlignment="Center" Margin="0,0,10,0"/>
                         <c:TrackedText x:Name="TitleText"

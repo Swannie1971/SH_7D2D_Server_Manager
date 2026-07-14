@@ -71,7 +71,7 @@
                         BorderBrush="{DynamicResource Hud.Amber}"
                         Height="30" Padding="14,0" Margin="0,0,8,0">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="Restart" Width="13" Height="13"
+                        <c:HudIcon Kind="Restart" Width="13" Height="13"
                                                  Foreground="{DynamicResource Hud.Amber}"
                                                  VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <c:TrackedText Text="RESTART NOW" LetterSpacing="0.12"
@@ -85,7 +85,7 @@
                         Style="{StaticResource Hud.Button.Primary}"
                         Height="30" Padding="14,0">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="ContentSave" Width="13" Height="13"
+                        <c:HudIcon Kind="ContentSave" Width="13" Height="13"
                                                  VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <c:TrackedText Text="APPLY" LetterSpacing="0.12"
                                        FontFamily="{DynamicResource Hud.Mono}"
@@ -174,7 +174,7 @@
                                                             CommandParameter="{Binding}"
                                                             Style="{StaticResource Hud.Button.Icon}"
                                                             Width="22" Height="22">
-                                                        <materialDesign:PackIcon Kind="Close" Width="11" Height="11"/>
+                                                        <c:HudIcon Kind="Close" Width="11" Height="11"/>
                                                     </Button>
                                                 </Grid>
                                             </Border>

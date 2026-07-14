@@ -27,7 +27,7 @@
                     <Rectangle Fill="{DynamicResource Hud.HazardTile}" Opacity="0.3"/>
                     <Border BorderBrush="{DynamicResource Hud.Border}" BorderThickness="0,0,0,1"/>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0">
-                        <materialDesign:PackIcon Kind="Update" Width="19" Height="19"
+                        <c:HudIcon Kind="Update" Width="19" Height="19"
                                                  Foreground="{DynamicResource Hud.Accent}"
                                                  VerticalAlignment="Center" Margin="0,0,11,0"/>
                         <StackPanel VerticalAlignment="Center">
@@ -112,7 +112,7 @@
                                 Width="170" Height="30"
                                 Click="Download_Click">
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="CloudDownload" Width="13" Height="13"
+                                <c:HudIcon Kind="CloudDownload" Width="13" Height="13"
                                                          VerticalAlignment="Center" Margin="0,0,6,0"/>
                                 <!-- Code-behind swaps this to "Open GitHub" when the release has
                                      no attached exe to download. -->

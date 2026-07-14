@@ -37,7 +37,7 @@
                     <Rectangle Fill="{DynamicResource Hud.HazardTile}" Opacity="0.3"/>
                     <Border BorderBrush="{DynamicResource Hud.Border}" BorderThickness="0,0,0,1"/>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0">
-                        <materialDesign:PackIcon Kind="Cog" Width="19" Height="19"
+                        <c:HudIcon Kind="Cog" Width="19" Height="19"
                                                  Foreground="{DynamicResource Hud.Accent}"
                                                  VerticalAlignment="Center" Margin="0,0,11,0"/>
                         <StackPanel VerticalAlignment="Center">
@@ -210,7 +210,7 @@
                                 Padding="12,9" Margin="0,0,0,10"
                                 Visibility="{Binding HasSaveError, Converter={StaticResource BoolToVis}}">
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="AlertOctagon" Width="15" Height="15"
+                                <c:HudIcon Kind="AlertOctagon" Width="15" Height="15"
                                                          Foreground="{DynamicResource Hud.Red}"
                                                          VerticalAlignment="Top" Margin="0,1,8,0"/>
                                 <TextBlock Text="{Binding SaveError}"
@@ -228,7 +228,7 @@
                                 Padding="12,9" Margin="0,0,0,10"
                                 Visibility="{Binding IsSaved, Converter={StaticResource BoolToVis}}">
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="CheckCircle" Width="15" Height="15"
+                                <c:HudIcon Kind="CheckCircle" Width="15" Height="15"
                                                          Foreground="{DynamicResource Hud.Green}"
                                                          VerticalAlignment="Center" Margin="0,0,8,0"/>
                                 <TextBlock Text="Config saved — serverconfig.xml written."
@@ -261,7 +261,7 @@
                                 Width="150" Height="30"
                                 Command="{Binding SaveCommand}">
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="ContentSave" Width="13" Height="13"
+                                <c:HudIcon Kind="ContentSave" Width="13" Height="13"
                                                          VerticalAlignment="Center" Margin="0,0,6,0"/>
                                 <c:TrackedText Text="SAVE CONFIG" LetterSpacing="0.12"
                                                FontFamily="{DynamicResource Hud.Mono}"

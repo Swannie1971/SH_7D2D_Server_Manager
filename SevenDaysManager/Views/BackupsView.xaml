@@ -51,18 +51,18 @@
                 <Button Command="{Binding RefreshCommand}"
                         Style="{StaticResource Hud.Button.Icon}"
                         ToolTip="Refresh" Margin="0,0,6,0">
-                    <materialDesign:PackIcon Kind="Refresh" Width="15" Height="15"/>
+                    <c:HudIcon Kind="Refresh" Width="15" Height="15"/>
                 </Button>
                 <Button Command="{Binding OpenBackupFolderCommand}"
                         Style="{StaticResource Hud.Button.Icon}"
                         ToolTip="Open backup folder in Explorer" Margin="0,0,10,0">
-                    <materialDesign:PackIcon Kind="FolderOpen" Width="15" Height="15"/>
+                    <c:HudIcon Kind="FolderOpen" Width="15" Height="15"/>
                 </Button>
                 <Button Command="{Binding CreateBackupCommand}"
                         Style="{StaticResource Hud.Button.Primary}"
                         Height="30" Padding="14,0">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="ArchivePlus" Width="13" Height="13"
+                        <c:HudIcon Kind="ArchivePlus" Width="13" Height="13"
                                                  VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <c:TrackedText Text="CREATE BACKUP" LetterSpacing="0.12"
                                        FontFamily="{DynamicResource Hud.Mono}"
@@ -81,7 +81,7 @@
                 Padding="12,8"
                 Visibility="{Binding IsServerRunning, Converter={StaticResource BoolToVis}}">
             <StackPanel Orientation="Horizontal">
-                <materialDesign:PackIcon Kind="AlertCircle" Width="15" Height="15"
+                <c:HudIcon Kind="AlertCircle" Width="15" Height="15"
                                          Foreground="{DynamicResource Hud.Amber}"
                                          VerticalAlignment="Center" Margin="0,0,9,0"/>
                 <TextBlock Style="{StaticResource Hud.Body}"
@@ -123,13 +123,13 @@
                             Width="26" Height="26" Margin="8,0,4,0"
                             ToolTip="Clear manual override — revert to auto-detect"
                             Visibility="{Binding HasManualSaveDir, Converter={StaticResource BoolToVis}}">
-                        <materialDesign:PackIcon Kind="Close" Width="12" Height="12"/>
+                        <c:HudIcon Kind="Close" Width="12" Height="12"/>
                     </Button>
                     <Button Grid.Column="3" Command="{Binding BrowseSaveFolderCommand}"
                             Style="{StaticResource Hud.Button.Icon}"
                             Width="26" Height="26"
                             ToolTip="Browse to save folder manually">
-                        <materialDesign:PackIcon Kind="FolderSearch" Width="13" Height="13"/>
+                        <c:HudIcon Kind="FolderSearch" Width="13" Height="13"/>
                     </Button>
                 </Grid>
 
@@ -193,7 +193,7 @@
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <materialDesign:PackIcon Grid.Column="0" Kind="AlertCircleOutline"
+                        <c:HudIcon Grid.Column="0" Kind="AlertCircleOutline"
                                                  Width="15" Height="15"
                                                  Foreground="{DynamicResource Hud.Amber}"
                                                  VerticalAlignment="Top" Margin="0,1,9,0"/>
@@ -225,7 +225,7 @@
                         Padding="11,8" Margin="0,8,0,0"
                         Visibility="{Binding SaveFolderExists, Converter={StaticResource InvBoolToVis}}">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="FolderAlert" Width="15" Height="15"
+                        <c:HudIcon Kind="FolderAlert" Width="15" Height="15"
                                                  Foreground="{DynamicResource Hud.Red}"
                                                  VerticalAlignment="Center" Margin="0,0,9,0"/>
                         <TextBlock Style="{StaticResource Hud.Body}"
@@ -278,7 +278,7 @@
                             </Style.Triggers>
                         </Style>
                     </StackPanel.Style>
-                    <materialDesign:PackIcon Kind="ArchiveOff" Width="44" Height="44"
+                    <c:HudIcon Kind="ArchiveOff" Width="44" Height="44"
                                              HorizontalAlignment="Center"
                                              Foreground="{DynamicResource Hud.FgFaint}"/>
                     <c:TrackedText Text="NO BACKUPS YET"
@@ -333,7 +333,7 @@
                         BorderBrush="{DynamicResource Hud.Amber}"
                         Height="34" Padding="16,0" Margin="0,0,8,0">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="Delete" Width="13" Height="13"
+                        <c:HudIcon Kind="Delete" Width="13" Height="13"
                                                  Foreground="{DynamicResource Hud.Amber}"
                                                  VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <c:TrackedText Text="DELETE" LetterSpacing="0.12"
@@ -350,7 +350,7 @@
                         Style="{StaticResource Hud.Button.Stop}"
                         Height="34" Padding="16,0">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="ArchiveArrowDown" Width="13" Height="13"
+                        <c:HudIcon Kind="ArchiveArrowDown" Width="13" Height="13"
                                                  Foreground="#12060A"
                                                  VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <c:TrackedText Text="RESTORE" LetterSpacing="0.12"

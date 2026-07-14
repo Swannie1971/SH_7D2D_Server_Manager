@@ -71,7 +71,7 @@
                             Style="{StaticResource Hud.Button.Icon}"
                             ToolTip="Add server"
                             Click="AddServerButton_Click">
-                        <materialDesign:PackIcon Kind="Plus" Width="18" Height="18"/>
+                        <c:HudIcon Kind="Plus" Width="18" Height="18"/>
                     </Button>
                 </Grid>
             </Border>
@@ -244,7 +244,7 @@
                             HorizontalAlignment="Left" Padding="10,0"
                             Click="AppSettingsButton_Click">
                         <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="Cog" Width="14" Height="14"
+                            <c:HudIcon Kind="Cog" Width="14" Height="14"
                                                      VerticalAlignment="Center" Margin="0,0,8,0"/>
                             <TextBlock Text="SETTINGS" VerticalAlignment="Center"/>
                         </StackPanel>
@@ -480,7 +480,7 @@
                                     Command="{Binding StartServerCommand}"
                                     Margin="0,0,4,4" Height="34" Padding="4,0">
                                 <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Play" Width="13" Height="13"
+                                    <c:HudIcon Kind="Play" Width="13" Height="13"
                                                              VerticalAlignment="Center" Margin="0,0,6,0"/>
                                     <c:TrackedText Text="START" LetterSpacing="0.12"
                                                    FontFamily="{DynamicResource Hud.Mono}"
@@ -494,7 +494,7 @@
                                     Command="{Binding StopServerCommand}"
                                     Margin="4,0,4,4" Height="34" Padding="4,0">
                                 <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Stop" Width="13" Height="13"
+                                    <c:HudIcon Kind="Stop" Width="13" Height="13"
                                                              VerticalAlignment="Center" Margin="0,0,6,0"/>
                                     <c:TrackedText Text="STOP" LetterSpacing="0.12"
                                                    FontFamily="{DynamicResource Hud.Mono}"
@@ -508,7 +508,7 @@
                                     Command="{Binding RestartServerCommand}"
                                     Margin="4,0,0,4" Height="34" Padding="4,0">
                                 <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="Restart" Width="13" Height="13"
+                                    <c:HudIcon Kind="Restart" Width="13" Height="13"
                                                              VerticalAlignment="Center" Margin="0,0,6,0"/>
                                     <c:TrackedText Text="RESTART" LetterSpacing="0.12"
                                                    FontFamily="{DynamicResource Hud.Mono}"
@@ -636,7 +636,7 @@
                                 <Border Background="#CC1A1A1A" Padding="8,6" CornerRadius="0">
                                     <Grid>
                                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                            <materialDesign:PackIcon Kind="AlertCircleOutline"
+                                            <c:HudIcon Kind="AlertCircleOutline"
                                                                      Foreground="#FF7043" Width="14" Height="14"
                                                                      VerticalAlignment="Center" Margin="0,0,6,0"/>
                                             <TextBlock Text="Server stopped" Foreground="#FF7043"
@@ -649,7 +649,7 @@
                                                 Click="CopyErrorLog_Click"
                                                 ToolTip="Copy log to clipboard">
                                             <StackPanel Orientation="Horizontal">
-                                                <materialDesign:PackIcon Kind="ContentCopy" Width="12" Height="12"
+                                                <c:HudIcon Kind="ContentCopy" Width="12" Height="12"
                                                                          VerticalAlignment="Center" Margin="0,0,4,0"/>
                                                 <TextBlock Text="Copy" VerticalAlignment="Center"/>
                                             </StackPanel>
@@ -697,7 +697,7 @@
                             <Button Style="{StaticResource Hud.Button.Icon}"
                                     Command="{Binding GoHomeCommand}"
                                     ToolTip="Back to cards">
-                                <materialDesign:PackIcon Kind="ArrowLeft" Width="16" Height="16"/>
+                                <c:HudIcon Kind="ArrowLeft" Width="16" Height="16"/>
                             </Button>
                             <c:TrackedText Text="{Binding ActiveDetailTitle}"
                                            Style="{StaticResource Hud.PanelHeader}"
@@ -715,7 +715,7 @@
                                              MouseLeftButtonUp="OverviewCard_Click">
                             <Grid>
                                 <StackPanel Margin="18">
-                                <materialDesign:PackIcon Kind="ViewDashboard" Style="{StaticResource Hud.NavCard.Icon}"/>
+                                <c:HudIcon Kind="ViewDashboard" Style="{StaticResource Hud.NavCard.Icon}"/>
                                 <c:TrackedText Text="OVERVIEW" Style="{StaticResource Hud.NavCard.Title}"/>
                                 <TextBlock Text="Live server stats, metrics and system info"
                                            Style="{StaticResource Hud.NavCard.Desc}"/>
@@ -728,7 +728,7 @@
                                              MouseLeftButtonUp="ConsoleCard_Click">
                             <Grid>
                                 <StackPanel Margin="18">
-                                <materialDesign:PackIcon Kind="Console" Style="{StaticResource Hud.NavCard.Icon}"/>
+                                <c:HudIcon Kind="Console" Style="{StaticResource Hud.NavCard.Icon}"/>
                                 <c:TrackedText Text="CONSOLE" Style="{StaticResource Hud.NavCard.Title}"/>
                                 <TextBlock Text="Live telnet stream and command input"
                                            Style="{StaticResource Hud.NavCard.Desc}"/>
@@ -741,7 +741,7 @@
                                              MouseLeftButtonUp="ConfigCard_Click">
                             <Grid>
                                 <StackPanel Margin="18">
-                                <materialDesign:PackIcon Kind="TuneVariant" Style="{StaticResource Hud.NavCard.Icon}"/>
+                                <c:HudIcon Kind="TuneVariant" Style="{StaticResource Hud.NavCard.Icon}"/>
                                 <c:TrackedText Text="CONFIG" Style="{StaticResource Hud.NavCard.Title}"/>
                                 <TextBlock Text="Edit serverconfig.xml — ports, world, gameplay"
                                            Style="{StaticResource Hud.NavCard.Desc}"/>
@@ -754,7 +754,7 @@
                                              MouseLeftButtonUp="GameSettingsCard_Click">
                             <Grid>
                                 <StackPanel Margin="18">
-                                <materialDesign:PackIcon Kind="GamepadVariant" Style="{StaticResource Hud.NavCard.Icon}"/>
+                                <c:HudIcon Kind="GamepadVariant" Style="{StaticResource Hud.NavCard.Icon}"/>
                                 <c:TrackedText Text="GAME SETTINGS" Style="{StaticResource Hud.NavCard.Title}"/>
                                 <TextBlock Text="Difficulty, zombies, blood moon, loot and more"
                                            Style="{StaticResource Hud.NavCard.Desc}"/>
@@ -767,7 +767,7 @@
                                              MouseLeftButtonUp="PlayersCard_Click">
                             <Grid>
                                 <StackPanel Margin="18">
-                                <materialDesign:PackIcon Kind="AccountGroup" Style="{StaticResource Hud.NavCard.Icon}"/>
+                                <c:HudIcon Kind="AccountGroup" Style="{StaticResource Hud.NavCard.Icon}"/>
                                 <c:TrackedText Text="PLAYERS" Style="{StaticResource Hud.NavCard.Title}"/>
                                 <TextBlock Text="Online list, kick, ban and broadcast"
                                            Style="{StaticResource Hud.NavCard.Desc}"/>
@@ -780,7 +780,7 @@
                                              MouseLeftButtonUp="DiscordCard_Click">
                             <Grid>
                                 <StackPanel Margin="18">
-                                <materialDesign:PackIcon Kind="MessageBadge" Style="{StaticResource Hud.NavCard.Icon}"/>
+                                <c:HudIcon Kind="MessageBadge" Style="{StaticResource Hud.NavCard.Icon}"/>
                                 <c:TrackedText Text="DISCORD" Style="{StaticResource Hud.NavCard.Title}"/>
                                 <TextBlock Text="Webhook notifications for server events"
                                            Style="{StaticResource Hud.NavCard.Desc}"/>
@@ -793,7 +793,7 @@
                                              MouseLeftButtonUp="BackupsCard_Click">
                             <Grid>
                                 <StackPanel Margin="18">
-                                <materialDesign:PackIcon Kind="Archive" Style="{StaticResource Hud.NavCard.Icon}"/>
+                                <c:HudIcon Kind="Archive" Style="{StaticResource Hud.NavCard.Icon}"/>
                                 <c:TrackedText Text="BACKUPS" Style="{StaticResource Hud.NavCard.Title}"/>
                                 <TextBlock Text="Create and restore save game backups"
                                            Style="{StaticResource Hud.NavCard.Desc}"/>
@@ -806,7 +806,7 @@
                                              MouseLeftButtonUp="ScheduleCard_Click">
                             <Grid>
                                 <StackPanel Margin="18">
-                                <materialDesign:PackIcon Kind="CalendarClock" Style="{StaticResource Hud.NavCard.Icon}"/>
+                                <c:HudIcon Kind="CalendarClock" Style="{StaticResource Hud.NavCard.Icon}"/>
                                 <c:TrackedText Text="SCHEDULE" Style="{StaticResource Hud.NavCard.Title}"/>
                                 <TextBlock Text="Automated restarts with in-game warnings"
                                            Style="{StaticResource Hud.NavCard.Desc}"/>
@@ -819,7 +819,7 @@
                                              MouseLeftButtonUp="ModsCard_Click">
                             <Grid>
                                 <StackPanel Margin="18">
-                                <materialDesign:PackIcon Kind="PuzzlePlus" Style="{StaticResource Hud.NavCard.Icon}"/>
+                                <c:HudIcon Kind="PuzzlePlus" Style="{StaticResource Hud.NavCard.Icon}"/>
                                 <c:TrackedText Text="MOD MANAGEMENT" Style="{StaticResource Hud.NavCard.Title}"/>
                                 <TextBlock Text="Install, enable and manage server mods"
                                            Style="{StaticResource Hud.NavCard.Desc}"/>
@@ -832,7 +832,7 @@
                                              MouseLeftButtonUp="ServerSettingsCard_Click">
                             <Grid>
                                 <StackPanel Margin="18">
-                                <materialDesign:PackIcon Kind="Cog" Style="{StaticResource Hud.NavCard.Icon}"/>
+                                <c:HudIcon Kind="Cog" Style="{StaticResource Hud.NavCard.Icon}"/>
                                 <c:TrackedText Text="SETTINGS" Style="{StaticResource Hud.NavCard.Title}"/>
                                 <TextBlock Text="Server settings, wipe options, danger zone"
                                            Style="{StaticResource Hud.NavCard.Desc}"/>
@@ -856,7 +856,7 @@
                             <Grid>
                             <StackPanel Margin="18">
                                 <Grid Margin="0,0,0,12">
-                                    <materialDesign:PackIcon Kind="Download"
+                                    <c:HudIcon Kind="Download"
                                                              Style="{StaticResource Hud.NavCard.Icon}"
                                                              HorizontalAlignment="Left"
                                                              Margin="0"/>

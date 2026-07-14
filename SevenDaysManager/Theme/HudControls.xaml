@@ -5,6 +5,13 @@
                     xmlns:conv="clr-namespace:SevenDaysManager.Converters"
                     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
 
+    <ResourceDictionary.MergedDictionaries>
+        <!-- Needed so Hud.NavCard.Icon can BasedOn the default HudIcon style (which carries
+             the ControlTemplate). A keyed style replaces the default outright, so without
+             that BasedOn the icon gets no template and draws nothing. -->
+        <ResourceDictionary Source="HudIcon.xaml"/>
+    </ResourceDictionary.MergedDictionaries>
+
     <!-- Zero radius, everywhere. This is the whole point. -->
     <CornerRadius x:Key="Hud.Zero">0</CornerRadius>
     <sys:Double x:Key="Hud.NoRadius">0</sys:Double>
@@ -308,8 +315,13 @@
         <Setter Property="Foreground" Value="{DynamicResource Hud.FgSubtle}"/>
     </Style>
 
-    <!-- Nav card icon: rust by default, accent on hover (trigger lives on the card) -->
-    <Style x:Key="Hud.NavCard.Icon" TargetType="materialDesign:PackIcon">
+    <!-- Nav card icon: rust by default, accent on hover (trigger lives on the card).
+         ⚠ BasedOn is REQUIRED. A keyed style REPLACES the type's default style, and the
+         default (Theme/HudIcon.xaml) is what carries HudIcon's ControlTemplate. Without
+         BasedOn the control gets no template at all — no Path is created and the icon
+         renders as empty space. (Diagnosed by walking the visual tree: path=NULL.) -->
+    <Style x:Key="Hud.NavCard.Icon" TargetType="c:HudIcon"
+           BasedOn="{StaticResource {x:Type c:HudIcon}}">
         <Setter Property="Width"      Value="26"/>
         <Setter Property="Height"     Value="26"/>
         <Setter Property="Foreground" Value="{DynamicResource Hud.Rust}"/>

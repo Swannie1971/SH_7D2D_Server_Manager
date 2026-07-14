@@ -203,7 +203,7 @@
                     Width="150" Height="32"
                     Command="{Binding SaveCommand}">
                 <StackPanel Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="ContentSave" Width="13" Height="13"
+                    <c:HudIcon Kind="ContentSave" Width="13" Height="13"
                                              VerticalAlignment="Center" Margin="0,0,6,0"/>
                     <c:TrackedText Text="SAVE CONFIG" LetterSpacing="0.12"
                                    FontFamily="{DynamicResource Hud.Mono}"

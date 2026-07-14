@@ -49,7 +49,7 @@
                         IsEnabled="{Binding Enabled}"
                         Height="30" Padding="14,0" Margin="0,0,8,0">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="Send" Width="13" Height="13"
+                        <c:HudIcon Kind="Send" Width="13" Height="13"
                                                  VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <c:TrackedText Text="SEND TEST" LetterSpacing="0.12"
                                        FontFamily="{DynamicResource Hud.Mono}"
@@ -62,7 +62,7 @@
                         Style="{StaticResource Hud.Button.Primary}"
                         Height="30" Padding="14,0">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="ContentSave" Width="13" Height="13"
+                        <c:HudIcon Kind="ContentSave" Width="13" Height="13"
                                                  VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <c:TrackedText Text="SAVE" LetterSpacing="0.12"
                                        FontFamily="{DynamicResource Hud.Mono}"

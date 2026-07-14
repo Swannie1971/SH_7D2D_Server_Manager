@@ -1,0 +1,162 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        ═══════════════════════════════════════════════════════════════════════════
+        HUD ICON GEOMETRY  —  24×24 viewbox, STROKED (not filled)
+        ═══════════════════════════════════════════════════════════════════════════
+
+        Every path here is drawn as an OUTLINE by HudIcon: 1.5px stroke, flat caps,
+        miter joins. That is the whole point of the set — MaterialDesign's PackIcon
+        geometry is *filled* and *rounded*, which fights the brutalist style.
+
+        Rules for authoring/adding a glyph:
+          • Straight segments and hard corners. Prefer 45°/90°. No curves unless the
+            shape is meaningless without one (clock face, radar sweep).
+          • Keep to the 24×24 grid, roughly a 2..22 safe area so the 1.5px stroke
+            doesn't clip at the edges.
+          • Do NOT close a path (Z) unless the shape really is a closed loop — a
+            stray Z adds a visible diagonal.
+          • Design at the intended size. These render at 13–19px, so anything with
+            more than ~8 segments turns to mush.
+
+        Naming mirrors the MaterialDesign Kind we replaced, so call sites map 1:1.
+    -->
+
+    <!-- ── Nav / structure ──────────────────────────────────────────────────── -->
+
+    <!-- ViewDashboard: four unequal panes -->
+    <Geometry x:Key="Icon.ViewDashboard">M 3,3 L 10,3 L 10,11 L 3,11 Z M 14,3 L 21,3 L 21,7 L 14,7 Z M 14,10 L 21,10 L 21,21 L 14,21 Z M 3,14 L 10,14 L 10,21 L 3,21 Z</Geometry>
+
+    <!-- Console: terminal window with a prompt caret -->
+    <Geometry x:Key="Icon.Console">M 2,4 L 22,4 L 22,20 L 2,20 Z M 6,9 L 9,12 L 6,15 M 11,15 L 17,15</Geometry>
+
+    <!-- TuneVariant: three sliders -->
+    <Geometry x:Key="Icon.TuneVariant">M 3,6 L 21,6 M 3,12 L 21,12 M 3,18 L 21,18 M 8,3 L 8,9 M 15,9 L 15,15 M 6,15 L 6,21</Geometry>
+
+    <!-- GamepadVariant: body with a d-pad cross left, two square buttons right -->
+    <Geometry x:Key="Icon.GamepadVariant">M 2,7 L 22,7 L 22,17 L 2,17 Z M 7,10 L 7,14 M 5,12 L 9,12 M 15,10 L 17,10 L 17,12 L 15,12 Z M 17,13 L 19,13 L 19,15 L 17,15 Z</Geometry>
+
+    <!-- AccountGroup: a full figure in front, a second offset behind it -->
+    <Geometry x:Key="Icon.AccountGroup">M 5,6 L 10,6 L 10,11 L 5,11 Z M 2,20 L 2,16 L 4,14 L 11,14 L 13,16 L 13,20 M 14,7 L 18,7 L 18,11 L 14,11 Z M 16,14 L 19,14 L 22,16 L 22,20</Geometry>
+
+    <!-- MessageBadge: speech box with a mark -->
+    <Geometry x:Key="Icon.MessageBadge">M 2,4 L 22,4 L 22,16 L 9,16 L 5,20 L 5,16 L 2,16 Z M 12,7 L 12,11 M 12,13 L 12,13.5</Geometry>
+
+    <!-- Archive: crate with a lid and a handle slot -->
+    <Geometry x:Key="Icon.Archive">M 2,4 L 22,4 L 22,8 L 2,8 Z M 4,8 L 4,20 L 20,20 L 20,8 M 9,12 L 15,12</Geometry>
+
+    <!-- CalendarClock: calendar with a clock face -->
+    <Geometry x:Key="Icon.CalendarClock">M 3,5 L 21,5 L 21,21 L 3,21 Z M 3,9 L 21,9 M 7,3 L 7,7 M 17,3 L 17,7 M 12,12 L 12,16 L 15,16</Geometry>
+
+    <!-- PuzzlePlus / PuzzleOutline: interlocking tile -->
+    <Geometry x:Key="Icon.PuzzlePlus">M 3,3 L 10,3 L 10,6 L 13,6 L 13,3 L 20,3 L 20,10 L 17,10 L 17,13 L 20,13 L 20,20 L 13,20 L 13,17 L 10,17 L 10,20 L 3,20 Z</Geometry>
+    <Geometry x:Key="Icon.PuzzleOutline">M 3,3 L 10,3 L 10,6 L 13,6 L 13,3 L 20,3 L 20,10 L 17,10 L 17,13 L 20,13 L 20,20 L 13,20 L 13,17 L 10,17 L 10,20 L 3,20 Z</Geometry>
+
+    <!-- Cog: square body, four square teeth on the axes, square bore.
+         An earlier attempt walked one continuous path in and out to fake teeth; at 13px it
+         collapsed into a lumpy blob with concave sides. Distinct body + teeth survives
+         downscaling because each element stays a recognisable rectangle. -->
+    <Geometry x:Key="Icon.Cog">M 6,6 L 18,6 L 18,18 L 6,18 Z M 9.5,2 L 14.5,2 L 14.5,6 M 9.5,2 L 9.5,6 M 9.5,22 L 14.5,22 L 14.5,18 M 9.5,22 L 9.5,18 M 2,9.5 L 2,14.5 L 6,14.5 M 2,9.5 L 6,9.5 M 22,9.5 L 22,14.5 L 18,14.5 M 22,9.5 L 18,9.5 M 10,10 L 14,10 L 14,14 L 10,14 Z</Geometry>
+
+    <!-- ── Transport ────────────────────────────────────────────────────────── -->
+
+    <!-- Play: hard triangle -->
+    <Geometry x:Key="Icon.Play">M 6,3 L 20,12 L 6,21 Z</Geometry>
+    <!-- Stop: square -->
+    <Geometry x:Key="Icon.Stop">M 5,5 L 19,5 L 19,19 L 5,19 Z</Geometry>
+    <!-- Restart / Refresh: a square cycle broken at the top-right, with an arrowhead.
+         No arcs — an arc rounds the silhouette, which the style forbids, and the earlier
+         arc-based Refresh rendered as a stray hook. -->
+    <!-- Open square loop: starts mid-top, runs anticlockwise all the way round, and ends
+         with a chevron arrowhead pointing back into the gap. -->
+    <!-- The gap sits mid-top; the arrowhead is a chevron ON the line, opening into the gap,
+         so it reads as the end of the loop rather than a detached tick floating above it. -->
+    <Geometry x:Key="Icon.Restart">M 11,4 L 4,4 L 4,20 L 20,20 L 20,4 L 14,4 L 16.5,1.5 M 14,4 L 16.5,6.5</Geometry>
+    <Geometry x:Key="Icon.Refresh">M 13,4 L 20,4 L 20,20 L 4,20 L 4,4 L 10,4 L 7.5,1.5 M 10,4 L 7.5,6.5</Geometry>
+
+    <!-- ── Actions ─────────────────────────────────────────────────────────── -->
+
+    <Geometry x:Key="Icon.Plus">M 12,4 L 12,20 M 4,12 L 20,12</Geometry>
+    <Geometry x:Key="Icon.Close">M 5,5 L 19,19 M 19,5 L 5,19</Geometry>
+    <Geometry x:Key="Icon.ArrowLeft">M 20,12 L 4,12 M 10,6 L 4,12 L 10,18</Geometry>
+
+    <!-- Send: paper plane, all straight edges -->
+    <Geometry x:Key="Icon.Send">M 3,11 L 21,3 L 13,21 L 11,13 Z M 11,13 L 3,11</Geometry>
+
+    <!-- ContentSave: floppy — shutter + label -->
+    <Geometry x:Key="Icon.ContentSave">M 3,3 L 17,3 L 21,7 L 21,21 L 3,21 Z M 7,3 L 7,10 L 16,10 L 16,3 M 7,15 L 17,15 L 17,21 L 7,21 Z</Geometry>
+
+    <Geometry x:Key="Icon.ContentCopy">M 8,3 L 20,3 L 20,16 L 8,16 Z M 4,8 L 4,21 L 16,21 L 16,19</Geometry>
+
+    <!-- Download / arrow into a tray -->
+    <Geometry x:Key="Icon.Download">M 12,3 L 12,15 M 7,10 L 12,15 L 17,10 M 3,19 L 21,19</Geometry>
+    <Geometry x:Key="Icon.CloudDownload">M 5,14 L 5,9 L 9,9 L 12,5 L 16,7 L 19,9 L 19,14 M 12,11 L 12,20 M 8,16 L 12,20 L 16,16</Geometry>
+    <Geometry x:Key="Icon.PackageDown">M 3,6 L 12,2 L 21,6 L 21,18 L 12,22 L 3,18 Z M 12,11 L 12,18 M 9,15 L 12,18 L 15,15</Geometry>
+    <!-- Update: a clock (octagon face + hands) — the arc-based version read as a broken pie -->
+    <Geometry x:Key="Icon.Update">M 9,3 L 15,3 L 21,9 L 21,15 L 15,21 L 9,21 L 3,15 L 3,9 Z M 12,7 L 12,12 L 16,14</Geometry>
+
+    <Geometry x:Key="Icon.Delete">M 4,6 L 20,6 M 9,6 L 9,3 L 15,3 L 15,6 M 6,6 L 6,21 L 18,21 L 18,6 M 10,10 L 10,17 M 14,10 L 14,17</Geometry>
+    <Geometry x:Key="Icon.TrashCanOutline">M 4,6 L 20,6 M 9,6 L 9,3 L 15,3 L 15,6 M 6,6 L 6,21 L 18,21 L 18,6 M 10,10 L 10,17 M 14,10 L 14,17</Geometry>
+
+    <!-- Picture frame with a mountain, plus a pencil over the corner -->
+    <Geometry x:Key="Icon.ImageEdit">M 3,4 L 15,4 L 15,10 M 3,4 L 3,19 L 17,19 L 17,15 M 3,16 L 8,11 L 11,14 M 20,7 L 13,14 L 12,18 L 16,17 L 22,10 Z</Geometry>
+
+    <Geometry x:Key="Icon.SortAlphabeticalAscending">M 4,6 L 12,6 M 4,12 L 10,12 M 4,18 L 8,18 M 17,3 L 17,21 M 13,17 L 17,21 L 21,17</Geometry>
+
+    <Geometry x:Key="Icon.Bullhorn">M 3,10 L 3,15 L 7,15 L 16,20 L 16,5 L 7,10 Z M 16,9 L 20,9 M 16,12.5 L 21,12.5 M 16,16 L 20,16</Geometry>
+
+    <!-- Web: globe as a hard octagon with a meridian + parallels. A real circle would round
+         the silhouette, and the earlier double-arc version was too fussy to read at 13px. -->
+    <Geometry x:Key="Icon.Web">M 8,3 L 16,3 L 21,8 L 21,16 L 16,21 L 8,21 L 3,16 L 3,8 Z M 3,12 L 21,12 M 12,3 L 12,21 M 6,7 L 18,7 M 6,17 L 18,17</Geometry>
+
+    <Geometry x:Key="Icon.Lock">M 5,11 L 19,11 L 19,21 L 5,21 Z M 8,11 L 8,7 L 12,4 L 16,7 L 16,11</Geometry>
+
+    <!-- ── Folders / archives ──────────────────────────────────────────────── -->
+
+    <!-- Open folder: back panel + a splayed front panel -->
+    <Geometry x:Key="Icon.FolderOpen">M 2,20 L 2,5 L 9,5 L 11,8 L 20,8 L 20,11 M 2,20 L 6,11 L 22,11 L 18,20 Z</Geometry>
+    <!-- Folder + magnifier (square lens, per the no-circles rule) -->
+    <Geometry x:Key="Icon.FolderSearch">M 2,20 L 2,5 L 9,5 L 11,8 L 21,8 L 21,12 M 2,20 L 12,20 M 12,13 L 17,13 L 17,18 L 12,18 Z M 17,18 L 21,22</Geometry>
+    <Geometry x:Key="Icon.FolderAlert">M 2,19 L 2,5 L 9,5 L 11,8 L 20,8 L 20,19 Z M 11,11 L 11,15 M 11,17 L 11,17.5</Geometry>
+
+    <Geometry x:Key="Icon.ArchivePlus">M 2,4 L 22,4 L 22,8 L 2,8 Z M 4,8 L 4,20 L 20,20 L 20,8 M 12,11 L 12,17 M 9,14 L 15,14</Geometry>
+    <Geometry x:Key="Icon.ArchiveOff">M 2,4 L 22,4 L 22,8 L 2,8 Z M 4,8 L 4,20 L 20,20 L 20,8 M 3,3 L 21,21</Geometry>
+    <Geometry x:Key="Icon.ArchiveArrowDown">M 2,4 L 22,4 L 22,8 L 2,8 Z M 4,8 L 4,20 L 20,20 L 20,8 M 12,11 L 12,17 M 9,14 L 12,17 L 15,14</Geometry>
+
+    <!-- ── Status / alerts ─────────────────────────────────────────────────── -->
+
+    <!-- Hazard triangle — the spec's preferred alert shape -->
+    <Geometry x:Key="Icon.AlertCircle">M 12,3 L 22,20 L 2,20 Z M 12,9 L 12,14 M 12,16.5 L 12,17</Geometry>
+    <Geometry x:Key="Icon.AlertCircleOutline">M 12,3 L 22,20 L 2,20 Z M 12,9 L 12,14 M 12,16.5 L 12,17</Geometry>
+    <!-- AlertOctagon: true octagon -->
+    <Geometry x:Key="Icon.AlertOctagon">M 8,2 L 16,2 L 22,8 L 22,16 L 16,22 L 8,22 L 2,16 L 2,8 Z M 12,7 L 12,13 M 12,16 L 12,16.5</Geometry>
+
+    <!-- CheckCircle: check inside an octagon (no circle) -->
+    <Geometry x:Key="Icon.CheckCircle">M 8,2 L 16,2 L 22,8 L 22,16 L 16,22 L 8,22 L 2,16 L 2,8 Z M 7,12 L 11,16 L 17,8</Geometry>
+
+    <!-- Used by HudDialog, which picks its icon from the MessageBoxImage. -->
+    <Geometry x:Key="Icon.HelpCircleOutline">M 8,2 L 16,2 L 22,8 L 22,16 L 16,22 L 8,22 L 2,16 L 2,8 Z M 9,9 L 9,7 L 15,7 L 15,12 L 12,12 L 12,15 M 12,17.5 L 12,18</Geometry>
+    <Geometry x:Key="Icon.InformationOutline">M 8,2 L 16,2 L 22,8 L 22,16 L 16,22 L 8,22 L 2,16 L 2,8 Z M 12,6 L 12,6.5 M 10,10 L 12,10 L 12,17 M 10,17 L 14,17</Geometry>
+    <Geometry x:Key="Icon.ChevronRight">M 9,5 L 16,12 L 9,19</Geometry>
+
+    <!-- ── Server / network ────────────────────────────────────────────────── -->
+
+    <!-- ServerPlus: stacked rack units + a plus -->
+    <Geometry x:Key="Icon.ServerPlus">M 3,3 L 21,3 L 21,9 L 3,9 Z M 3,12 L 15,12 L 15,18 L 3,18 Z M 6,6 L 6,6.5 M 6,15 L 6,15.5 M 19,12 L 19,20 M 15,16 L 23,16</Geometry>
+
+    <!-- Two nodes, the link between them struck through -->
+    <Geometry x:Key="Icon.LanDisconnect">M 3,4 L 10,4 L 10,9 L 3,9 Z M 14,15 L 21,15 L 21,20 L 14,20 Z M 6.5,9 L 6.5,12 L 17.5,12 L 17.5,15 M 3,3 L 21,21</Geometry>
+
+    <!-- ── Accounts ────────────────────────────────────────────────────────── -->
+
+    <!-- Card: square head + shoulders on the left, data lines on the right -->
+    <Geometry x:Key="Icon.AccountDetails">M 3,4 L 21,4 L 21,20 L 3,20 Z M 7,8 L 11,8 L 11,12 L 7,12 Z M 6,17 L 6,15 L 12,15 L 12,17 M 14,9 L 18,9 M 14,12 L 18,12 M 14,16 L 18,16</Geometry>
+
+    <!-- Head + shoulders, struck through -->
+    <Geometry x:Key="Icon.AccountOff">M 9,4 L 15,4 L 15,10 L 9,10 Z M 5,20 L 5,16 L 8,14 L 16,14 L 19,16 L 19,20 M 3,3 L 21,21</Geometry>
+
+    <!-- Head + shoulders, with a minus (remove) -->
+    <Geometry x:Key="Icon.AccountRemove">M 6,4 L 12,4 L 12,10 L 6,10 Z M 2,20 L 2,16 L 5,14 L 13,14 L 15,15.5 M 15,19 L 22,19</Geometry>
+
+</ResourceDictionary>

@@ -55,13 +55,14 @@ public partial class HudDialog : Window
     /// <summary>The icon also sets the accent: warnings amber, errors red, questions accent.</summary>
     private void ApplyIcon(MessageBoxImage icon)
     {
+        // HudIcon.Kind is a string key into Theme/HudIcons.xaml, not a PackIconKind enum.
         var (kind, tint) = icon switch
         {
-            MessageBoxImage.Error       => (PackIconKind.AlertOctagon,      HudTint.Red),
-            MessageBoxImage.Warning     => (PackIconKind.AlertCircleOutline, HudTint.Amber),
-            MessageBoxImage.Question    => (PackIconKind.HelpCircleOutline,  HudTint.Accent),
-            MessageBoxImage.Information => (PackIconKind.InformationOutline, HudTint.Blue),
-            _                           => (PackIconKind.ChevronRight,       HudTint.Accent),
+            MessageBoxImage.Error       => ("AlertOctagon",       HudTint.Red),
+            MessageBoxImage.Warning     => ("AlertCircleOutline", HudTint.Amber),
+            MessageBoxImage.Question    => ("HelpCircleOutline",  HudTint.Accent),
+            MessageBoxImage.Information => ("InformationOutline", HudTint.Blue),
+            _                           => ("ChevronRight",       HudTint.Accent),
         };
 
         TitleIcon.Kind = kind;

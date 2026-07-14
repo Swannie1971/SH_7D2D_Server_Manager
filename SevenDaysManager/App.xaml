@@ -16,6 +16,9 @@
 
                 <!-- Tactical HUD -->
                 <ResourceDictionary Source="Theme/TacticalDark.xaml"/>
+                <!-- Geometry first: HudIcon.xaml's template resolves Icon.* from it. -->
+                <ResourceDictionary Source="Theme/HudIcons.xaml"/>
+                <ResourceDictionary Source="Theme/HudIcon.xaml"/>
                 <ResourceDictionary Source="Theme/HudControls.xaml"/>
                 <ResourceDictionary Source="Theme/HudPanel.xaml"/>
             </ResourceDictionary.MergedDictionaries>

@@ -71,7 +71,7 @@
                         Style="{StaticResource Hud.Button}"
                         Height="30" Padding="12,0">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="Refresh" Width="13" Height="13"
+                        <c:HudIcon Kind="Refresh" Width="13" Height="13"
                                                  VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <c:TrackedText Text="REFRESH" LetterSpacing="0.12"
                                        FontFamily="{DynamicResource Hud.Mono}"
@@ -106,7 +106,7 @@
                             Style="{StaticResource Hud.Button.Primary}"
                             Height="34" Padding="16,0">
                         <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="Bullhorn" Width="13" Height="13"
+                            <c:HudIcon Kind="Bullhorn" Width="13" Height="13"
                                                      VerticalAlignment="Center" Margin="0,0,6,0"/>
                             <c:TrackedText Text="BROADCAST" LetterSpacing="0.12"
                                            FontFamily="{DynamicResource Hud.Mono}"
@@ -131,7 +131,7 @@
                         <ContextMenu>
                             <MenuItem Header="Player Info" Click="PlayerInfo_Click">
                                 <MenuItem.Icon>
-                                    <materialDesign:PackIcon Kind="AccountDetails"/>
+                                    <c:HudIcon Kind="AccountDetails"/>
                                 </MenuItem.Icon>
                             </MenuItem>
                         </ContextMenu>
@@ -154,7 +154,7 @@
                 <!-- Empty state: not connected -->
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"
                             Visibility="{Binding IsOffline, Converter={StaticResource BoolToVis}}">
-                    <materialDesign:PackIcon Kind="LanDisconnect" Width="44" Height="44"
+                    <c:HudIcon Kind="LanDisconnect" Width="44" Height="44"
                                              HorizontalAlignment="Center"
                                              Foreground="{DynamicResource Hud.FgFaint}"/>
                     <c:TrackedText Text="NO TELNET LINK"
@@ -179,7 +179,7 @@
                             </Style.Triggers>
                         </Style>
                     </StackPanel.Style>
-                    <materialDesign:PackIcon Kind="AccountOff" Width="44" Height="44"
+                    <c:HudIcon Kind="AccountOff" Width="44" Height="44"
                                              HorizontalAlignment="Center"
                                              Foreground="{DynamicResource Hud.FgFaint}"/>
                     <c:TrackedText Text="NO PLAYERS ONLINE"
@@ -229,7 +229,7 @@
                         BorderBrush="{DynamicResource Hud.Amber}"
                         Height="34" Padding="16,0" Margin="0,0,8,0">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="AccountRemove" Width="13" Height="13"
+                        <c:HudIcon Kind="AccountRemove" Width="13" Height="13"
                                                  Foreground="{DynamicResource Hud.Amber}"
                                                  VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <c:TrackedText Text="KICK" LetterSpacing="0.12"
@@ -246,7 +246,7 @@
                         Style="{StaticResource Hud.Button.Stop}"
                         Height="34" Padding="16,0">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="AccountOff" Width="13" Height="13"
+                        <c:HudIcon Kind="AccountOff" Width="13" Height="13"
                                                  Foreground="#12060A"
                                                  VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <c:TrackedText Text="BAN 1YR" LetterSpacing="0.12"

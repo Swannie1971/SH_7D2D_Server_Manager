@@ -390,7 +390,7 @@
                         Command="{Binding RequestSaveCommand}"
                         Width="150" Height="32">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="ContentSave" Width="13" Height="13"
+                        <c:HudIcon Kind="ContentSave" Width="13" Height="13"
                                                  VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <c:TrackedText Text="SAVE CHANGES" LetterSpacing="0.12"
                                        FontFamily="{DynamicResource Hud.Mono}"
@@ -418,7 +418,7 @@
                     <Rectangle Fill="{DynamicResource Hud.HazardTile}" Opacity="0.35"/>
                     <Border BorderBrush="{DynamicResource Hud.Border}" BorderThickness="0,0,0,1"/>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0">
-                        <materialDesign:PackIcon Kind="ContentSave" Width="18" Height="18"
+                        <c:HudIcon Kind="ContentSave" Width="18" Height="18"
                                                  Foreground="{DynamicResource Hud.Amber}"
                                                  VerticalAlignment="Center" Margin="0,0,10,0"/>
                         <c:TrackedText Text="SAVE GAME SETTINGS"

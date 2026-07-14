@@ -29,7 +29,7 @@
                             HorizontalAlignment="Right" VerticalAlignment="Bottom"
                             Margin="0,0,12,12" Height="28" Padding="12,0">
                         <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon Kind="ImageEdit" Width="12" Height="12"
+                            <c:HudIcon Kind="ImageEdit" Width="12" Height="12"
                                                      VerticalAlignment="Center" Margin="0,0,6,0"/>
                             <c:TrackedText Text="CHANGE" LetterSpacing="0.12"
                                            FontFamily="{DynamicResource Hud.Mono}"
@@ -81,7 +81,7 @@
                     HorizontalAlignment="Left"
                     Width="160" Height="32" Margin="0,0,0,24">
                 <StackPanel Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="ContentSave" Width="13" Height="13"
+                    <c:HudIcon Kind="ContentSave" Width="13" Height="13"
                                              VerticalAlignment="Center" Margin="0,0,6,0"/>
                     <c:TrackedText Text="SAVE CHANGES" LetterSpacing="0.12"
                                    FontFamily="{DynamicResource Hud.Mono}"
@@ -157,7 +157,7 @@
                                 Command="{Binding DeleteCommand}"
                                 HorizontalAlignment="Left" Width="160" Height="32">
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="TrashCanOutline" Width="13" Height="13"
+                                <c:HudIcon Kind="TrashCanOutline" Width="13" Height="13"
                                                          Foreground="{DynamicResource Hud.Red}"
                                                          VerticalAlignment="Center" Margin="0,0,6,0"/>
                                 <c:TrackedText Text="DELETE SERVER" LetterSpacing="0.12"
@@ -172,7 +172,7 @@
                     <!-- Stage 2: confirm -->
                     <StackPanel Visibility="{Binding ConfirmDelete, Converter={StaticResource BoolToVis}}">
                         <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
-                            <materialDesign:PackIcon Kind="AlertOctagon" Width="16" Height="16"
+                            <c:HudIcon Kind="AlertOctagon" Width="16" Height="16"
                                                      Foreground="{DynamicResource Hud.Red}"
                                                      VerticalAlignment="Center" Margin="0,0,9,0"/>
                             <c:TrackedText Text="ARE YOU SURE?"

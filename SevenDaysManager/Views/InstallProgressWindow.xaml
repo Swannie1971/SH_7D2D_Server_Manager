@@ -38,7 +38,7 @@
                     <Rectangle Fill="{DynamicResource Hud.HazardTile}" Opacity="0.3"/>
                     <Border BorderBrush="{DynamicResource Hud.Border}" BorderThickness="0,0,0,1"/>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0">
-                        <materialDesign:PackIcon Kind="PackageDown" Width="19" Height="19"
+                        <c:HudIcon Kind="PackageDown" Width="19" Height="19"
                                                  Foreground="{DynamicResource Hud.Accent}"
                                                  VerticalAlignment="Center" Margin="0,0,11,0"/>
                         <StackPanel VerticalAlignment="Center">
@@ -163,7 +163,7 @@
                                 Command="{Binding StartCommand}"
                                 Visibility="{Binding IsReady, Converter={StaticResource BoolToVis}}">
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="Download" Width="13" Height="13"
+                                <c:HudIcon Kind="Download" Width="13" Height="13"
                                                          VerticalAlignment="Center" Margin="0,0,6,0"/>
                                 <c:TrackedText Text="START" LetterSpacing="0.12"
                                                FontFamily="{DynamicResource Hud.Mono}"

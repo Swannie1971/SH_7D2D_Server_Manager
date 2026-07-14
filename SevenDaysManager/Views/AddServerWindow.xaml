@@ -35,7 +35,7 @@
                     <Rectangle Fill="{DynamicResource Hud.HazardTile}" Opacity="0.3"/>
                     <Border BorderBrush="{DynamicResource Hud.Border}" BorderThickness="0,0,0,1"/>
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0">
-                        <materialDesign:PackIcon Kind="ServerPlus" Width="19" Height="19"
+                        <c:HudIcon Kind="ServerPlus" Width="19" Height="19"
                                                  Foreground="{DynamicResource Hud.Accent}"
                                                  VerticalAlignment="Center" Margin="0,0,11,0"/>
                         <StackPanel VerticalAlignment="Center">
@@ -73,7 +73,7 @@
                                     Margin="0,0,10,10" Height="28" Padding="12,0"
                                     Background="#CC08080A">
                                 <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="ImageEdit" Width="13" Height="13"
+                                    <c:HudIcon Kind="ImageEdit" Width="13" Height="13"
                                                              Foreground="{DynamicResource Hud.Accent}"
                                                              VerticalAlignment="Center" Margin="0,0,6,0"/>
                                     <c:TrackedText Text="CHOOSE IMAGE" LetterSpacing="0.12"
@@ -225,7 +225,7 @@
                                 Width="150" Height="30"
                                 Click="SaveButton_Click">
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="Plus" Width="13" Height="13"
+                                <c:HudIcon Kind="Plus" Width="13" Height="13"
                                                          VerticalAlignment="Center" Margin="0,0,6,0"/>
                                 <c:TrackedText Text="ADD SERVER" LetterSpacing="0.12"
                                                FontFamily="{DynamicResource Hud.Mono}"

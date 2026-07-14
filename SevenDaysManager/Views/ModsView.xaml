@@ -49,12 +49,12 @@
                 <Button Command="{Binding OpenModsFolderCommand}"
                         Style="{StaticResource Hud.Button.Icon}"
                         ToolTip="Open Mods folder in Explorer" Margin="0,0,6,0">
-                    <materialDesign:PackIcon Kind="FolderOpen" Width="15" Height="15"/>
+                    <c:HudIcon Kind="FolderOpen" Width="15" Height="15"/>
                 </Button>
                 <Button Command="{Binding LoadCommand}"
                         Style="{StaticResource Hud.Button.Icon}"
                         ToolTip="Refresh mod list" Margin="0,0,6,0">
-                    <materialDesign:PackIcon Kind="Refresh" Width="15" Height="15"/>
+                    <c:HudIcon Kind="Refresh" Width="15" Height="15"/>
                 </Button>
 
                 <!-- Sort order -->
@@ -70,7 +70,7 @@
                                     BorderBrush="{DynamicResource Hud.BorderStrong}"
                                     BorderThickness="1">
                                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                    <materialDesign:PackIcon x:Name="SortIcon"
+                                    <c:HudIcon x:Name="SortIcon"
                                                              Kind="SortAlphabeticalAscending"
                                                              Width="13" Height="13"
                                                              Foreground="{DynamicResource Hud.Rust}"
@@ -100,7 +100,7 @@
                         Style="{StaticResource Hud.Button.Primary}"
                         Height="30" Padding="14,0">
                     <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="PackageDown" Width="13" Height="13"
+                        <c:HudIcon Kind="PackageDown" Width="13" Height="13"
                                                  VerticalAlignment="Center" Margin="0,0,6,0"/>
                         <c:TrackedText Text="INSTALL FROM ZIP" LetterSpacing="0.12"
                                        FontFamily="{DynamicResource Hud.Mono}"
@@ -142,7 +142,7 @@
                         </Style.Triggers>
                     </Style>
                 </StackPanel.Style>
-                <materialDesign:PackIcon Kind="PuzzleOutline" Width="52" Height="52"
+                <c:HudIcon Kind="PuzzleOutline" Width="52" Height="52"
                                          Foreground="{DynamicResource Hud.FgFaint}"
                                          HorizontalAlignment="Center"/>
                 <c:TrackedText Text="NO MODS INSTALLED"
@@ -235,7 +235,7 @@
                                                     </Style>
                                                 </Border.Style>
                                                 <StackPanel Orientation="Horizontal">
-                                                    <materialDesign:PackIcon Kind="Lock" Width="9" Height="9"
+                                                    <c:HudIcon Kind="Lock" Width="9" Height="9"
                                                                              Foreground="{DynamicResource Hud.Red}"
                                                                              VerticalAlignment="Center" Margin="0,0,5,0"/>
                                                     <TextBlock Text="GAME SYSTEM"
@@ -317,7 +317,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Button.Style>
-                                            <materialDesign:PackIcon Kind="Web" Width="14" Height="14"/>
+                                            <c:HudIcon Kind="Web" Width="14" Height="14"/>
                                         </Button>
 
                                         <!-- Enable / disable — locked for game system mods -->
@@ -357,7 +357,7 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Button.Style>
-                                            <materialDesign:PackIcon Kind="TrashCanOutline" Width="14" Height="14"/>
+                                            <c:HudIcon Kind="TrashCanOutline" Width="14" Height="14"/>
                                         </Button>
                                     </StackPanel>
                                 </Grid>
