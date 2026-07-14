@@ -17,6 +17,7 @@ public partial class App : Application
         Services.ThemeService.Apply(Services.ThemeService.Load());
         Services.CardBrushService.Apply(appSettings);
         Services.BackgroundImageService.Apply(appSettings);
+        Services.FontService.Apply(appSettings);
 
         DispatcherUnhandledException += OnUnhandled;
     }

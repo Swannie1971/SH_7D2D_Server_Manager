@@ -72,6 +72,24 @@
     <FontFamily x:Key="Hud.Mono">Cascadia Mono, JetBrains Mono, Consolas, Courier New</FontFamily>
     <FontFamily x:Key="Hud.Sans">Segoe UI, Inter, Arial</FontFamily>
 
+    <!-- Display face: headers and titles ONLY (PanelHeader, PageTitle, NavCard.Title,
+         SectionLabel). A slab serif carries industrial weight and, unlike the novelty
+         "horror" faces, survives 12.5px under wide tracking.
+
+         Everything else stays Hud.Mono. Ports, IPs, counts, timestamps and log output need
+         tabular alignment — a proportional face makes columns of digits ragged.
+
+         ⚠ These styles are TrackedText, which resolves ONE real glyph typeface to build its
+         GlyphRun. Keep the fallbacks to faces that actually exist, and verify any new face
+         passes TryGetGlyphTypeface before switching to it. -->
+    <FontFamily x:Key="Hud.Display">Rockwell, Bahnschrift, Segoe UI</FontFamily>
+
+    <!-- Tracking travels WITH the face — each one wants a different value (a condensed face
+         like Impact needs far more air than Rockwell, or it reads as a wall). FontService
+         replaces both entries together when the user picks a font in Settings; the header
+         styles bind LetterSpacing to this rather than hardcoding a number. -->
+    <sys:Double x:Key="Hud.Display.Tracking">0.14</sys:Double>
+
     <!-- ═══════════════════════════════════════════ TILES / TEXTURES ══ -->
 
     <!-- Engineering grid: 34x34 accent lines @ ~2.6% -->

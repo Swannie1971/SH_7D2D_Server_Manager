@@ -20,4 +20,8 @@ public class AppSettings
 
     // Empty = use the bundled default background
     public string BackgroundImagePath { get; set; } = "";
+
+    // Display face for headers and titles. Data (ports, IPs, counts, logs) always stays mono.
+    // Stored as the family name; see FontService for the allowed set and per-face tracking.
+    public string DisplayFont { get; set; } = "Rockwell";
 }

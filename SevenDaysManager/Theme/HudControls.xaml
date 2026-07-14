@@ -28,13 +28,15 @@
          same and multi-word labels read as one word). TrackedText lays out the glyphs itself
          with real per-glyph advances. See TrackedText.cs. -->
 
-    <!-- Panel header (h2): mono 11.5 / 700 / 0.16em UPPER -->
+    <!-- Panel header (h2): user-selected display face, 12 / 700 / UPPER.
+         LetterSpacing is a DynamicResource because tracking is per-face — FontService swaps
+         the family and the tracking together when the user picks a font in Settings. -->
     <Style x:Key="Hud.PanelHeader" TargetType="c:TrackedText">
-        <Setter Property="FontFamily"    Value="{DynamicResource Hud.Mono}"/>
-        <Setter Property="FontSize"      Value="11.5"/>
+        <Setter Property="FontFamily"    Value="{DynamicResource Hud.Display}"/>
+        <Setter Property="FontSize"      Value="12"/>
         <Setter Property="FontWeight"    Value="Bold"/>
         <Setter Property="Foreground"    Value="{DynamicResource Hud.Fg}"/>
-        <Setter Property="LetterSpacing" Value="0.16"/>
+        <Setter Property="LetterSpacing" Value="{DynamicResource Hud.Display.Tracking}"/>
     </Style>
 
     <!-- Section label (sidebar): mono 9 / 700 / 0.26em UPPER, RUST -->
@@ -64,13 +66,13 @@
         <Setter Property="Typography.NumeralAlignment" Value="Tabular"/>
     </Style>
 
-    <!-- Page title: mono 19 / 700 / 0.14em UPPER -->
+    <!-- Page title: user-selected display face, 19 / 700 / UPPER -->
     <Style x:Key="Hud.PageTitle" TargetType="c:TrackedText">
-        <Setter Property="FontFamily"    Value="{DynamicResource Hud.Mono}"/>
+        <Setter Property="FontFamily"    Value="{DynamicResource Hud.Display}"/>
         <Setter Property="FontSize"      Value="19"/>
         <Setter Property="FontWeight"    Value="Bold"/>
         <Setter Property="Foreground"    Value="{DynamicResource Hud.Fg}"/>
-        <Setter Property="LetterSpacing" Value="0.14"/>
+        <Setter Property="LetterSpacing" Value="{DynamicResource Hud.Display.Tracking}"/>
     </Style>
 
     <!-- Body / description: sans, normal case -->
@@ -300,11 +302,11 @@
 
     <!-- Nav card title: uppercase mono, tracked -->
     <Style x:Key="Hud.NavCard.Title" TargetType="c:TrackedText">
-        <Setter Property="FontFamily"    Value="{DynamicResource Hud.Mono}"/>
-        <Setter Property="FontSize"      Value="12"/>
+        <Setter Property="FontFamily"    Value="{DynamicResource Hud.Display}"/>
+        <Setter Property="FontSize"      Value="13"/>
         <Setter Property="FontWeight"    Value="Bold"/>
         <Setter Property="Foreground"    Value="{DynamicResource Hud.Fg}"/>
-        <Setter Property="LetterSpacing" Value="0.12"/>
+        <Setter Property="LetterSpacing" Value="{DynamicResource Hud.Display.Tracking}"/>
         <Setter Property="Margin"        Value="0,0,0,6"/>
         <Setter Property="HorizontalAlignment" Value="Left"/>
     </Style>

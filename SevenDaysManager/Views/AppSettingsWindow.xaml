@@ -50,7 +50,7 @@
                     <c:HudPanel Tint="Accent" Padding="18" Margin="0,0,0,18">
                         <StackPanel>
                             <TextBlock Style="{StaticResource Hud.Body}" Margin="0,0,0,16"
-                                       Text="The tactical palette is fixed. You control the backdrop and how translucent the panels sit over it."/>
+                                       Text="The tactical palette is fixed. You control the display font, the backdrop, and how translucent the panels sit over it."/>
 
                             <!-- Background image -->
                             <c:TrackedText Text="BACKGROUND IMAGE" Style="{StaticResource Hud.StatCaption}" Margin="0,0,0,8"/>
@@ -79,6 +79,56 @@
                                         Command="{Binding ResetBackgroundImageCommand}"
                                         Visibility="{Binding HasCustomBackground, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                             </StackPanel>
+
+                            <!-- Display font — headers and titles only; data stays mono -->
+                            <c:TrackedText Text="DISPLAY FONT" Style="{StaticResource Hud.StatCaption}" Margin="0,0,0,8"/>
+                            <ComboBox Style="{StaticResource Hud.ComboBox}"
+                                      ItemsSource="{Binding FontOptions}"
+                                      SelectedItem="{Binding DisplayFont}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <!-- Render each option IN its own face, so the list previews itself -->
+                                            <TextBlock Text="{Binding Label}"
+                                                       FontFamily="{Binding Family}"
+                                                       FontSize="13" FontWeight="Bold"
+                                                       MinWidth="110"
+                                                       VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding Note}"
+                                                       FontFamily="{DynamicResource Hud.Mono}"
+                                                       FontSize="10"
+                                                       Foreground="{DynamicResource Hud.FgFaint}"
+                                                       VerticalAlignment="Center"
+                                                       Margin="12,0,0,0"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+
+                            <!-- Live sample: this is a real TrackedText on the real styles, so it
+                                 changes the instant a font is picked. -->
+                            <Border Background="{DynamicResource Hud.Surface2}"
+                                    BorderBrush="{DynamicResource Hud.Border}"
+                                    BorderThickness="1"
+                                    Padding="12,10" Margin="0,10,0,4">
+                                <StackPanel>
+                                    <c:TrackedText Text="SERVER OVERVIEW"
+                                                   Style="{StaticResource Hud.PageTitle}"
+                                                   FontSize="16"/>
+                                    <c:TrackedText Text="BLOOD MOON — DAY 21"
+                                                   Style="{StaticResource Hud.PanelHeader}"
+                                                   Foreground="{DynamicResource Hud.Accent}"
+                                                   Margin="0,6,0,0"/>
+                                    <TextBlock Text="8/16 players · 26900 · 192.168.1.44"
+                                               Style="{StaticResource Hud.Mono.Text}"
+                                               FontSize="10.5"
+                                               Foreground="{DynamicResource Hud.FgFaint}"
+                                               Margin="0,6,0,0"/>
+                                </StackPanel>
+                            </Border>
+                            <TextBlock Style="{StaticResource Hud.SettingHint}"
+                                       Margin="0,0,0,16"
+                                       Text="Headers and titles only. Ports, IPs and counts stay monospaced so columns stay aligned."/>
 
                             <!-- Panel opacity -->
                             <Grid Margin="0,0,0,6">

@@ -136,7 +136,19 @@ public class TrackedText : FrameworkElement
 
     private GlyphRun? _run;
     private Size _runSize;
-    private string? _builtFor;   // the text the cached run was built from
+    private string? _builtFor;   // identity of everything the cached run was built from
+
+    /// <summary>
+    /// Cache key covering EVERY input to the glyph run — not just Text.
+    ///
+    /// Keying on Text alone was wrong: when the user swaps the display font in Settings the
+    /// text is unchanged, so a stale run built with the old face would be redrawn. The font
+    /// DPs are all AffectsMeasure, which normally forces a rebuild via MeasureOverride, but
+    /// OnRender can still run without a fresh measure — so the guard has to be able to see
+    /// the change by itself.
+    /// </summary>
+    private string CacheKey =>
+        $"{Text}{FontFamily?.Source}{FontSize}{FontWeight}{FontStyle}{LetterSpacing}{WordSpacingFactor}";
 
     protected override Size MeasureOverride(Size availableSize)
     {
@@ -146,11 +158,11 @@ public class TrackedText : FrameworkElement
 
     protected override void OnRender(DrawingContext dc)
     {
-        // Rebuild if the cached run doesn't match the current Text. Relying on MeasureOverride
+        // Rebuild if the cached run doesn't match the current state. Relying on MeasureOverride
         // alone is not enough: a binding can deliver Text after measure has already run (e.g. a
         // header supplied by a ControlTemplate), and AffectsRender re-renders WITHOUT re-measuring
         // — which would draw a stale run.
-        if (_run is null || !string.Equals(_builtFor, Text, StringComparison.Ordinal))
+        if (_run is null || !string.Equals(_builtFor, CacheKey, StringComparison.Ordinal))
             BuildGlyphRun();
 
         if (_run is null) return;
@@ -163,7 +175,7 @@ public class TrackedText : FrameworkElement
         _runSize = new Size(0, 0);
 
         var text = Text;
-        _builtFor = text;
+        _builtFor = CacheKey;
 
         if (string.IsNullOrEmpty(text)) return;
 

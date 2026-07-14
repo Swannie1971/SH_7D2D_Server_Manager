@@ -25,6 +25,12 @@ public partial class AppSettingsViewModel : ObservableObject
     // translucent panels are over the background image.
     [ObservableProperty] private int _cardOpacity;
 
+    // ── Display font ─────────────────────────────────────────────────────────
+    // Headers and titles only. Data stays mono — see FontService.
+    public IReadOnlyList<FontService.FontOption> FontOptions => FontService.Options;
+
+    [ObservableProperty] private FontService.FontOption _displayFont = FontService.Options[0];
+
     // ── Background image ─────────────────────────────────────────────────────
     [ObservableProperty] private string _backgroundImagePath = "";
     public bool HasCustomBackground => !string.IsNullOrWhiteSpace(BackgroundImagePath);
@@ -46,6 +52,13 @@ public partial class AppSettingsViewModel : ObservableObject
         _autoStartOnLogin    = AutoStartService.IsEnabled();
         _cardOpacity         = _appSettings.CardOpacity;
         _backgroundImagePath = _appSettings.BackgroundImagePath;
+
+        // Match on the stored family name; fall back to the default if it's unknown
+        // (e.g. an older document, or a font we've since dropped from the list).
+        _displayFont = FontService.Options.FirstOrDefault(o =>
+                           string.Equals(o.Family, _appSettings.DisplayFont,
+                                         StringComparison.OrdinalIgnoreCase))
+                       ?? FontService.Options[0];
     }
 
     [RelayCommand]
@@ -80,6 +93,10 @@ public partial class AppSettingsViewModel : ObservableObject
 
     partial void OnCardOpacityChanged(int value) => CardBrushService.Apply(value);
 
+    // Live preview: swapping the resource restyles every header immediately, no restart.
+    partial void OnDisplayFontChanged(FontService.FontOption value) =>
+        FontService.Apply(value.Family);
+
     [RelayCommand]
     private void BrowseBackgroundImage()
     {
@@ -110,6 +127,7 @@ public partial class AppSettingsViewModel : ObservableObject
         _appSettings.StartMinimized       = StartMinimized;
         _appSettings.CardOpacity          = CardOpacity;
         _appSettings.BackgroundImagePath  = BackgroundImagePath?.Trim() ?? "";
+        _appSettings.DisplayFont          = DisplayFont.Family;
         App.DataStore.SaveAppSettings(_appSettings);
         ThemeService.Apply(_settings);
     }
