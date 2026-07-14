@@ -83,16 +83,128 @@
                 </Grid>
             </Border>
 
-            <!-- ══ DIFFICULTY ════════════════════════════════════════════════ -->
-            <c:HudPanel Header="DIFFICULTY" Tint="Rust" Margin="0,0,0,8">
+            <!-- ══ DIFFICULTY ════════════════════════════════════════════════
+                 HudPanel's default Padding is 0, and its header carries its own inset. The
+                 panels below get theirs from the Expander's Margin="16,...", so this one needs
+                 a matching 16 or its content sits flush against the border while everything
+                 else is indented. -->
+            <c:HudPanel Header="DIFFICULTY" Tint="Rust" Margin="0,0,0,8" Padding="18,0,18,14">
                 <StackPanel>
+
+                    <!-- Badge on the left, live code readout on the right. -->
+                    <Grid Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                    <!-- ── Active profile badge ──────────────────────────────────
+                         Reads the preset's name while the settings match it exactly, and flips
+                         to CUSTOM the moment ANY option diverges — including one the preset
+                         never touched. Bump the air drops on Scavenger and it is no longer
+                         Scavenger, so the badge must say so. -->
+                    <Border Grid.Column="0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            BorderThickness="1"
+                            Padding="10,4">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Background"  Value="{DynamicResource Hud.GreenSoft}"/>
+                                <Setter Property="BorderBrush" Value="{DynamicResource Hud.Green}"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsCustom}" Value="True">
+                                        <Setter Property="Background"  Value="{DynamicResource Hud.AmberSoft}"/>
+                                        <Setter Property="BorderBrush" Value="{DynamicResource Hud.Amber}"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+
+                        <StackPanel Orientation="Horizontal">
+                            <c:TrackedText Text="PROFILE" LetterSpacing="0.2"
+                                           FontFamily="{DynamicResource Hud.Mono}"
+                                           FontSize="8.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource Hud.FgMuted}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,10,0"/>
+                            <c:TrackedText Text="{Binding ProfileLabel}" LetterSpacing="0.14"
+                                           FontFamily="{DynamicResource Hud.Mono}"
+                                           FontSize="10.5" FontWeight="Bold"
+                                           VerticalAlignment="Center">
+                                <c:TrackedText.Style>
+                                    <Style TargetType="c:TrackedText">
+                                        <Setter Property="Foreground" Value="{DynamicResource Hud.Green}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsCustom}" Value="True">
+                                                <Setter Property="Foreground" Value="{DynamicResource Hud.Amber}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </c:TrackedText.Style>
+                            </c:TrackedText>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- ── Live sandbox code ─────────────────────────────────────
+                         The exact string that gets written to serverconfig.xml, updating as
+                         the dropdowns change. Read-only, but selectable and copyable — it's a
+                         readout, not an input, so there's no way to type a broken code in.
+                         A TextBox (not a TextBlock) purely so the text can be selected. -->
+                    <Border Grid.Column="1"
+                            Background="{DynamicResource ConsoleBrush}"
+                            BorderBrush="{DynamicResource Hud.Border}"
+                            BorderThickness="1"
+                            Margin="16,0,0,0"
+                            Padding="10,5">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <c:TrackedText Grid.Column="0"
+                                           Text="CODE" LetterSpacing="0.2"
+                                           FontFamily="{DynamicResource Hud.Mono}"
+                                           FontSize="8.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource Hud.FgMuted}"
+                                           VerticalAlignment="Center"
+                                           Margin="0,0,10,0"/>
+
+                            <TextBox Grid.Column="1"
+                                     Text="{Binding SandboxCode, Mode=OneWay}"
+                                     IsReadOnly="True"
+                                     IsReadOnlyCaretVisible="False"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     Padding="0"
+                                     VerticalAlignment="Center"
+                                     TextWrapping="Wrap"
+                                     FontFamily="{DynamicResource Hud.Mono}"
+                                     FontSize="11"
+                                     Foreground="{DynamicResource Hud.Accent}"/>
+
+                            <Button Grid.Column="2"
+                                    Style="{StaticResource Hud.Button.Icon}"
+                                    Width="26" Height="26"
+                                    Margin="8,0,0,0"
+                                    ToolTip="Copy the sandbox code"
+                                    Command="{Binding CopyCodeCommand}">
+                                <c:HudIcon Kind="ContentCopy" Width="13" Height="13"
+                                           Foreground="{DynamicResource Hud.FgMuted}"/>
+                            </Button>
+                        </Grid>
+                    </Border>
+                    </Grid>
+
                     <!-- Hud.Body, not Hud.SettingHint: this is explanatory copy, not a sub-label.
                          SettingHint is FgFaint (#4D545B), the palette's "disabled/timestamp"
                          grey — unreadable for a paragraph, especially over the background image. -->
                     <TextBlock Style="{StaticResource Hud.Body}"
                                TextWrapping="Wrap"
                                Margin="0,0,0,12"
-                               Text="In V3.0 difficulty is a preset over the damage multipliers — there is no longer a difficulty setting of its own. Applying one replaces every gameplay option below."/>
+                               Text="In V3.0 difficulty is a preset over the damage multipliers — there is no longer a difficulty setting of its own. Applying one replaces every gameplay option below, but you can then tweak anything you like — the profile just becomes Custom."/>
                     <!-- Buttons run green -> red across the difficulty ramp, so the scale reads
                          at a glance. The colour comes from the game's own difficulty rank
                          (Severity), not from list position. -->
@@ -102,20 +214,50 @@
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Button Style="{StaticResource Hud.Button}"
-                                        Height="32" MinWidth="140" Margin="0,0,8,8"
-                                        BorderBrush="{Binding Severity, Converter={StaticResource SeverityToBrush}}"
-                                        Background="{Binding Severity, Converter={StaticResource SeverityToBrush},
-                                                             ConverterParameter=fill}"
-                                        Command="{Binding DataContext.ApplyPresetCommand,
-                                                  RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                        CommandParameter="{Binding}">
-                                    <c:TrackedText Text="{Binding Name}" LetterSpacing="0.1"
-                                                   FontFamily="{DynamicResource Hud.Mono}"
-                                                   FontSize="10.5" FontWeight="Bold"
-                                                   Foreground="{Binding Severity, Converter={StaticResource SeverityToBrush}}"
-                                                   VerticalAlignment="Center"/>
-                                </Button>
+                                <Grid Margin="0,0,8,8">
+                                    <Button Height="32" MinWidth="140"
+                                            BorderBrush="{Binding Severity, Converter={StaticResource SeverityToBrush}}"
+                                            Command="{Binding DataContext.ApplyPresetCommand,
+                                                      RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}">
+                                        <Button.Style>
+                                            <Style TargetType="Button" BasedOn="{StaticResource Hud.Button}">
+                                                <!-- Unselected: faint wash, coloured text. -->
+                                                <Setter Property="Background"
+                                                        Value="{Binding Severity, Converter={StaticResource SeverityToBrush},
+                                                                        ConverterParameter=fill}"/>
+                                                <Style.Triggers>
+                                                    <!-- Selected: filled with its own colour, dark ink on top —
+                                                         unmistakable which preset is loaded. -->
+                                                    <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                        <Setter Property="Background"
+                                                                Value="{Binding Severity, Converter={StaticResource SeverityToBrush},
+                                                                                ConverterParameter=solid}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+
+                                        <c:TrackedText Text="{Binding Name}" LetterSpacing="0.1"
+                                                       FontFamily="{DynamicResource Hud.Mono}"
+                                                       FontSize="10.5" FontWeight="Bold"
+                                                       VerticalAlignment="Center">
+                                            <c:TrackedText.Style>
+                                                <Style TargetType="c:TrackedText">
+                                                    <Setter Property="Foreground"
+                                                            Value="{Binding Severity, Converter={StaticResource SeverityToBrush}}"/>
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                            <Setter Property="Foreground"
+                                                                    Value="{Binding Severity, Converter={StaticResource SeverityToBrush},
+                                                                                    ConverterParameter=ink}"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </c:TrackedText.Style>
+                                        </c:TrackedText>
+                                    </Button>
+                                </Grid>
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
@@ -124,7 +266,7 @@
 
             <!-- ══ COMBAT ════════════════════════════════════════════════════ -->
             <c:HudPanel Tint="Red" Margin="0,0,0,8" Padding="0">
-                <Expander Header="COMBAT &amp; PROGRESSION" IsExpanded="True" Style="{StaticResource Hud.Expander}">
+                <Expander Header="COMBAT &amp; PROGRESSION" IsExpanded="False" Style="{StaticResource Hud.Expander}">
                     <ItemsControl Margin="16,4,16,8"
                                   ItemsSource="{Binding CombatOptions}"
                                   ItemTemplate="{StaticResource SandboxOptionTemplate}"
@@ -134,7 +276,7 @@
 
             <!-- ══ ZOMBIES ═══════════════════════════════════════════════════ -->
             <c:HudPanel Tint="Green" Margin="0,0,0,8" Padding="0">
-                <Expander Header="ZOMBIES" IsExpanded="True" Style="{StaticResource Hud.Expander}">
+                <Expander Header="ZOMBIES" IsExpanded="False" Style="{StaticResource Hud.Expander}">
                     <ItemsControl Margin="16,4,16,8"
                                   ItemsSource="{Binding ZombieOptions}"
                                   ItemTemplate="{StaticResource SandboxOptionTemplate}"
@@ -144,7 +286,7 @@
 
             <!-- ══ BLOOD MOON ════════════════════════════════════════════════ -->
             <c:HudPanel Tint="Rust" Margin="0,0,0,8" Padding="0">
-                <Expander Header="BLOOD MOON" IsExpanded="True" Style="{StaticResource Hud.Expander}">
+                <Expander Header="BLOOD MOON" IsExpanded="False" Style="{StaticResource Hud.Expander}">
                     <ItemsControl Margin="16,4,16,8"
                                   ItemsSource="{Binding BloodMoonOptions}"
                                   ItemTemplate="{StaticResource SandboxOptionTemplate}"
@@ -154,7 +296,7 @@
 
             <!-- ══ LOOT ══════════════════════════════════════════════════════ -->
             <c:HudPanel Tint="Amber" Margin="0,0,0,8" Padding="0">
-                <Expander Header="LOOT &amp; DROPS" IsExpanded="True" Style="{StaticResource Hud.Expander}">
+                <Expander Header="LOOT &amp; DROPS" IsExpanded="False" Style="{StaticResource Hud.Expander}">
                     <ItemsControl Margin="16,4,16,8"
                                   ItemsSource="{Binding LootOptions}"
                                   ItemTemplate="{StaticResource SandboxOptionTemplate}"
@@ -164,7 +306,7 @@
 
             <!-- ══ WORLD & TIME ══════════════════════════════════════════════ -->
             <c:HudPanel Tint="Blue" Margin="0,0,0,8" Padding="0">
-                <Expander Header="WORLD &amp; TIME" IsExpanded="True" Style="{StaticResource Hud.Expander}">
+                <Expander Header="WORLD &amp; TIME" IsExpanded="False" Style="{StaticResource Hud.Expander}">
                     <ItemsControl Margin="16,4,16,8"
                                   ItemsSource="{Binding WorldOptions}"
                                   ItemTemplate="{StaticResource SandboxOptionTemplate}"
@@ -253,26 +395,9 @@
                 <Expander Header="SANDBOX CODE" IsExpanded="False" Style="{StaticResource Hud.Expander}">
                     <StackPanel Margin="16,4,16,14">
 
-                        <c:TrackedText Text="GENERATED CODE" Style="{StaticResource Hud.StatCaption}"/>
-                        <TextBlock Style="{StaticResource Hud.Body}"
-                                   TextWrapping="Wrap" Margin="0,4,0,8"
-                                   Text="This is what gets written to serverconfig.xml. It updates as you change the options above."/>
-                        <Border Background="{DynamicResource ConsoleBrush}"
-                                BorderBrush="{DynamicResource Hud.Border}"
-                                BorderThickness="1"
-                                Padding="12,10">
-                            <TextBox Text="{Binding SandboxCode, Mode=OneWay}"
-                                     IsReadOnly="True"
-                                     Background="Transparent"
-                                     BorderThickness="0"
-                                     TextWrapping="Wrap"
-                                     FontFamily="{DynamicResource Hud.Mono}"
-                                     FontSize="11.5"
-                                     Foreground="{DynamicResource Hud.Accent}"/>
-                        </Border>
-
-                        <Rectangle Fill="{DynamicResource Hud.DashRule}" Height="1" Margin="0,16,0,14"/>
-
+                        <!-- The generated code itself lives in the always-visible readout at the
+                             top of the page, so it isn't repeated here. This panel is just
+                             import + the themed presets. -->
                         <c:TrackedText Text="IMPORT A CODE" Style="{StaticResource Hud.StatCaption}"/>
                         <TextBlock Style="{StaticResource Hud.Body}"
                                    TextWrapping="Wrap" Margin="0,4,0,8"

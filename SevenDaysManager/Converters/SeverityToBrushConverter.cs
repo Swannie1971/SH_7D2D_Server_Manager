@@ -14,8 +14,13 @@ namespace SevenDaysManager.Converters;
 /// muddy olive around the middle. Two segments keep every stop a colour that exists in the
 /// palette.
 ///
-/// <para>Pass "fill" as the parameter for the translucent background; anything else (or
-/// nothing) yields the solid border colour.</para>
+/// <para>Parameter selects the variant:
+/// <list type="bullet">
+///   <item><c>"fill"</c> — faint translucent wash, for an unselected button's background.</item>
+///   <item><c>"solid"</c> — full-strength, for the SELECTED button's background.</item>
+///   <item><c>"ink"</c> — near-black, for text sitting on a "solid" fill.</item>
+///   <item>anything else — the plain colour, for borders and text.</item>
+/// </list></para>
 /// </summary>
 public sealed class SeverityToBrushConverter : IValueConverter
 {
@@ -39,8 +44,21 @@ public sealed class SeverityToBrushConverter : IValueConverter
             ? Lerp(Safe,    Caution, t * 2)
             : Lerp(Caution, Lethal, (t - 0.5) * 2);
 
-        var isFill = parameter as string == "fill";
-        if (isFill) color.A = 0x22;   // faint wash; the border carries the signal
+        switch (parameter as string)
+        {
+            case "fill":
+                // Faint wash; the border carries the signal.
+                color.A = 0x22;
+                break;
+
+            case "ink":
+                // Text to sit ON a "solid" fill. The ramp spans green → amber → red, all of
+                // which are light enough that a near-black reads cleanly — whereas the theme's
+                // AccentInk is tuned for the bright accent green and disappears against the
+                // muted end of the ramp.
+                color = Color.FromRgb(0x0A, 0x0B, 0x0D);
+                break;
+        }
 
         var brush = new SolidColorBrush(color);
         brush.Freeze();

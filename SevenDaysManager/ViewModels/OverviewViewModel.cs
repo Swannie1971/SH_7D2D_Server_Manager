@@ -139,9 +139,17 @@ public partial class OverviewViewModel : ObservableObject, IAsyncDisposable
     /// Name the difficulty behind a sandbox code.
     ///
     /// V3.0 has no GameDifficulty property any more — the six difficulty levels are just
-    /// presets over the damage multipliers. So we match on those six fields rather than the
-    /// whole code: a config that picked "Warrior" and then changed the loot rate is still
-    /// Warrior difficulty, and should say so.
+    /// presets over the damage multipliers. Two questions, so two comparisons:
+    ///
+    /// <list type="bullet">
+    ///   <item>Which difficulty TIER is it? Compare only the six always-written fields, so a
+    ///     config that picked Warrior and then raised the loot rate still reads as Warrior.</item>
+    ///   <item>Has it been tweaked? Compare the WHOLE state — any difference at all, including
+    ///     an option the preset never touched, means it's no longer stock.</item>
+    /// </list>
+    ///
+    /// So a tweaked Warrior reports "Warrior (modified)": you get the tier and the fact that
+    /// it isn't the stock preset.
     /// </summary>
     private static string DescribeDifficulty(string? sandboxCode)
     {
@@ -157,12 +165,18 @@ public partial class OverviewViewModel : ObservableObject, IAsyncDisposable
         foreach (var preset in SandboxSettings.Presets.Where(p => p.IsDifficulty))
         {
             var theirs = SandboxCodeService.Decode(preset.Code);
-            var match = keyIds.All(id =>
+
+            var sameTier = keyIds.All(id =>
                 mine.TryGetValue(id, out var a) &&
                 theirs.TryGetValue(id, out var b) &&
                 a == b);
 
-            if (match) return preset.Name;
+            if (!sameTier) continue;
+
+            var stock = mine.Count == theirs.Count &&
+                        mine.All(kv => theirs.TryGetValue(kv.Key, out var v) && v == kv.Value);
+
+            return stock ? preset.Name : $"{preset.Name} (modified)";
         }
 
         return "Custom";

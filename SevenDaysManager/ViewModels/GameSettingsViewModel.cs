@@ -118,12 +118,55 @@ public partial class GameSettingsViewModel : ObservableObject
     public bool   ConfigExists => _configService.ConfigExists(_server.InstallDir);
 
     /// <summary>The six stock difficulty presets, as one-click buttons.</summary>
-    public IReadOnlyList<SandboxPreset> DifficultyPresets { get; } =
-        SandboxSettings.Presets.Where(p => p.IsDifficulty).ToList();
+    public IReadOnlyList<PresetButtonViewModel> DifficultyPresets { get; } =
+        SandboxSettings.Presets.Where(p => p.IsDifficulty)
+                               .Select(p => new PresetButtonViewModel(p)).ToList();
 
     /// <summary>The themed presets (Caveman Life, Dying World…).</summary>
-    public IReadOnlyList<SandboxPreset> ThemePresets { get; } =
-        SandboxSettings.Presets.Where(p => !p.IsDifficulty).ToList();
+    public IReadOnlyList<PresetButtonViewModel> ThemePresets { get; } =
+        SandboxSettings.Presets.Where(p => !p.IsDifficulty)
+                               .Select(p => new PresetButtonViewModel(p)).ToList();
+
+    private IEnumerable<PresetButtonViewModel> AllPresets =>
+        DifficultyPresets.Concat(ThemePresets);
+
+    // ── Which preset are we on? ───────────────────────────────────────────────
+
+    /// <summary>Name of the preset the current settings exactly match, or null if none do.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsCustom))]
+    [NotifyPropertyChangedFor(nameof(ProfileLabel))]
+    private string? _activePreset;
+
+    /// <summary>True when the settings don't match any stock preset — i.e. a custom profile.</summary>
+    public bool IsCustom => ActivePreset is null;
+
+    /// <summary>What the badge reads: "SCAVENGER" or "CUSTOM".</summary>
+    public string ProfileLabel => ActivePreset?.ToUpperInvariant() ?? "CUSTOM";
+
+    /// <summary>
+    /// Work out which preset (if any) the current state is, and light up its button.
+    ///
+    /// The comparison is over the FULL decoded state, not just the difficulty fields: change
+    /// the air-drop rate on Scavenger and it is no longer Scavenger, even though the damage
+    /// multipliers still match. Anything that isn't an exact match is CUSTOM.
+    /// </summary>
+    private void RefreshActivePreset()
+    {
+        string? match = null;
+
+        foreach (var vm in AllPresets)
+        {
+            var theirs = SandboxCodeService.Decode(vm.Preset.Code);
+            var same   = _sandbox.Count == theirs.Count &&
+                         _sandbox.All(kv => theirs.TryGetValue(kv.Key, out var v) && v == kv.Value);
+
+            vm.IsActive = same;
+            if (same) match = vm.Preset.Name;
+        }
+
+        ActivePreset = match;
+    }
 
     // ── Still-valid XML option lists ──────────────────────────────────────────
 
@@ -275,21 +318,34 @@ public partial class GameSettingsViewModel : ObservableObject
         OnPropertyChanged(nameof(WorldOptions));
     }
 
-    /// <summary>Re-encode the full sandbox state (not just the options we show).</summary>
-    private void RefreshCode() => SandboxCode = SandboxCodeService.Encode(_sandbox);
-
-    /// <summary>Apply a stock preset — this is what "difficulty" now means in V3.0.</summary>
-    [RelayCommand]
-    private void ApplyPreset(SandboxPreset? preset)
+    /// <summary>
+    /// Re-encode the full sandbox state (not just the options we show), and re-evaluate which
+    /// preset — if any — it now matches. Every path that mutates _sandbox calls this, so the
+    /// code preview and the CUSTOM badge can never drift from the actual settings.
+    /// </summary>
+    private void RefreshCode()
     {
-        if (preset is null) return;
+        SandboxCode = SandboxCodeService.Encode(_sandbox);
+        RefreshActivePreset();
+    }
 
-        // A preset REPLACES the whole sandbox state, exactly as picking it in-game would.
-        _sandbox = SandboxCodeService.Decode(preset.Code);
+    /// <summary>
+    /// Apply a stock preset — this is what "difficulty" now means in V3.0.
+    ///
+    /// A preset is a STARTING POINT, not a mode. It replaces the whole state, but nothing
+    /// stops the user then tweaking individual options; the badge just flips to CUSTOM.
+    /// </summary>
+    [RelayCommand]
+    private void ApplyPreset(PresetButtonViewModel? button)
+    {
+        if (button is null) return;
+
+        // Replaces the whole sandbox state, exactly as picking it in-game would.
+        _sandbox = SandboxCodeService.Decode(button.Preset.Code);
         BuildOptions();
         RefreshCode();
 
-        ImportStatus = $"Applied preset: {preset.Name}";
+        ImportStatus = $"Applied preset: {button.Preset.Name}";
         ImportFailed = false;
         IsSaved      = false;
     }
@@ -321,6 +377,25 @@ public partial class GameSettingsViewModel : ObservableObject
         ImportFailed = false;
         ImportCode   = "";
         IsSaved      = false;
+    }
+
+    /// <summary>Copy the current code, so it can be pasted into the game or another panel.</summary>
+    [RelayCommand]
+    private void CopyCode()
+    {
+        if (string.IsNullOrWhiteSpace(SandboxCode)) return;
+        try
+        {
+            System.Windows.Clipboard.SetText(SandboxCode);
+            ImportStatus = "Sandbox code copied to the clipboard.";
+            ImportFailed = false;
+        }
+        catch (Exception ex)
+        {
+            // The clipboard can be locked by another process; not worth failing the whole tab.
+            ImportStatus = $"Could not copy: {ex.Message}";
+            ImportFailed = true;
+        }
     }
 
     [RelayCommand]
