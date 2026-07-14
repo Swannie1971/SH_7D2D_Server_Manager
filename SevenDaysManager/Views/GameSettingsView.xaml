@@ -40,25 +40,45 @@
 
             <c:HudTitle Title="GAME SETTINGS" HorizontalAlignment="Left" Margin="2,0,0,10"/>
 
-            <!-- ══ V3 NOTICE ══════════════════════════════════════════════════ -->
-            <Border Background="{DynamicResource Hud.BlueSoft}"
-                    BorderBrush="{DynamicResource Hud.Blue}"
+            <!-- ══ V3 NOTICE ══════════════════════════════════════════════════
+                 Amber, not blue: this isn't trivia. Anyone upgrading from an older
+                 build had their difficulty/loot/zombie settings silently doing
+                 nothing, so it needs to read as a warning.
+
+                 ⚠ Grid, not a horizontal StackPanel. A StackPanel measures its
+                 children against INFINITE width, so TextWrapping never engages and
+                 the text runs off the edge. The star column is what gives the
+                 TextBlock a real width to wrap into. -->
+            <Border Background="{DynamicResource Hud.AmberSoft}"
+                    BorderBrush="{DynamicResource Hud.Amber}"
                     BorderThickness="1"
                     Padding="14,11" Margin="0,0,0,10">
-                <StackPanel Orientation="Horizontal">
-                    <c:HudIcon Kind="AlertCircleOutline" Width="16" Height="16"
-                               Foreground="{DynamicResource Hud.Blue}"
-                               VerticalAlignment="Top" Margin="0,1,10,0"/>
-                    <StackPanel>
-                        <c:TrackedText Text="V3.0 — SANDBOX CODE"
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <c:HudIcon Grid.Column="0"
+                               Kind="AlertOctagon" Width="17" Height="17"
+                               Foreground="{DynamicResource Hud.Amber}"
+                               VerticalAlignment="Top" Margin="0,1,11,0"/>
+
+                    <StackPanel Grid.Column="1">
+                        <c:TrackedText Text="V3.0 — GAMEPLAY MOVED TO SANDBOX CODE"
                                        Style="{StaticResource Hud.StatCaption}"
-                                       Foreground="{DynamicResource Hud.Blue}"/>
+                                       Foreground="{DynamicResource Hud.Amber}"/>
                         <TextBlock Style="{StaticResource Hud.Body}"
-                                   Margin="0,5,0,0"
+                                   Margin="0,6,0,0"
                                    TextWrapping="Wrap"
-                                   Text="Dead Hot Summer replaced the individual gameplay properties with a single Sandbox Code. These controls build that code for you — every choice comes from the game's own list of allowed values, so what gets written is always valid."/>
+                                   Foreground="{DynamicResource Hud.Fg}"
+                                   Text="Dead Hot Summer removed the individual gameplay properties from serverconfig.xml — difficulty, XP, zombie speeds, blood moon and loot are now packed into a single Sandbox Code. Older builds of this app kept writing the old properties, which the game silently ignores."/>
+                        <TextBlock Style="{StaticResource Hud.Body}"
+                                   Margin="0,6,0,0"
+                                   TextWrapping="Wrap"
+                                   Text="The controls below build that code for you. Every choice comes from the game's own list of allowed values, so what gets written is always valid."/>
                     </StackPanel>
-                </StackPanel>
+                </Grid>
             </Border>
 
             <!-- ══ DIFFICULTY ════════════════════════════════════════════════ -->
