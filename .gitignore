@@ -26,6 +26,9 @@ images/
 publish.binlog
 *.binlog
 
+# Built installers (the .iss script IS tracked; its output isn't)
+installer/output/
+
 # Bundled tools (not source)
 SevenDaysManager/rcedit-x64.exe
 
