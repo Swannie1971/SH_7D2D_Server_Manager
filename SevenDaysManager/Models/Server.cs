@@ -1,10 +1,38 @@
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+
 namespace SevenDaysManager.Models;
 
-public class Server
+public class Server : INotifyPropertyChanged
 {
+    // Minimal, hand-rolled INotifyPropertyChanged rather than converting the whole class to
+    // ObservableObject/[ObservableProperty] — Server is LiteDB-persisted with ~40 plain
+    // properties, and a full conversion is a lot of surface area to touch for what's actually a
+    // one-property problem.
+    //
+    // Status is the only property the server-list row's DataTriggers bind to (see
+    // MainWindow.xaml's ListBox DataTemplate), and it never raised change notifications. WPF had
+    // no way to know the row needed re-rendering when Status changed, so MainViewModel worked
+    // around it with Servers.RemoveAt(idx) + Servers.Insert(idx, server) to force the ListBox to
+    // re-template the item — but removing an item from an ObservableCollection that a Selector
+    // is bound to clears the Selector's SelectedItem SYNCHRONOUSLY, before the Insert ever runs.
+    // That pushed a blank Server back through the two-way SelectedServer binding, which
+    // MainViewModel correctly saw as "the selection changed" and closed whatever detail card was
+    // open — every single time a server's status changed, including just starting one.
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    private void OnPropertyChanged([CallerMemberName] string? name = null) =>
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
     public string Name { get; set; } = "";
-    public string Status { get; set; } = ServerStatus.Stopped;
+
+    private string _status = ServerStatus.Stopped;
+    public string Status
+    {
+        get => _status;
+        set { if (_status != value) { _status = value; OnPropertyChanged(); } }
+    }
 
     // File system
     public string InstallDir { get; set; } = "";

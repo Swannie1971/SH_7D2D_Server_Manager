@@ -233,28 +233,36 @@
                 </ListBox.ItemTemplate>
             </ListBox>
 
-            <!-- SYSTEM strip: app settings + version -->
+            <!-- SYSTEM strip: app settings + version/credit -->
             <Border Grid.Row="3"
                     Background="{DynamicResource Hud.BgElevated}"
                     BorderThickness="0,1,0,0"
                     BorderBrush="{DynamicResource Hud.Border}"
                     Padding="12,10">
-                <Grid>
-                    <Button Style="{StaticResource Hud.Button.Ghost}"
-                            HorizontalAlignment="Left" Padding="10,0"
-                            Click="AppSettingsButton_Click">
-                        <StackPanel Orientation="Horizontal">
-                            <c:HudIcon Kind="Cog" Width="14" Height="14"
-                                                     VerticalAlignment="Center" Margin="0,0,8,0"/>
-                            <TextBlock Text="SETTINGS" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-                    <TextBlock Text="{Binding AppVersion}"
-                               HorizontalAlignment="Right" VerticalAlignment="Center"
+                <StackPanel>
+                    <Grid>
+                        <Button Style="{StaticResource Hud.Button.Ghost}"
+                                HorizontalAlignment="Left" Padding="10,0"
+                                Click="AppSettingsButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <c:HudIcon Kind="Cog" Width="14" Height="14"
+                                                         VerticalAlignment="Center" Margin="0,0,8,0"/>
+                                <TextBlock Text="SETTINGS" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <TextBlock Text="{Binding AppVersion}"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center"
+                                   Style="{StaticResource Hud.Mono.Text}"
+                                   FontSize="10" FontWeight="Bold"
+                                   Foreground="{DynamicResource Hud.Accent}"/>
+                    </Grid>
+                    <TextBlock Text="Developed by Swannie"
+                               HorizontalAlignment="Left"
                                Style="{StaticResource Hud.Mono.Text}"
-                               FontSize="10" FontWeight="Bold"
-                               Foreground="{DynamicResource Hud.Accent}"/>
-                </Grid>
+                               FontSize="9"
+                               Foreground="{DynamicResource Hud.FgFaint}"
+                               Margin="10,6,0,0"/>
+                </StackPanel>
             </Border>
 
             <!-- ⚠ Hazard rail — dashed rust ticks down the sidebar's outer edge.
@@ -491,7 +499,7 @@
                             </Button>
                             <!-- STOP: chamfered red — destructive -->
                             <Button Style="{StaticResource Hud.Button.Stop}"
-                                    Command="{Binding StopServerCommand}"
+                                    Click="StopServerButton_Click"
                                     Margin="4,0,4,4" Height="34" Padding="4,0">
                                 <StackPanel Orientation="Horizontal">
                                     <c:HudIcon Kind="Stop" Width="13" Height="13"
@@ -506,6 +514,7 @@
                             <!-- RESTART: ghost outline -->
                             <Button Style="{StaticResource Hud.Button.Restart}"
                                     Command="{Binding RestartServerCommand}"
+                                    IsEnabled="{Binding SelectedServerRunning}"
                                     Margin="4,0,0,4" Height="34" Padding="4,0">
                                 <StackPanel Orientation="Horizontal">
                                     <c:HudIcon Kind="Restart" Width="13" Height="13"

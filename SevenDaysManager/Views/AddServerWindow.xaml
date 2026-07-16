@@ -92,6 +92,37 @@
                             <c:TrackedText Text="SERVER NAME" Style="{StaticResource Hud.FieldLabel}"/>
                             <TextBox Style="{StaticResource Hud.TextBox}"
                                      Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}"/>
+
+                            <!-- Editable, not just displayed: this drives WHERE SteamCMD actually
+                                 writes the server. It auto-fills from Name + the default install
+                                 root while untouched, and stops following the moment the user
+                                 types in it or clicks Browse (AddServerViewModel tracks this). -->
+                            <c:TrackedText Text="INSTALL LOCATION" Style="{StaticResource Hud.FieldLabel}"
+                                           Margin="0,12,0,0"/>
+                            <Grid Margin="0,4,0,0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox Grid.Column="0"
+                                         Style="{StaticResource Hud.TextBox}"
+                                         Text="{Binding InstallDir, UpdateSourceTrigger=PropertyChanged}"
+                                         FontFamily="{DynamicResource Hud.Mono}"
+                                         FontSize="12"/>
+                                <Button Grid.Column="1"
+                                        Style="{StaticResource Hud.Button}"
+                                        Command="{Binding BrowseInstallDirCommand}"
+                                        Margin="8,0,0,0" Height="30" Padding="12,0">
+                                    <c:TrackedText Text="BROWSE" LetterSpacing="0.1"
+                                                   FontFamily="{DynamicResource Hud.Mono}"
+                                                   FontSize="10.5" FontWeight="Bold"
+                                                   Foreground="{DynamicResource Hud.Fg}"
+                                                   VerticalAlignment="Center"/>
+                                </Button>
+                            </Grid>
+                            <TextBlock Text="Server files (~15 GB) will be installed here. Pick a drive with enough free space."
+                                       Style="{StaticResource Hud.SettingHint}"
+                                       Margin="0,6,0,0"/>
                         </StackPanel>
                     </c:HudPanel>
 

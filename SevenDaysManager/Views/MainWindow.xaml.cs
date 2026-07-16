@@ -118,6 +118,13 @@ public partial class MainWindow : Window
         new AppSettingsWindow { Owner = this }.ShowDialog();
     }
 
+    private void StopServerButton_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new StopServerWindow { Owner = this };
+        if (dialog.ShowDialog() != true) return;
+        _ = _vm.StopServerAsync(dialog.DelaySeconds, dialog.Message);
+    }
+
     private void OverviewCard_Click(object sender, System.Windows.Input.MouseButtonEventArgs e) =>
         _vm.OpenOverviewCommand.Execute(null);
 

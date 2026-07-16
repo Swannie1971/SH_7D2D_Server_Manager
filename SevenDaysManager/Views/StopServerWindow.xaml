@@ -1,0 +1,122 @@
+<Window x:Class="SevenDaysManager.Views.StopServerWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:SevenDaysManager.Controls"
+        Title="Stop Server"
+        Width="440" SizeToContent="Height"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        FontSize="14">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </Window.Resources>
+
+    <Border Background="{DynamicResource Hud.Bg}"
+            BorderBrush="{DynamicResource Hud.BorderStrong}"
+            BorderThickness="1"
+            VerticalAlignment="Top">
+        <Grid VerticalAlignment="Top">
+            <c:HudAtmosphere Panel.ZIndex="0"/>
+
+            <StackPanel Panel.ZIndex="1" VerticalAlignment="Top">
+
+                <!-- ══ Header ══ -->
+                <Grid Height="58"
+                      Background="Transparent"
+                      MouseLeftButtonDown="Header_MouseLeftButtonDown">
+                    <Rectangle Fill="{DynamicResource Hud.BgElevated}"/>
+                    <Rectangle Fill="{DynamicResource Hud.HazardTile}" Opacity="0.35"/>
+                    <Border BorderBrush="{DynamicResource Hud.Border}" BorderThickness="0,0,0,1"/>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0">
+                        <c:HudIcon Kind="Stop" Width="17" Height="17"
+                                                 Foreground="#E23B3B"
+                                                 VerticalAlignment="Center" Margin="0,0,11,0"/>
+                        <c:TrackedText Text="STOP SERVER"
+                                       Style="{StaticResource Hud.PanelHeader}"
+                                       FontSize="12.5"/>
+                    </StackPanel>
+                </Grid>
+
+                <StackPanel Margin="18,16,18,0">
+
+                    <c:TrackedText Text="SHUTDOWN DELAY" Style="{StaticResource Hud.FieldLabel}"/>
+                    <UniformGrid Columns="5" Margin="0,6,0,4">
+                        <RadioButton Content="NOW" IsChecked="{Binding PresetNow}"
+                                     GroupName="stopDelay" Style="{StaticResource Hud.RadioButton}"/>
+                        <RadioButton Content="30S" IsChecked="{Binding Preset30S}"
+                                     GroupName="stopDelay" Style="{StaticResource Hud.RadioButton}"/>
+                        <RadioButton Content="1M" IsChecked="{Binding Preset1M}"
+                                     GroupName="stopDelay" Style="{StaticResource Hud.RadioButton}"/>
+                        <RadioButton Content="5M" IsChecked="{Binding Preset5M}"
+                                     GroupName="stopDelay" Style="{StaticResource Hud.RadioButton}"/>
+                        <RadioButton Content="10M" IsChecked="{Binding Preset10M}"
+                                     GroupName="stopDelay" Style="{StaticResource Hud.RadioButton}"/>
+                    </UniformGrid>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                        <RadioButton Content="CUSTOM" IsChecked="{Binding PresetCustom}"
+                                     GroupName="stopDelay" Style="{StaticResource Hud.RadioButton}"
+                                     VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <TextBox Text="{Binding CustomSeconds, UpdateSourceTrigger=PropertyChanged}"
+                                 Style="{StaticResource Hud.TextBox}"
+                                 Width="80" Height="30"
+                                 IsEnabled="{Binding PresetCustom}"/>
+                        <TextBlock Text="seconds" Style="{StaticResource Hud.SettingHint}"
+                                    VerticalAlignment="Center" Margin="8,0,0,0"/>
+                    </StackPanel>
+
+                    <c:TrackedText Text="MESSAGE TO PLAYERS" Style="{StaticResource Hud.FieldLabel}"
+                                   Margin="0,18,0,0"/>
+                    <TextBox Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource Hud.TextBox}"
+                             TextWrapping="Wrap" MinHeight="56"
+                             AcceptsReturn="True"
+                             VerticalContentAlignment="Top"
+                             Margin="0,6,0,6"/>
+
+                    <TextBlock Text="Players get a warning now and again at intervals until shutdown."
+                               Style="{StaticResource Hud.SettingHint}"
+                               TextWrapping="Wrap"
+                               Margin="0,0,0,4"/>
+                </StackPanel>
+
+                <!-- ══ Buttons ══ -->
+                <Border Background="{DynamicResource Hud.BgElevated}"
+                        BorderBrush="{DynamicResource Hud.Border}"
+                        BorderThickness="0,1,0,0"
+                        Padding="16,12" Margin="0,14,0,0">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button Style="{StaticResource Hud.Button.Ghost}"
+                                Width="100" Height="30" Margin="0,0,8,0"
+                                Click="CancelButton_Click">
+                            <c:TrackedText Text="CANCEL" LetterSpacing="0.12"
+                                           FontFamily="{DynamicResource Hud.Mono}"
+                                           FontSize="10.5" FontWeight="Bold"
+                                           Foreground="{DynamicResource Hud.FgMuted}"
+                                           VerticalAlignment="Center"/>
+                        </Button>
+                        <Button Style="{StaticResource Hud.Button.Stop}"
+                                Width="140" Height="30"
+                                Click="StopButton_Click">
+                            <StackPanel Orientation="Horizontal">
+                                <c:HudIcon Kind="Stop" Width="13" Height="13"
+                                                         VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <c:TrackedText Text="STOP SERVER" LetterSpacing="0.12"
+                                               FontFamily="{DynamicResource Hud.Mono}"
+                                               FontSize="10.5" FontWeight="Bold"
+                                               Foreground="#12060A"
+                                               VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <c:HudBrackets Panel.ZIndex="2" Tint="Red"/>
+        </Grid>
+    </Border>
+</Window>

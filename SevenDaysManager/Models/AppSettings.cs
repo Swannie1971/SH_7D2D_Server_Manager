@@ -7,8 +7,13 @@ public class AppSettings
     // Paths
     public string DefaultInstallRoot { get; set; } = @"C:\GameServers\7DaysToDie";
 
-    // Derived — not stored separately
-    public string SteamCmdExe => System.IO.Path.Combine(DefaultInstallRoot, "steamcmd", "steamcmd.exe");
+    // SteamCMD is shared across every server, so it lives in a reserved sibling folder of
+    // DefaultInstallRoot (SteamCmdService.ReservedFolderName) rather than inside any one
+    // server's own folder — see SteamCmdService.SharedSteamCmdDir for why that distinction
+    // matters. Built from THIS instance's DefaultInstallRoot, not a fresh settings read, so it
+    // always matches whatever root this particular AppSettings object actually has.
+    public string SteamCmdExe => System.IO.Path.Combine(
+        DefaultInstallRoot, Services.SteamCmdService.ReservedFolderName, "steamcmd.exe");
 
     // Behaviour
     public bool StartMinimized { get; set; } = false;

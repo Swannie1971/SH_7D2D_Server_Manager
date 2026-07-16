@@ -278,25 +278,25 @@ public partial class MainViewModel : ObservableObject
         ActionError = "";
         try
         {
+            // ServerProcessService.Start sets server.Status itself, and Status now raises
+            // PropertyChanged, so the list row re-renders on its own — no extra refresh needed.
             if (!_process.Start(server, out var err))
                 ActionError = err;
-            else
-                RefreshServerInList(server);
         }
         catch (Exception ex) { ActionError = ex.Message; }
     }
 
-    [RelayCommand]
-    private async Task StopServerAsync()
+    // Invoked from MainWindow's code-behind after the Stop dialog is confirmed, so the
+    // chosen delay/message can be threaded through. Not a [RelayCommand] — the button
+    // needs to show that dialog first, which needs a Window for Owner.
+    public async Task StopServerAsync(int delaySeconds, string message)
     {
         if (SelectedServer is not { } server) return;
         ActionError = "";
         try
         {
-            RefreshServerInList(server);
             var progress = new Progress<string>(msg => ActionError = msg);
-            await _process.StopAsync(server, progress);
-            RefreshServerInList(server);
+            await _process.StopAsync(server, progress, delaySeconds, message);
             ActionError = "";
         }
         catch (Exception ex) { ActionError = ex.Message; }
@@ -312,7 +312,6 @@ public partial class MainViewModel : ObservableObject
             _restartingServers.Add(server.Id);
             var progress = new Progress<string>(msg => ActionError = msg);
             await _process.StopAsync(server, progress);
-            RefreshServerInList(server);
 
             if (!_process.Start(server, out var err))
             {
@@ -322,7 +321,6 @@ public partial class MainViewModel : ObservableObject
             else
             {
                 ActionError = "";
-                RefreshServerInList(server);
             }
         }
         catch (Exception ex) { ActionError = ex.Message; _restartingServers.Remove(server.Id); }
@@ -426,13 +424,13 @@ public partial class MainViewModel : ObservableObject
                     _ = SendDiscordEventAsync(server, server.Discord.EventServerStart, "start");
             }
 
-            var idx = Servers.IndexOf(server);
-            if (idx >= 0)
-            {
-                Servers.RemoveAt(idx);
-                Servers.Insert(idx, server);
-                if (wasSelected) SelectedServer = server;
-            }
+            // No collection mutation needed here any more — server.Status = status above
+            // (line 404) already raises PropertyChanged, which is enough for the list row's
+            // DataTriggers to re-render on their own. This used to also do
+            // Servers.RemoveAt(idx) + Servers.Insert(idx, server) "to force a refresh", but that
+            // clears the ListBox's SelectedItem the instant the item is removed — before the
+            // Insert runs — which closed whatever detail card was open on every status change,
+            // including the server simply finishing starting up.
 
             if (pendingError is not null)
                 ActionError = pendingError;
@@ -467,17 +465,6 @@ public partial class MainViewModel : ObservableObject
         if (disc is null || !disc.Enabled) return;
         await _discord.SendEventAsync(evt, disc.DefaultWebhook,
             $"{server.Id}:{key}", server.Name);
-    }
-
-    private void RefreshServerInList(Server server)
-    {
-        var idx = Servers.IndexOf(server);
-        if (idx < 0) return;
-        var wasSelected = server == SelectedServer;
-        Servers.RemoveAt(idx);
-        Servers.Insert(idx, server);
-        if (wasSelected)
-            SelectedServer = server;
     }
 
     // ── Live stats ───────────────────────────────────────────────────────────

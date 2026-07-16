@@ -16,15 +16,38 @@ public class SteamCmdService
 
     private static readonly HttpClient Http = new();
 
+    // The reserved folder name SteamCMD lives under, as a SIBLING of every server folder inside
+    // DefaultInstallRoot — e.g. D:\Servers\_SteamCMD next to D:\Servers\MyServer. Deliberately
+    // NOT %APPDATA%: server files and the tool that manages them stay together on the same
+    // drive/folder tree, by design (see AddServerViewModel's name-collision guard, which refuses
+    // to let a server be named the same as this folder).
+    //
+    // It must still be a location no server's OWN install dir can equal or nest inside, though.
+    // SteamCMD is a SHARED tool used for every server; when a server's InstallDir coincided with
+    // SteamCMD's own folder, SteamCMD's library registration (steamapps\libraryfolders.vdf)
+    // silently took over: every future +force_install_dir for that steamcmd.exe was ignored, and
+    // the game installed next to steamcmd.exe instead of the requested server folder — no error,
+    // no warning. A fixed, reserved sibling name keeps them on the same tree while keeping that
+    // collision structurally impossible rather than just unlikely.
+    public const string ReservedFolderName = "_SteamCMD";
+
+    // Re-read live rather than cached: DefaultInstallRoot is a user setting that can change
+    // after this type is first used (e.g. in AppSettingsViewModel), and every server install
+    // must use whatever the CURRENT setting is, not whatever it was at process start.
+    public static string SharedSteamCmdDir =>
+        Path.Combine(App.DataStore.GetAppSettings().DefaultInstallRoot, ReservedFolderName);
+
+    public static string SharedSteamCmdExe =>
+        Path.Combine(SharedSteamCmdDir, "steamcmd.exe");
+
     private readonly string _steamCmdDir;
     public string SteamCmdExe { get; }
     public bool IsSteamCmdPresent => File.Exists(SteamCmdExe);
 
     public SteamCmdService()
     {
-        var root     = App.DataStore.GetAppSettings().DefaultInstallRoot;
-        _steamCmdDir = Path.Combine(root, "steamcmd");
-        SteamCmdExe  = Path.Combine(_steamCmdDir, "steamcmd.exe");
+        _steamCmdDir = SharedSteamCmdDir;
+        SteamCmdExe  = SharedSteamCmdExe;
     }
 
     // Download and extract SteamCMD if not already present
@@ -77,6 +100,18 @@ public class SteamCmdService
             try { Directory.Delete(steamAppsDir, recursive: true); }
             catch (Exception ex) { progress?.Report($"[SteamCMD] (could not fully clear: {ex.Message})"); }
         }
+
+        // +force_install_dir is silently IGNORED for an app SteamCMD already has a library
+        // registration for. That registration lives in the shared steamcmd folder's own
+        // steamapps\libraryfolders.vdf and appmanifest_294420.acf — not in the server's own
+        // folder, so the cleanup above never touches it. When it's stale (pointing anywhere
+        // other than this installDir — e.g. left over from before SteamCMD lived in its own
+        // fixed folder, or from a run where installDir happened to equal the shared folder),
+        // every future install silently lands next to steamcmd.exe instead of the chosen
+        // server directory, with no error. Detected exactly that way in testing: SteamCMD's
+        // own log showed it committing to "<steamcmd dir>\steamapps\common\..." while
+        // force_install_dir had been passed the correct, different path.
+        ClearStaleLibraryRegistration(progress);
 
         int exitCode = -1;
         int attempt  = 0;
@@ -176,6 +211,28 @@ public class SteamCmdService
             catch { /* best-effort; may lack access to MainModule for some processes */ }
             finally { p.Dispose(); }
         }
+    }
+
+    // If SteamCMD's own bookkeeping — in ITS shared folder, never a server's own folder — has
+    // app 294420 registered at all, +force_install_dir is silently ignored on every subsequent
+    // run and the game installs next to steamcmd.exe instead of the requested server folder.
+    // No error, no warning.
+    //
+    // SharedSteamCmdDir is a fixed location no server's InstallDir can legitimately equal (see
+    // its own comment), so unlike the server-side "steamapps" cleanup above, there is no
+    // legitimate case where THIS steamapps folder should contain a 294420 registration — if
+    // it's there at all, it's stale, full stop. Deleting it is safe: it's manifests and library
+    // config that SteamCMD regenerates on its next run, never the actual downloaded game files
+    // (those live under the server's own installDir once force_install_dir is honoured).
+    private void ClearStaleLibraryRegistration(IProgress<string>? progress)
+    {
+        var manifest = Path.Combine(_steamCmdDir, "steamapps", $"appmanifest_{AppId}.acf");
+        if (!File.Exists(manifest)) return;
+
+        progress?.Report("[SteamCMD] Found a stale install registration from a previous run — clearing it so this install goes to the right folder…");
+        var steamCmdOwnSteamApps = Path.Combine(_steamCmdDir, "steamapps");
+        try { Directory.Delete(steamCmdOwnSteamApps, recursive: true); }
+        catch (Exception ex) { progress?.Report($"[SteamCMD] (could not fully clear stale registration: {ex.Message})"); }
     }
 
     // Add Windows Defender exclusions for the SteamCMD dir and install dir so real-time scanning

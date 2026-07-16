@@ -38,9 +38,14 @@ public partial class AppSettingsViewModel : ObservableObject
     // True when not running as a published exe — shows an explanatory note in the UI
     public bool IsDevBuild => AutoStartService.GetExePath() is null;
 
+    // SteamCMD lives in a reserved sibling folder of DefaultInstallRoot (never inside any one
+    // server's own folder — see SteamCmdService.ReservedFolderName for why). Built from the
+    // TEXTBOX value, not the persisted setting, so this preview updates live as the user types
+    // a new root and before they've clicked Save — OnDefaultInstallRootChanged below re-raises
+    // this on every keystroke for exactly that reason.
     public string SteamCmdExePreview => System.IO.Path.Combine(
         string.IsNullOrWhiteSpace(DefaultInstallRoot) ? "…" : DefaultInstallRoot,
-        "steamcmd", "steamcmd.exe");
+        SteamCmdService.ReservedFolderName, "steamcmd.exe");
 
     public AppSettingsViewModel()
     {

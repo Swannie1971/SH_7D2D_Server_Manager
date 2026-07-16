@@ -4,6 +4,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Text;
 using SevenDaysManager.Models;
+using System.Linq;
 
 namespace SevenDaysManager.Services;
 
@@ -81,11 +82,18 @@ public class ServerProcessService
 
     // ── Stop (graceful via Telnet → force kill fallback) ─────────────────────
 
-    public async Task StopAsync(Server server, IProgress<string> progress)
+    // Broadcast a warning at these remaining-second marks, whenever the total delay is
+    // long enough to reach them — matches the RustPanel-style "warn now and again" UX.
+    private static readonly int[] WarningMarks = [600, 300, 60, 30, 10, 5, 4, 3, 2, 1];
+
+    public Task StopAsync(Server server, IProgress<string> progress) =>
+        StopAsync(server, progress, delaySeconds: 0, message: "");
+
+    public async Task StopAsync(Server server, IProgress<string> progress, int delaySeconds, string message)
     {
         server.Status = ServerStatus.Stopping;
 
-        var graceful = await TryGracefulShutdownAsync(server, progress);
+        var graceful = await TryGracefulShutdownAsync(server, progress, delaySeconds, message);
         if (!graceful)
         {
             progress.Report("Telnet unavailable — force stopping…");
@@ -98,7 +106,8 @@ public class ServerProcessService
         App.DataStore.SaveServer(server);
     }
 
-    private async Task<bool> TryGracefulShutdownAsync(Server server, IProgress<string> progress)
+    private async Task<bool> TryGracefulShutdownAsync(
+        Server server, IProgress<string> progress, int delaySeconds, string message)
     {
         if (server.LastPid is not { } pid) return false;
         if (server.TelnetPort <= 0)        return false;
@@ -128,6 +137,9 @@ public class ServerProcessService
                 await DrainAsync(stream, milliseconds: 600);
             }
 
+            if (delaySeconds > 0)
+                await CountdownWithWarningsAsync(writer, progress, delaySeconds, message);
+
             // Save world
             progress.Report("Saving world…");
             await writer.WriteLineAsync("saveworld");
@@ -135,6 +147,8 @@ public class ServerProcessService
 
             // Initiate shutdown
             progress.Report("Shutting down server…");
+            if (!string.IsNullOrWhiteSpace(message))
+                await writer.WriteLineAsync($"say \"{SanitizeForSay(message)}\"");
             await writer.WriteLineAsync("shutdown");
 
             // Wait up to 30 s for clean exit
@@ -153,6 +167,38 @@ public class ServerProcessService
             return false;
         }
     }
+
+    // Waits out the requested delay, broadcasting a "say" warning to players at each mark
+    // in WarningMarks that the remaining time crosses.
+    private static async Task CountdownWithWarningsAsync(
+        StreamWriter writer, IProgress<string> progress, int delaySeconds, string message)
+    {
+        var remaining = delaySeconds;
+        var announced = new HashSet<int>();
+
+        while (remaining > 0)
+        {
+            var mark = WarningMarks.FirstOrDefault(m => m <= remaining && !announced.Contains(m));
+            if (mark != 0)
+            {
+                announced.Add(mark);
+                var when = mark >= 60 ? $"{mark / 60} minute{(mark >= 120 ? "s" : "")}" : $"{mark} second{(mark == 1 ? "" : "s")}";
+                var text = string.IsNullOrWhiteSpace(message)
+                    ? $"Server restarting in {when}."
+                    : $"{message} ({when})";
+                progress.Report($"Warning: {text}");
+                await writer.WriteLineAsync($"say \"{SanitizeForSay(text)}\"");
+            }
+
+            var step = Math.Min(1000, remaining * 1000);
+            await Task.Delay(step);
+            remaining -= step / 1000;
+        }
+    }
+
+    // Telnet "say" wraps the argument in quotes — strip any the caller typed so the
+    // command can't be broken out of.
+    private static string SanitizeForSay(string text) => text.Replace("\"", "'");
 
     private static async Task DrainAsync(NetworkStream stream, int milliseconds)
     {
