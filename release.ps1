@@ -7,6 +7,7 @@
 
   Steps, in order. Each one asks first, so you can run only the parts you need:
 
+      0. Bump version   -> shows the current one, writes the new one to all 3 files
       1. Publish        -> the single self-contained .exe
       2. Installer      -> the Inno Setup wizard (needs step 1)
       3. Push code      -> merge the branch into main and push
@@ -14,9 +15,13 @@
 
   The version is read out of UpdateService.cs, which is the app's single source of
   truth - so the tag, the installer and what the app reports about itself can never
-  disagree.
+  disagree. Step 0 keeps the csproj and the .iss in step with it.
 
-  -Yes runs every step without prompting.
+  Step 0 does NOT commit. Step 3 refuses a dirty tree, so commit the bump before you
+  get there (or answer no to step 3 and commit it yourself).
+
+  -Yes runs every step without prompting, and SKIPS step 0 - a version number can only
+  come from a human.
 
   NOTE: keep this file ASCII-only. Windows PowerShell 5.1 reads a BOM-less script as
   ANSI, so UTF-8 box-drawing characters get mangled and the script fails to parse.
@@ -55,23 +60,114 @@ function Ask ($question) {
 }
 
 # ---- Version: read it from the app, don't retype it --------------------------
-$m = Select-String -Path $versionFile -Pattern 'CurrentVersion\s*=\s*"([^"]+)"'
-if (-not $m) {
-    Write-Fail "Could not find CurrentVersion in $versionFile"
-    exit 1
+function Read-AppVersion {
+    $m = Select-String -Path $versionFile -Pattern 'CurrentVersion\s*=\s*"([^"]+)"'
+    if (-not $m) {
+        Write-Fail "Could not find CurrentVersion in $versionFile"
+        exit 1
+    }
+    return $m.Matches[0].Groups[1].Value
 }
-$version = $m.Matches[0].Groups[1].Value
-$tag     = "v$version"
 
-# The .iss carries its own copy, used for the installer's filename. Warn loudly if
-# they drift - a mismatch means the installer is named after the wrong version.
-$issMatch = Select-String -Path $issFile -Pattern '#define\s+MyAppVersion\s+"([^"]+)"'
-$issVer   = $issMatch.Matches[0].Groups[1].Value
+function Read-IssVersion {
+    $m = Select-String -Path $issFile -Pattern '#define\s+MyAppVersion\s+"([^"]+)"'
+    if (-not $m) {
+        Write-Fail "Could not find MyAppVersion in $issFile"
+        exit 1
+    }
+    return $m.Matches[0].Groups[1].Value
+}
+
+# Rewrites the version in all three files that carry it. UpdateService.cs is the source
+# of truth the rest of this script reads; the other two only matter for the exe's file
+# properties and the installer's filename, but they must not drift out of step.
+function Set-AppVersion ($new) {
+    # UpdateService.cs - the source of truth
+    (Get-Content $versionFile -Raw) `
+        -replace '(CurrentVersion\s*=\s*")[^"]+(")', "`${1}$new`${2}" |
+        Set-Content $versionFile -Encoding utf8 -NoNewline
+
+    # csproj - Version is 3-part, Assembly/FileVersion are 4-part
+    (Get-Content $csproj -Raw) `
+        -replace '(<Version>)[^<]+(</Version>)',                 "`${1}$new`${2}" `
+        -replace '(<AssemblyVersion>)[^<]+(</AssemblyVersion>)', "`${1}$new.0`${2}" `
+        -replace '(<FileVersion>)[^<]+(</FileVersion>)',         "`${1}$new.0`${2}" |
+        Set-Content $csproj -Encoding utf8 -NoNewline
+
+    # installer
+    (Get-Content $issFile -Raw) `
+        -replace '(#define\s+MyAppVersion\s+")[^"]+(")', "`${1}$new`${2}" |
+        Set-Content $issFile -Encoding utf8 -NoNewline
+}
+
+$version = Read-AppVersion
+$issVer  = Read-IssVersion
+
+Write-Host ""
+Write-Host "  7 Days to Die - Server Manager" -ForegroundColor White
+Write-Host "  ---------------------------------------------"
+Write-Host "  current version                : $version" -ForegroundColor Cyan
+Write-Host ""
+
+# ---- 0. Bump the version ----------------------------------------------------
+# Skipped under -Yes: the new number can only come from a human, and Ask would return
+# $true and then block on Read-Host, hanging an unattended run.
+if (-not $Yes -and (Ask "0. Bump the version?")) {
+    while ($true) {
+        $new = (Read-Host "   New version (blank = keep $version)").Trim()
+        if ([string]::IsNullOrWhiteSpace($new)) { break }
+
+        # x.y or x.y.z only - the csproj appends a 4th part for Assembly/FileVersion,
+        # and the tag has to parse as a [Version] for the update check to compare it.
+        if ($new -notmatch '^\d+\.\d+(\.\d+)?$') {
+            Write-Warn "Use a numeric version like 0.3.3"
+            continue
+        }
+        if ($new -eq $version) { break }
+
+        Set-AppVersion $new
+        $version = Read-AppVersion
+        $issVer  = Read-IssVersion
+
+        if ($version -ne $new) {
+            Write-Fail "Version did not take - $versionFile still reads $version"
+            exit 1
+        }
+
+        Write-Ok "bumped to $version"
+        Write-Host "       UpdateService.cs, SevenDaysManager.csproj, sevendays.iss"
+
+        # Offer to commit it here, because step 3 refuses a dirty tree - leaving the bump
+        # uncommitted means the run cannot reach the push without you stopping to do it by
+        # hand. Only the three version files are staged, BY PATH: any other work in progress
+        # is none of this commit's business and must not be swept in.
+        if (Ask "   Commit the bump?") {
+            git -C $repo add -- $versionFile $csproj $issFile
+            if ($LASTEXITCODE -ne 0) { Write-Fail "git add failed"; exit 1 }
+
+            git -C $repo commit -m "Bump version to $version"
+            if ($LASTEXITCODE -ne 0) { Write-Fail "git commit failed"; exit 1 }
+
+            Write-Ok "committed: Bump version to $version"
+
+            $others = git -C $repo status --porcelain
+            if ($others) {
+                Write-Warn "other changes are still uncommitted - step 3 will refuse them:"
+                git -C $repo status --short
+            }
+        }
+        else {
+            Write-Warn "the bump is not committed - step 3 will refuse a dirty tree"
+        }
+        break
+    }
+}
+
+$tag      = "v$version"
 $setupExe = Join-Path $repo "installer\output\SevenDaysManager-Setup-$issVer.exe"
 
 Write-Host ""
-Write-Host "  7 Days to Die - Server Manager   release $tag" -ForegroundColor White
-Write-Host "  ---------------------------------------------"
+Write-Host "  releasing $tag" -ForegroundColor White
 Write-Host "  app version (UpdateService.cs) : $version"
 Write-Host "  installer version (.iss)       : $issVer"
 
@@ -137,7 +233,10 @@ $doPush = Ask "3. Merge '$branch' into main and push?"
 if ($doPush) {
     Write-Step "git"
 
-    if ($dirty) {
+    # Re-read rather than trusting the $dirty snapshot from startup: step 0 may have
+    # committed the bump since, and a publish + installer build is long enough that you
+    # could well have committed something in another window while it ran.
+    if (git -C $repo status --porcelain) {
         Write-Fail "working tree is dirty - commit or stash first"
         git -C $repo status --short
         exit 1
