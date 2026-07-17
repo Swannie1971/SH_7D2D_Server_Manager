@@ -12,10 +12,10 @@ public record LabeledValue(int Value, string Label);
 /// Game Settings for V3.0.
 ///
 /// <para>Gameplay is no longer a set of XML properties — it's the single <c>SandboxCode</c>
-/// string. So this VM keeps the FULL decoded code (all 150 options), surfaces the ~20 that
-/// admins actually tune as dropdowns, and re-encodes everything on save. Options we don't
-/// show still round-trip untouched, which is what lets someone import a code from the game
-/// client without us quietly discarding the parts our UI doesn't know about.</para>
+/// string. This VM keeps the FULL decoded code and surfaces EVERY option as a dropdown,
+/// grouped by <see cref="SandboxOption.Category"/> — the same grouping the game's own Sandbox
+/// Settings screen uses — and re-encodes everything on save. Nothing is hidden: what you see
+/// here is the full set the in-game screen shows.</para>
 ///
 /// <para>Every dropdown's choices come from the game's own value list for that option, so the
 /// UI cannot construct a code the game would reject.</para>
@@ -28,58 +28,22 @@ public partial class GameSettingsViewModel : ObservableObject
     /// <summary>Full decoded sandbox state: option id -> value index. The source of truth.</summary>
     private Dictionary<int, int> _sandbox = new();
 
-    /// <summary>The options we surface as dropdowns, in display order.</summary>
+    /// <summary>Every sandbox option as a dropdown, in display order.</summary>
     public List<SandboxOptionViewModel> Options { get; } = new();
 
-    // Grouped for the UI.
-    public IEnumerable<SandboxOptionViewModel> CombatOptions   => Group("Combat");
-    public IEnumerable<SandboxOptionViewModel> ZombieOptions   => Group("Zombies");
-    public IEnumerable<SandboxOptionViewModel> BloodMoonOptions=> Group("Blood Moon");
-    public IEnumerable<SandboxOptionViewModel> LootOptions     => Group("Loot & Drops");
-    public IEnumerable<SandboxOptionViewModel> WorldOptions    => Group("World & Time");
+    // Grouped for the UI — one group per SandboxOption.Category.
+    public IEnumerable<SandboxOptionViewModel> GeneralOptions  => Group("General");
+    public IEnumerable<SandboxOptionViewModel> EntitiesOptions => Group("Entities");
+    public IEnumerable<SandboxOptionViewModel> WorldOptions    => Group("World");
+    public IEnumerable<SandboxOptionViewModel> ResourcesOptions=> Group("Resources");
+    public IEnumerable<SandboxOptionViewModel> CraftingOptions => Group("Crafting");
+    public IEnumerable<SandboxOptionViewModel> TradersOptions  => Group("Traders");
+    public IEnumerable<SandboxOptionViewModel> TasksOptions    => Group("Tasks");
+    public IEnumerable<SandboxOptionViewModel> MiscOptions     => Group("Misc");
 
     private readonly Dictionary<string, List<SandboxOptionViewModel>> _groups = new();
     private IEnumerable<SandboxOptionViewModel> Group(string name) =>
         _groups.TryGetValue(name, out var g) ? g : Enumerable.Empty<SandboxOptionViewModel>();
-
-    /// <summary>
-    /// The ~20 sandbox options worth exposing, grouped. Chosen because these are what server
-    /// admins actually change; the other 130 stay at whatever the imported code says.
-    /// </summary>
-    private static readonly (string Group, string Option)[] Surfaced =
-    {
-        ("Combat",      "XPMultiplier"),
-        ("Combat",      "IncomingDamage"),
-        ("Combat",      "RangedDamage"),
-        ("Combat",      "MeleeDamage"),
-        ("Combat",      "BlockDamage"),
-        ("Combat",      "DeathPenalty"),
-
-        ("Zombies",     "ZombieMove"),
-        ("Zombies",     "ZombieMoveNight"),
-        ("Zombies",     "ZombieFeralMove"),
-        ("Zombies",     "ZombieBMMove"),
-        ("Zombies",     "ZombieFeralSense"),
-        ("Zombies",     "AISmellMode"),
-        ("Zombies",     "EnemyDifficulty"),
-
-        ("Blood Moon",  "BloodMoonFrequency"),
-        ("Blood Moon",  "BloodMoonRange"),
-        ("Blood Moon",  "BloodMoonEnemyCount"),
-        ("Blood Moon",  "BloodMoonWarning"),
-
-        ("Loot & Drops","GlobalLootCount"),
-        ("Loot & Drops","LootRespawnDays"),
-        ("Loot & Drops","AirDropFrequency"),
-        ("Loot & Drops","AirDropMarker"),
-        ("Loot & Drops","DropOnDeath"),
-        ("Loot & Drops","DropOnQuit"),
-
-        ("World & Time","DayNightLength"),
-        ("World & Time","DayLightLength"),
-        ("World & Time","BiomeProgression"),
-        ("World & Time","StormFreq"),
-    };
 
     // ── Server-level settings that are STILL plain XML properties in V3.0 ──────
     [ObservableProperty] private int _playerKillingMode;
@@ -289,11 +253,8 @@ public partial class GameSettingsViewModel : ObservableObject
         Options.Clear();
         _groups.Clear();
 
-        foreach (var (group, name) in Surfaced)
+        foreach (var opt in SandboxSettings.All)
         {
-            var opt = SandboxSettings.ByName(name);
-            if (opt is null) continue;   // table changed under us — skip rather than crash
-
             var idx = _sandbox.TryGetValue(opt.Id, out var v) ? v : opt.DefaultIndex;
             var vm  = new SandboxOptionViewModel(opt, idx);
 
@@ -306,16 +267,19 @@ public partial class GameSettingsViewModel : ObservableObject
             };
 
             Options.Add(vm);
-            if (!_groups.TryGetValue(group, out var list))
-                _groups[group] = list = new List<SandboxOptionViewModel>();
+            if (!_groups.TryGetValue(opt.Category, out var list))
+                _groups[opt.Category] = list = new List<SandboxOptionViewModel>();
             list.Add(vm);
         }
 
-        OnPropertyChanged(nameof(CombatOptions));
-        OnPropertyChanged(nameof(ZombieOptions));
-        OnPropertyChanged(nameof(BloodMoonOptions));
-        OnPropertyChanged(nameof(LootOptions));
+        OnPropertyChanged(nameof(GeneralOptions));
+        OnPropertyChanged(nameof(EntitiesOptions));
         OnPropertyChanged(nameof(WorldOptions));
+        OnPropertyChanged(nameof(ResourcesOptions));
+        OnPropertyChanged(nameof(CraftingOptions));
+        OnPropertyChanged(nameof(TradersOptions));
+        OnPropertyChanged(nameof(TasksOptions));
+        OnPropertyChanged(nameof(MiscOptions));
     }
 
     /// <summary>

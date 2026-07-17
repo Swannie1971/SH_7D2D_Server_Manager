@@ -281,51 +281,81 @@
                 </StackPanel>
             </c:HudPanel>
 
-            <!-- ══ COMBAT ════════════════════════════════════════════════════ -->
+            <!-- ══ GENERAL ═══════════════════════════════════════════════════ -->
             <c:HudPanel Tint="Red" Margin="0,0,0,8" Padding="0">
-                <Expander Header="COMBAT &amp; PROGRESSION" IsExpanded="False" Style="{StaticResource Hud.Expander}">
+                <Expander Header="GENERAL &amp; PROGRESSION" IsExpanded="False" Style="{StaticResource Hud.Expander}">
                     <ItemsControl Margin="16,4,16,8"
-                                  ItemsSource="{Binding CombatOptions}"
+                                  ItemsSource="{Binding GeneralOptions}"
                                   ItemTemplate="{StaticResource SandboxOptionTemplate}"
                                   ItemsPanel="{StaticResource TwoColumn}"/>
                 </Expander>
             </c:HudPanel>
 
-            <!-- ══ ZOMBIES ═══════════════════════════════════════════════════ -->
+            <!-- ══ ENTITIES (zombies & animals) ═════════════════════════════ -->
             <c:HudPanel Tint="Green" Margin="0,0,0,8" Padding="0">
-                <Expander Header="ZOMBIES" IsExpanded="False" Style="{StaticResource Hud.Expander}">
+                <Expander Header="ENTITIES — ZOMBIES &amp; ANIMALS" IsExpanded="False" Style="{StaticResource Hud.Expander}">
                     <ItemsControl Margin="16,4,16,8"
-                                  ItemsSource="{Binding ZombieOptions}"
+                                  ItemsSource="{Binding EntitiesOptions}"
                                   ItemTemplate="{StaticResource SandboxOptionTemplate}"
                                   ItemsPanel="{StaticResource TwoColumn}"/>
                 </Expander>
             </c:HudPanel>
 
-            <!-- ══ BLOOD MOON ════════════════════════════════════════════════ -->
+            <!-- ══ WORLD (blood moon, air drops, time, screen) ══════════════ -->
             <c:HudPanel Tint="Rust" Margin="0,0,0,8" Padding="0">
-                <Expander Header="BLOOD MOON" IsExpanded="False" Style="{StaticResource Hud.Expander}">
-                    <ItemsControl Margin="16,4,16,8"
-                                  ItemsSource="{Binding BloodMoonOptions}"
-                                  ItemTemplate="{StaticResource SandboxOptionTemplate}"
-                                  ItemsPanel="{StaticResource TwoColumn}"/>
-                </Expander>
-            </c:HudPanel>
-
-            <!-- ══ LOOT ══════════════════════════════════════════════════════ -->
-            <c:HudPanel Tint="Amber" Margin="0,0,0,8" Padding="0">
-                <Expander Header="LOOT &amp; DROPS" IsExpanded="False" Style="{StaticResource Hud.Expander}">
-                    <ItemsControl Margin="16,4,16,8"
-                                  ItemsSource="{Binding LootOptions}"
-                                  ItemTemplate="{StaticResource SandboxOptionTemplate}"
-                                  ItemsPanel="{StaticResource TwoColumn}"/>
-                </Expander>
-            </c:HudPanel>
-
-            <!-- ══ WORLD & TIME ══════════════════════════════════════════════ -->
-            <c:HudPanel Tint="Blue" Margin="0,0,0,8" Padding="0">
-                <Expander Header="WORLD &amp; TIME" IsExpanded="False" Style="{StaticResource Hud.Expander}">
+                <Expander Header="WORLD — BLOOD MOON, TIME &amp; EVENTS" IsExpanded="False" Style="{StaticResource Hud.Expander}">
                     <ItemsControl Margin="16,4,16,8"
                                   ItemsSource="{Binding WorldOptions}"
+                                  ItemTemplate="{StaticResource SandboxOptionTemplate}"
+                                  ItemsPanel="{StaticResource TwoColumn}"/>
+                </Expander>
+            </c:HudPanel>
+
+            <!-- ══ RESOURCES (loot, farming, mining) ════════════════════════ -->
+            <c:HudPanel Tint="Amber" Margin="0,0,0,8" Padding="0">
+                <Expander Header="RESOURCES — LOOT, FARMING &amp; MINING" IsExpanded="False" Style="{StaticResource Hud.Expander}">
+                    <ItemsControl Margin="16,4,16,8"
+                                  ItemsSource="{Binding ResourcesOptions}"
+                                  ItemTemplate="{StaticResource SandboxOptionTemplate}"
+                                  ItemsPanel="{StaticResource TwoColumn}"/>
+                </Expander>
+            </c:HudPanel>
+
+            <!-- ══ CRAFTING ══════════════════════════════════════════════════ -->
+            <c:HudPanel Tint="Blue" Margin="0,0,0,8" Padding="0">
+                <Expander Header="CRAFTING" IsExpanded="False" Style="{StaticResource Hud.Expander}">
+                    <ItemsControl Margin="16,4,16,8"
+                                  ItemsSource="{Binding CraftingOptions}"
+                                  ItemTemplate="{StaticResource SandboxOptionTemplate}"
+                                  ItemsPanel="{StaticResource TwoColumn}"/>
+                </Expander>
+            </c:HudPanel>
+
+            <!-- ══ TRADERS ═══════════════════════════════════════════════════ -->
+            <c:HudPanel Tint="Green" Margin="0,0,0,8" Padding="0">
+                <Expander Header="TRADERS &amp; VENDING" IsExpanded="False" Style="{StaticResource Hud.Expander}">
+                    <ItemsControl Margin="16,4,16,8"
+                                  ItemsSource="{Binding TradersOptions}"
+                                  ItemTemplate="{StaticResource SandboxOptionTemplate}"
+                                  ItemsPanel="{StaticResource TwoColumn}"/>
+                </Expander>
+            </c:HudPanel>
+
+            <!-- ══ TASKS (quests & challenges) ═══════════════════════════════ -->
+            <c:HudPanel Tint="Amber" Margin="0,0,0,8" Padding="0">
+                <Expander Header="TASKS — QUESTS &amp; CHALLENGES" IsExpanded="False" Style="{StaticResource Hud.Expander}">
+                    <ItemsControl Margin="16,4,16,8"
+                                  ItemsSource="{Binding TasksOptions}"
+                                  ItemTemplate="{StaticResource SandboxOptionTemplate}"
+                                  ItemsPanel="{StaticResource TwoColumn}"/>
+                </Expander>
+            </c:HudPanel>
+
+            <!-- ══ MISC (vehicles & silly options) ══════════════════════════ -->
+            <c:HudPanel Tint="Rust" Margin="0,0,0,8" Padding="0">
+                <Expander Header="MISC — VEHICLES &amp; FUN OPTIONS" IsExpanded="False" Style="{StaticResource Hud.Expander}">
+                    <ItemsControl Margin="16,4,16,8"
+                                  ItemsSource="{Binding MiscOptions}"
                                   ItemTemplate="{StaticResource SandboxOptionTemplate}"
                                   ItemsPanel="{StaticResource TwoColumn}"/>
                 </Expander>
