@@ -1,5 +1,5 @@
-; ──────────────────────────────────────────────────────────────────────────
-;  7 Days to Die — Server Manager · Inno Setup script
+﻿; â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+;  7 Days to Die â€” Server Manager Â· Inno Setup script
 ;
 ;  Build:
 ;    1. dotnet publish SevenDaysManager\SevenDaysManager.csproj -c Release
@@ -10,17 +10,17 @@
 ;  Why this is so much simpler than the RustPanel installer: this app publishes
 ;  to ONE self-contained .exe (no Node runtime, no services, no database server).
 ;  Its data lives in %APPDATA%\7D2DManager\, which is per-user and outside
-;  {app} — so an upgrade preserves servers and settings with no migration step.
+;  {app} â€” so an upgrade preserves servers and settings with no migration step.
 ;
 ;  Distribution model:
-;    · This installer  → clean first-time install
-;    · Bare .exe on GitHub Releases → what the in-app updater downloads and
+;    Â· This installer  â†’ clean first-time install
+;    Â· Bare .exe on GitHub Releases â†’ what the in-app updater downloads and
 ;      copies over the running file. Both must be the same build.
-; ──────────────────────────────────────────────────────────────────────────
+; â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 #define MyAppName      "7 Days to Die Server Manager"
 #define MyAppShortName "SevenDaysManager"
-#define MyAppVersion   "0.3.2"
+#define MyAppVersion   "0.3.3"
 #define MyAppPublisher "Swannie"
 #define MyAppURL       "https://github.com/Swannie1971/SH_7D2D_Manager-releases"
 #define MyAppExe       "SevenDaysManager.exe"
@@ -72,7 +72,7 @@ Name: "startup";     Description: "Start automatically when I sign in";         
 ; Defender's real-time scanner inspects every file SteamCMD writes, which turns a
 ; server download into a crawl. Excluding the install root and SteamCMD is the
 ; difference between minutes and hours.
-Name: "defender";    Description: "Add Windows Defender exclusions for SteamCMD and server files (strongly recommended — downloads are far slower without this)"; GroupDescription: "Windows integration:"
+Name: "defender";    Description: "Add Windows Defender exclusions for SteamCMD and server files (strongly recommended â€” downloads are far slower without this)"; GroupDescription: "Windows integration:"
 
 [Files]
 ; The single self-contained exe. Everything else (WPF, LiteDB, the .NET runtime)
@@ -98,7 +98,7 @@ Filename: "{app}\{#MyAppExe}"; Description: "Launch {#MyAppName}"; Flags: nowait
 
 [Code]
 
-{ Add a Defender path exclusion. Safe to re-run — Add-MpPreference de-duplicates. }
+{ Add a Defender path exclusion. Safe to re-run â€” Add-MpPreference de-duplicates. }
 procedure AddDefenderExclusion(Path: String);
 var
   Rc: Integer;
@@ -122,7 +122,7 @@ begin
   if CurStep = ssPostInstall then begin
     if WizardIsTaskSelected('defender') then begin
       { The app's default install root. Users can change it in Settings, in which
-        case they'll want to exclude that path too — but this covers the default. }
+        case they'll want to exclude that path too â€” but this covers the default. }
       AddDefenderExclusion('C:\GameServers');
       AddDefenderExclusion(ExpandConstant('{app}'));
     end;
@@ -140,7 +140,7 @@ begin
   end;
 
   if CurStep = usPostUninstall then begin
-    { Servers, settings, schedules and Discord config. Never delete without asking —
+    { Servers, settings, schedules and Discord config. Never delete without asking â€”
       and note this is only the app's OWN data; the game server files under
       C:\GameServers are left alone entirely. }
     DataDir := ExpandConstant('{userappdata}\7D2DManager');
@@ -148,8 +148,8 @@ begin
       KeepData := MsgBox(
         'Keep your server list and settings?' + #13#10 + #13#10 +
         DataDir + #13#10 + #13#10 +
-        'YES  — keep them, so reinstalling picks up where you left off.' + #13#10 +
-        'NO   — delete them permanently.' + #13#10 + #13#10 +
+        'YES  â€” keep them, so reinstalling picks up where you left off.' + #13#10 +
+        'NO   â€” delete them permanently.' + #13#10 + #13#10 +
         'Your actual game server files are NOT affected either way.',
         mbConfirmation, MB_YESNO or MB_DEFBUTTON1);
       if KeepData = IDNO then
