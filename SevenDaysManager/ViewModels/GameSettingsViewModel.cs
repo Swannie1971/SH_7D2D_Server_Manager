@@ -7,6 +7,7 @@ using SevenDaysManager.Services;
 namespace SevenDaysManager.ViewModels;
 
 public record LabeledValue(int Value, string Label);
+public record StringOption(string Value, string Label);
 
 /// <summary>
 /// Game Settings for V3.0.
@@ -55,6 +56,12 @@ public partial class GameSettingsViewModel : ObservableObject
     [ObservableProperty] private int _landClaimOfflineDurabilityModifier;
     [ObservableProperty] private int _playerSafeZoneLevel;
     [ObservableProperty] private int _playerSafeZoneHours;
+
+    // ── Performance: OS process priority + CPU affinity ───────────────────────
+    // Not serverconfig.xml — these act on the process at launch (see ServerProcessService).
+    [ObservableProperty] private string _processPriority = "";
+    [ObservableProperty] private bool   _cpuAffinityEnabled;
+    [ObservableProperty] private int    _cpuAffinityCores;
 
     // ── Sandbox code ──────────────────────────────────────────────────────────
     [ObservableProperty] private string _sandboxCode = "";
@@ -220,6 +227,39 @@ public partial class GameSettingsViewModel : ObservableObject
         new LabeledValue(100, "100"),
     };
 
+    // ── Performance option lists ──────────────────────────────────────────────
+
+    /// <summary>Labelled process-priority choices. Value is the ProcessPriorityClass name.</summary>
+    public IReadOnlyList<StringOption> PriorityOptions { get; } = new[]
+    {
+        new StringOption("",            "Normal — default (no change)"),
+        new StringOption("AboveNormal", "Above Normal — favour the server (recommended)"),
+        new StringOption("High",        "High — use with care, can starve other apps"),
+    };
+
+    /// <summary>How many logical cores this machine has — the ceiling for affinity.</summary>
+    public int CoreCount => Environment.ProcessorCount;
+
+    /// <summary>
+    /// Core-count choices for affinity, from a safe floor up to the machine total. Never offers
+    /// fewer than 2 cores (pinning a Unity server to a single core is a reliable way to make
+    /// stutter WORSE), and caps at the real core count so we can't build an invalid mask.
+    /// </summary>
+    public IReadOnlyList<LabeledValue> AffinityCoreOptions { get; } =
+        BuildAffinityCoreOptions();
+
+    private static IReadOnlyList<LabeledValue> BuildAffinityCoreOptions()
+    {
+        var total = Environment.ProcessorCount;
+        var list  = new List<LabeledValue>();
+        for (var n = Math.Min(2, total); n <= total; n++)
+        {
+            var label = n == total ? $"{n} cores — all" : $"{n} cores";
+            list.Add(new LabeledValue(n, label));
+        }
+        return list;
+    }
+
     public GameSettingsViewModel(Server server)
     {
         _server = server;
@@ -246,6 +286,14 @@ public partial class GameSettingsViewModel : ObservableObject
         LandClaimOfflineDurabilityModifier = _server.LandClaimOfflineDurabilityModifier;
         PlayerSafeZoneLevel = _server.PlayerSafeZoneLevel;
         PlayerSafeZoneHours = _server.PlayerSafeZoneHours;
+
+        ProcessPriority    = _server.ProcessPriority;
+        CpuAffinityEnabled = _server.CpuAffinityEnabled;
+        // Default the core count to "all but two" the first time — a reasonable starting point
+        // that leaves headroom for the OS and the game client without the admin having to think.
+        CpuAffinityCores   = _server.CpuAffinityCores > 0
+            ? _server.CpuAffinityCores
+            : Math.Max(2, CoreCount - 2);
     }
 
     private void BuildOptions()
@@ -386,6 +434,10 @@ public partial class GameSettingsViewModel : ObservableObject
             _server.PlayerSafeZoneLevel = PlayerSafeZoneLevel;
             _server.PlayerSafeZoneHours = PlayerSafeZoneHours;
 
+            _server.ProcessPriority    = ProcessPriority ?? "";
+            _server.CpuAffinityEnabled = CpuAffinityEnabled;
+            _server.CpuAffinityCores   = CpuAffinityCores;
+
             App.DataStore.SaveServer(_server);
 
             if (Directory.Exists(_server.InstallDir))
@@ -398,6 +450,47 @@ public partial class GameSettingsViewModel : ObservableObject
         {
             SaveError = $"Save failed: {ex.Message}";
             IsSaved   = false;
+        }
+    }
+
+    // ── [DIAGNOSTIC] Temporary lag-spike investigation ────────────────────────
+    // These back the temporary "Diagnostics" panel. Remove this region and the panel in
+    // GameSettingsView.xaml once the lag-spike cause is found. See DiagnosticReportService.
+    [ObservableProperty] private string _diagnosticStatus = "";
+
+    [RelayCommand]
+    private void CopyDiagnosticReport()
+    {
+        try
+        {
+            var report = DiagnosticReportService.Build(_server);
+            System.Windows.Clipboard.SetText(report);
+            DiagnosticStatus = "Report copied to the clipboard — paste it to Andy/your tester.";
+        }
+        catch (Exception ex)
+        {
+            DiagnosticStatus = $"Could not build the report: {ex.Message}";
+        }
+    }
+
+    [RelayCommand]
+    private void OpenLogFolder()
+    {
+        try
+        {
+            var path = DiagnosticReportService.LogPath(_server);
+            if (path is null)
+            {
+                DiagnosticStatus = "No log file yet — start the server at least once first.";
+                return;
+            }
+            // Open Explorer with the log file selected, so the tester can drag it into Discord.
+            System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{path}\"");
+            DiagnosticStatus = "Opened the log folder.";
+        }
+        catch (Exception ex)
+        {
+            DiagnosticStatus = $"Could not open the folder: {ex.Message}";
         }
     }
 }

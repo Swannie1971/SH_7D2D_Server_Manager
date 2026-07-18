@@ -1,0 +1,89 @@
+===== 7D2D MANAGER - DIAGNOSTIC REPORT =====
+Generated : 2026-07-18 15:28:41 (local)
+App       : v0.3.4
+Server    : My Server1
+
+----- SYSTEM -----
+OS            : Microsoft Windows NT 10.0.26200.0
+CPU           : AMD Ryzen 5 7600 6-Core Processor
+Logical cores : 12
+RAM           : 31 GB
+Server drive  : C: - 393.6 GB free of 1862.1 GB
+
+----- PERFORMANCE SETTINGS -----
+Configured priority : AboveNormal
+Configured affinity : OFF (all cores)
+Applied priority    : AboveNormal
+Applied affinity    : 0xFFF (12 of 12 cores)
+
+----- SERVER PROCESS -----
+PID           : 68104
+Memory        : 2922 MB
+Threads       : 95
+Uptime        : 0h 22m
+
+----- TOP PROCESSES BY MEMORY (contention snapshot) -----
+     2922 MB  7DaysToDieServer
+      654 MB  Memory Compression
+      595 MB  Discord
+      383 MB  explorer
+      372 MB  MsMpEng
+      344 MB  steamwebhelper
+      341 MB  SevenDaysManager
+      269 MB  steamwebhelper
+      248 MB  PAD.Console.Host
+      207 MB  SteelSeriesSonar
+      179 MB  Discord
+      164 MB  msedge
+
+----- RECENT SAVE EVENTS (match these against felt spikes) -----
+  2026-07-18T15:20:51 858.907 INF DroneManager saved 9 bytes
+  2026-07-18T15:20:51 858.908 INF TurretTracker saved 9 bytes
+  2026-07-18T15:22:47 974.977 INF VehicleManager saving 1 (1 + 0)
+  2026-07-18T15:22:47 974.979 INF VehicleManager saved 659 bytes
+  2026-07-18T15:22:55 982.898 INF DroneManager saving 0 (0 + 0)
+  2026-07-18T15:22:55 982.898 INF TurretTracker saving 0 (0 + 0)
+  2026-07-18T15:22:55 982.900 INF DroneManager saved 9 bytes
+  2026-07-18T15:22:55 982.900 INF TurretTracker saved 9 bytes
+  2026-07-18T15:24:51 1098.782 INF VehicleManager saving 1 (1 + 0)
+  2026-07-18T15:24:51 1098.783 INF VehicleManager saved 659 bytes
+  2026-07-18T15:24:59 1106.615 INF DroneManager saving 0 (0 + 0)
+  2026-07-18T15:24:59 1106.615 INF TurretTracker saving 0 (0 + 0)
+  2026-07-18T15:24:59 1106.617 INF DroneManager saved 9 bytes
+  2026-07-18T15:24:59 1106.617 INF TurretTracker saved 9 bytes
+  2026-07-18T15:26:55 1222.575 INF VehicleManager saving 0 (0 + 0)
+  2026-07-18T15:26:55 1222.577 INF VehicleManager saved 9 bytes
+  2026-07-18T15:27:03 1230.560 INF DroneManager saving 0 (0 + 0)
+  2026-07-18T15:27:03 1230.560 INF TurretTracker saving 0 (0 + 0)
+  2026-07-18T15:27:03 1230.562 INF DroneManager saved 9 bytes
+  2026-07-18T15:27:03 1230.562 INF TurretTracker saved 9 bytes
+
+----- LOG TAIL (last 25 lines) -----
+(full log: C:\GameServers\7DaysToDie\My Server1\manager_server.log)
+2026-07-18T15:28:26 1314.144 INF Executing command 'mem' by Telnet from 127.0.0.1:50299
+Unloading 0 Unused Serialized files (Serialized files now loaded: 55)
+Unloading 0 unused Assets to reduce memory usage. Loaded Objects now: 239724.
+Total: 362.397200 ms (FindLiveObjects: 11.431200 ms CreateObjectMapping: 11.204900 ms MarkObjects: 339.624800 ms  DeleteObjects: 0.135900 ms)
+
+2026-07-18T15:28:27 1314.666 INF Executing command 'gettime' by Telnet from 127.0.0.1:50299
+2026-07-18T15:28:27 1314.668 INF Executing command 'version' by Telnet from 127.0.0.1:50299
+2026-07-18T15:28:30 1317.568 INF Time: 21.37m FPS: 18.31 Heap: 956.4MB Max: 1657.1MB Chunks: 27 CGO: 0 Ply: 0 Zom: 9 Ent: 0 (71) Items: 0 CO: 0 RSS: 2922.0MB
+2026-07-18T15:28:31 1319.467 INF Executing command 'mem' by Telnet from 127.0.0.1:50299
+Unloading 0 Unused Serialized files (Serialized files now loaded: 55)
+Unloading 0 unused Assets to reduce memory usage. Loaded Objects now: 237493.
+Total: 344.230400 ms (FindLiveObjects: 10.711700 ms CreateObjectMapping: 7.922400 ms MarkObjects: 325.454800 ms  DeleteObjects: 0.141000 ms)
+
+2026-07-18T15:28:32 1319.972 INF Executing command 'gettime' by Telnet from 127.0.0.1:50299
+2026-07-18T15:28:32 1319.973 INF Executing command 'version' by Telnet from 127.0.0.1:50299
+2026-07-18T15:28:36 1324.473 INF Executing command 'mem' by Telnet from 127.0.0.1:50299
+Unloading 0 Unused Serialized files (Serialized files now loaded: 55)
+2026-07-18T15:28:37 1324.627 WRN Connection closed by host in TelnetClient_127.0.0.1:54409
+2026-07-18T15:28:37 1324.627 INF Telnet connection closed: 127.0.0.1:54409
+2026-07-18T15:28:37 1324.627 INF Exited thread TelnetClient_127.0.0.1:54409
+Unloading 0 unused Assets to reduce memory usage. Loaded Objects now: 235479.
+Total: 357.390900 ms (FindLiveObjects: 11.406700 ms CreateObjectMapping: 8.485200 ms MarkObjects: 337.343800 ms  DeleteObjects: 0.154800 ms)
+
+2026-07-18T15:28:37 1324.985 INF Executing command 'gettime' by Telnet from 127.0.0.1:50299
+2026-07-18T15:28:37 1324.987 INF Executing command 'version' by Telnet from 127.0.0.1:50299
+
+===== END OF REPORT =====

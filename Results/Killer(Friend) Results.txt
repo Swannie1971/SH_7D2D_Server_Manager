@@ -1,0 +1,80 @@
+===== 7D2D MANAGER - DIAGNOSTIC REPORT =====
+Generated : 2026-07-18 14:28:14 (local)
+App       : v0.3.4
+Server    : Shadowhunter Test Sever
+
+----- SYSTEM -----
+OS            : Microsoft Windows NT 10.0.17763.0
+CPU           : Intel(R) Xeon(R) CPU E5-2690 v4 @ 2.60GHz
+Logical cores : 56
+RAM           : 191 GB
+Server drive  : G: - 152.1 GB free of 223.0 GB
+
+----- PERFORMANCE SETTINGS -----
+Configured priority : AboveNormal
+Configured affinity : ON - 56 cores
+Applied priority    : AboveNormal
+Applied affinity    : 0xFFFFFFFFFFFFFF (56 of 56 cores)
+
+----- SERVER PROCESS -----
+PID           : 10372
+Memory        : 3353 MB
+Threads       : 181
+Uptime        : 0h 3m
+
+----- TOP PROCESSES BY MEMORY (contention snapshot) -----
+    11633 MB  RustDedicated
+     9072 MB  RustDedicated
+     3353 MB  7DaysToDieServer
+      959 MB  mysqld
+      410 MB  firefox
+      360 MB  SevenDaysManager
+      301 MB  firefox
+      269 MB  MyRustServer
+      240 MB  MsMpEng
+      223 MB  firefox
+      219 MB  explorer
+      168 MB  Code
+
+----- RECENT SAVE EVENTS (match these against felt spikes) -----
+  2026-07-18T14:24:19 0.606 INF [SaveDataUtils] InitStatic Begin
+  2026-07-18T14:24:19 0.609 INF [SaveDataUtils] UserGameDataDir: G:\7D2D\5X\ServerData
+  2026-07-18T14:24:19 0.609 INF [SaveDataUtils] SdPlayerPrefs -> Unity
+  2026-07-18T14:24:19 0.609 INF [SaveDataUtils] InitStatic Complete
+  2026-07-18T14:24:31 12.193 INF Persistent GamePrefs saved
+  GamePref.SaveDataLimit = -1
+  GamePref.SaveDataLimitType = Unlimited
+  2026-07-18T14:26:51 152.365 INF VehicleManager saving 10 (1 + 9)
+  2026-07-18T14:26:51 152.369 INF VehicleManager saved 5154 bytes
+  2026-07-18T14:27:25 186.875 INF VehicleManager saving 10 (1 + 9)
+  2026-07-18T14:27:25 186.877 INF VehicleManager saved 5154 bytes
+
+----- LOG TAIL (last 25 lines) -----
+(full log: G:\7D2D\5X\manager_server.log)
+WARNING: Shader Did you use #pragma only_renderers and omit this platform?
+WARNING: Shader If subshaders removal was intentional, you may have forgotten turning Fallback off?
+ERROR: Shader Standard shader is not supported on this GPU (none of subshaders/fallbacks are suitable)
+WARNING: Shader Unsupported: 'Standard' - All subshaders removed
+WARNING: Shader Did you use #pragma only_renderers and omit this platform?
+WARNING: Shader If subshaders removal was intentional, you may have forgotten turning Fallback off?
+2026-07-18T14:28:11 232.910 INF Player KillerDelta_Tickle_My_Kitty disconnected after 1.8 minutes
+2026-07-18T14:28:12 233.421 INF DynamicMusic: 171 successfully removed from Bloodmoon state cache
+2026-07-18T14:28:12 233.422 INF Player disconnected: EntityID=171, PltfmId='Steam_76561198876134479', CrossId='EOS_00023555501c4d7eacca50f4232c5710', OwnerID='Steam_76561198876134479', PlayerName='KillerDelta_Tickle_My_Kitty', ClientNumber='1'
+2026-07-18T14:28:12 233.422 INF Exited thread NCS_Reader_0_0
+2026-07-18T14:28:12 233.422 INF Exited thread NCS_Writer_0_0
+2026-07-18T14:28:12 233.423 INF Exited thread NCS_Reader_0_1
+2026-07-18T14:28:12 233.423 INF Exited thread NCS_Writer_0_1
+2026-07-18T14:28:12 233.424 INF NET: LiteNetLib: Client disconnect from: 192.168.0.1:53432 / 0 (RemoteConnectionClose)
+2026-07-18T14:28:12 233.428 INF GMSG: Player 'KillerDelta_Tickle_My_Kitty' left the game
+2026-07-18T14:28:12 233.430 INF [PlayerInteractions] persistent player disconnect
+2026-07-18T14:28:12 233.433 INF NET: LiteNetLib: MT: Client disconnect from: 192.168.0.1:53432 / 0 (RemoteConnectionClose)
+2026-07-18T14:28:12 233.437 INF 21651 VehicleManager RemoveTrackedVehicle [type=EntityVJeep, name=vehicleChargerNew, id=342], Unloaded
+2026-07-18T14:28:13 234.302 INF Executing command 'mem' by Telnet from 127.0.0.1:54549
+Unloading 1 Unused Serialized files (Serialized files now loaded: 118)
+Unloading 166 unused Assets to reduce memory usage. Loaded Objects now: 242138.
+Total: 811.053900 ms (FindLiveObjects: 18.814900 ms CreateObjectMapping: 30.039100 ms MarkObjects: 761.390600 ms  DeleteObjects: 0.809000 ms)
+
+2026-07-18T14:28:14 235.616 INF Executing command 'gettime' by Telnet from 127.0.0.1:54549
+2026-07-18T14:28:14 235.618 INF Executing command 'version' by Telnet from 127.0.0.1:54549
+
+===== END OF REPORT =====

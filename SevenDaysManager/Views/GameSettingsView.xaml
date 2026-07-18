@@ -7,6 +7,8 @@
     <UserControl.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis"/>
         <conv:SeverityToBrushConverter x:Key="SeverityToBrush"/>
+        <!-- [DIAGNOSTIC] temporary — remove with the diagnostics panel -->
+        <conv:StringToVisibilityConverter x:Key="StringToVisibility"/>
 
         <!-- One sandbox option = label + dropdown. The dropdown's items come from the game's
              own list of allowed values for that option, so the UI structurally cannot produce
@@ -41,6 +43,59 @@
         <StackPanel Margin="14,14,14,16">
 
             <c:HudTitle Title="GAME SETTINGS" HorizontalAlignment="Left" Margin="2,0,0,10"/>
+
+            <!-- ══ [DIAGNOSTIC] TEMPORARY — lag-spike investigation ══════════════
+                 A throwaway panel so a tester can send us a diagnostic report. Remove this
+                 whole block (and the [DIAGNOSTIC] region in the VM + DiagnosticReportService)
+                 once the lag-spike cause is found. -->
+            <Border Background="{DynamicResource Hud.RedSoft}"
+                    BorderBrush="{DynamicResource Hud.Red}"
+                    BorderThickness="1"
+                    Padding="14,12" Margin="0,0,0,10">
+                <StackPanel>
+                    <c:TrackedText Text="⚠ DIAGNOSTICS (TEMPORARY)"
+                                   Style="{StaticResource Hud.StatCaption}"
+                                   Foreground="{DynamicResource Hud.Red}"/>
+                    <TextBlock Style="{StaticResource Hud.Body}"
+                               TextWrapping="Wrap" Margin="0,6,0,10"
+                               Text="For the lag-spike testing. Start the server, play until you feel a spike, then click Copy Report and paste it to us. Open Log Folder gives you the raw log file to attach as well."/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Style="{StaticResource Hud.Button}"
+                                Command="{Binding CopyDiagnosticReportCommand}"
+                                Height="30" Padding="14,0" Margin="0,0,8,0">
+                            <StackPanel Orientation="Horizontal">
+                                <c:HudIcon Kind="ContentCopy" Width="13" Height="13"
+                                           VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <c:TrackedText Text="COPY REPORT" LetterSpacing="0.1"
+                                               FontFamily="{DynamicResource Hud.Mono}"
+                                               FontSize="10.5" FontWeight="Bold"
+                                               Foreground="{DynamicResource Hud.Fg}"
+                                               VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource Hud.Button}"
+                                Command="{Binding OpenLogFolderCommand}"
+                                Height="30" Padding="14,0">
+                            <StackPanel Orientation="Horizontal">
+                                <c:HudIcon Kind="FolderOpen" Width="13" Height="13"
+                                           VerticalAlignment="Center" Margin="0,0,6,0"/>
+                                <c:TrackedText Text="OPEN LOG FOLDER" LetterSpacing="0.1"
+                                               FontFamily="{DynamicResource Hud.Mono}"
+                                               FontSize="10.5" FontWeight="Bold"
+                                               Foreground="{DynamicResource Hud.Fg}"
+                                               VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                    <TextBlock Text="{Binding DiagnosticStatus}"
+                               Style="{StaticResource Hud.Mono.Text}"
+                               FontSize="11"
+                               Foreground="{DynamicResource Hud.Accent}"
+                               TextWrapping="Wrap"
+                               Margin="0,10,0,0"
+                               Visibility="{Binding DiagnosticStatus, Converter={StaticResource StringToVisibility}}"/>
+                </StackPanel>
+            </Border>
 
             <!-- ══ V3 NOTICE ══════════════════════════════════════════════════
                  Amber, not blue: this isn't trivia. Anyone upgrading from an older
@@ -433,6 +488,65 @@
                                           SelectedValue="{Binding PlayerSafeZoneHours}"/>
                             </StackPanel>
                         </UniformGrid>
+                    </StackPanel>
+                </Expander>
+            </c:HudPanel>
+
+            <!-- ══ PERFORMANCE — OS process priority + CPU affinity ══════════
+                 NOT serverconfig.xml: these act on the server PROCESS at launch, so they
+                 apply on the next start, not a live reload. Aimed at the shared-machine case
+                 (playing on the same box) where the server fights other apps for CPU. -->
+            <c:HudPanel Tint="Blue" Margin="0,0,0,8" Padding="0">
+                <Expander Header="PERFORMANCE — CPU PRIORITY &amp; AFFINITY" IsExpanded="False" Style="{StaticResource Hud.Expander}">
+                    <StackPanel Margin="16,4,16,12">
+                        <TextBlock Style="{StaticResource Hud.Body}"
+                                   TextWrapping="Wrap" Margin="0,0,0,12"
+                                   Text="Random lag spikes on a machine you also play or work on are usually the server fighting other apps for CPU. These bias Windows toward the server. They act on the process, so they take effect the next time you start the server — not while it's running."/>
+
+                        <!-- Priority -->
+                        <c:TrackedText Text="Process Priority" Style="{StaticResource Hud.SettingLabel}"/>
+                        <ComboBox Style="{StaticResource Hud.ComboBox}" Margin="0,4,0,4"
+                                  SelectedValuePath="Value"
+                                  ItemsSource="{Binding PriorityOptions}"
+                                  SelectedValue="{Binding ProcessPriority}"/>
+                        <TextBlock Style="{StaticResource Hud.SettingHint}"
+                                   TextWrapping="Wrap" Margin="0,0,0,16"
+                                   Text="Above Normal is the safe pick — the server wins ties for CPU without shutting anything else out. High can starve the game client you're playing on the same PC."/>
+
+                        <Rectangle Fill="{DynamicResource Hud.DashRule}" Height="1" Margin="0,0,0,14"/>
+
+                        <!-- Affinity toggle -->
+                        <Grid Margin="0,0,0,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
+                                <c:TrackedText Text="Pin to specific cores (CPU affinity)"
+                                               Style="{StaticResource Hud.SettingLabel}"/>
+                                <TextBlock Style="{StaticResource Hud.SettingHint}"
+                                           TextWrapping="Wrap"
+                                           Text="Restricts the server to a set number of cores. Off by default — leave it off unless priority alone doesn't smooth the spikes."/>
+                            </StackPanel>
+                            <ToggleButton Grid.Column="1"
+                                          Style="{StaticResource Hud.Toggle}"
+                                          IsChecked="{Binding CpuAffinityEnabled}"
+                                          VerticalAlignment="Center" Margin="12,0,0,0"/>
+                        </Grid>
+
+                        <!-- Core count — only meaningful when affinity is on -->
+                        <StackPanel Margin="0,10,0,0"
+                                    IsEnabled="{Binding CpuAffinityEnabled}">
+                            <c:TrackedText Text="Cores to allow" Style="{StaticResource Hud.SettingLabel}"/>
+                            <ComboBox Style="{StaticResource Hud.ComboBox}" Margin="0,4,0,4"
+                                      Width="200" HorizontalAlignment="Left"
+                                      SelectedValuePath="Value"
+                                      ItemsSource="{Binding AffinityCoreOptions}"
+                                      SelectedValue="{Binding CpuAffinityCores}"/>
+                            <TextBlock Style="{StaticResource Hud.SettingHint}"
+                                       TextWrapping="Wrap"
+                                       Text="The server is pinned to this many cores, counting from the first. Fewer cores frees the rest for other apps — but too few makes stutter worse, so start high and only lower it if it helps."/>
+                        </StackPanel>
                     </StackPanel>
                 </Expander>
             </c:HudPanel>
