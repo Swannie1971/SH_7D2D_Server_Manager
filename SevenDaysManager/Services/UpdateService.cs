@@ -9,7 +9,7 @@ public static class UpdateService
     // The single source of truth for the app version. The sidebar binds to it
     // (MainViewModel.AppVersion), and the update check compares it against the latest
     // GitHub release tag â€” so bump this and tag the release as "v{CurrentVersion}".
-    public const string CurrentVersion = "0.3.4";
+    public const string CurrentVersion = "0.3.5";
 
     private static readonly HttpClient _http = new()
     {
