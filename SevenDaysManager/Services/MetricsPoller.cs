@@ -1,9 +1,25 @@
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Windows.Threading;
 using SevenDaysManager.Models;
 
 namespace SevenDaysManager.Services;
 
+/// <summary>
+/// Feeds the live-stats panels (FPS, heap, players, entities, game time).
+///
+/// <para><b>Stats come from the server's LOG, not from a telnet query.</b> The obvious approach —
+/// and what this class used to do — is to send the <c>mem</c> console command every few seconds.
+/// Do not do that: in 7D2D <c>mem</c> forces a full asset unload and GC mark, which is
+/// stop-the-world. Two real servers, measured with no players connected, stalled ~350 ms
+/// (Ryzen 7600) and ~810 ms (Xeon E5-2690 v4) on <i>every</i> call. With this poller running on a
+/// 5 s timer — and a second one stacked on top when the Overview card was open — that produced
+/// exactly the "random lag spikes" players were reporting.</para>
+///
+/// <para>The server already writes a line carrying all the same numbers to its log on its own
+/// schedule, so we tail that instead: identical data, zero cost. Only the genuinely cheap
+/// <c>gettime</c>/<c>version</c> commands still go over telnet.</para>
+/// </summary>
 public sealed class MetricsPoller : IAsyncDisposable
 {
     public record Snapshot(
@@ -22,7 +38,14 @@ public sealed class MetricsPoller : IAsyncDisposable
 
     // Each field parsed independently — one missing/renamed field won't break the rest
     private static readonly Regex FpsRx    = new(@"FPS:\s*([\d.]+)",          RegexOptions.Compiled);
-    private static readonly Regex HeapRx   = new(@"Heap:\s*([\d.]+)/([\d.]+)\s*MB", RegexOptions.Compiled);
+
+    // ⚠ Two different shapes for the same data, because we no longer ask for it:
+    //   'mem' printed   "Heap: 956.4/1657.1MB"
+    //   the server's own periodic line prints  "Heap: 956.4MB Max: 1657.1MB"
+    // We now read the latter (see the class comment), so Max is a SEPARATE field. Matching
+    // only the old "used/max" form would silently leave the heap gauge reading zero.
+    private static readonly Regex HeapRx    = new(@"Heap:\s*([\d.]+)\s*MB",   RegexOptions.Compiled);
+    private static readonly Regex HeapMaxRx = new(@"Max:\s*([\d.]+)\s*MB",    RegexOptions.Compiled);
     private static readonly Regex RssRx    = new(@"RSS:\s*([\d.]+)\s*MB",          RegexOptions.Compiled);
     private static readonly Regex ChunksRx = new(@"Chunks:\s*(\d+)",         RegexOptions.Compiled);
     private static readonly Regex CgoRx    = new(@"CGO:\s*(\d+)",            RegexOptions.Compiled);
@@ -67,9 +90,67 @@ public sealed class MetricsPoller : IAsyncDisposable
     private async Task RequestAsync()
     {
         if (!_telnet.IsConnected) return;
-        await _telnet.SendAsync("mem");
+
+        // ⚠ Do NOT send "mem" here. It looks like a harmless stats query, but in 7D2D it forces
+        // a full asset unload + GC mark, and that is stop-the-world: the server freezes for the
+        // duration. Measured on two real servers, 5 s apart, with nobody even connected:
+        //     Ryzen 7600  -> ~350 ms per call
+        //     Xeon E5-2690 v4 -> ~810 ms per call   (MarkObjects is single-threaded, so his
+        //                                            56 cores bought him nothing)
+        // That WAS the "random lag spikes" players reported. The stats it returned are printed
+        // by the server to its own log for free — see ReadLogStats. Never reintroduce it.
         await _telnet.SendAsync("gettime");
         await _telnet.SendAsync("version");
+
+        ReadLogStats();
+    }
+
+    // ── Stats from the log (free) ─────────────────────────────────────────────
+
+    // Byte offset we've already consumed, so each tick only reads what's new.
+    // -1 = we haven't attached yet; the first read seeks to the END so we don't churn through
+    // a multi-megabyte backlog and report stats from a previous session as if they were live.
+    private long _logOffset = -1;
+
+    /// <summary>
+    /// Pull the newest server-printed stats line out of the log. The server emits
+    ///   "Time: 21.37m FPS: 18.31 Heap: 956.4MB Max: 1657.1MB Chunks: 27 ... RSS: 2922.0MB"
+    /// on its own schedule, containing every field the old "mem" command returned — at no cost
+    /// to the server, because it was going to write that line anyway.
+    /// </summary>
+    private void ReadLogStats()
+    {
+        var path = _server.ServerLogPath;
+        if (string.IsNullOrWhiteSpace(path) || !File.Exists(path))
+        {
+            path = Path.Combine(_server.InstallDir ?? "", "manager_server.log");
+            if (!File.Exists(path)) return;
+        }
+
+        try
+        {
+            // ReadWrite share: the server holds this file open for writing.
+            using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+
+            // First attach: jump to the end. We want live stats, not the whole backlog.
+            if (_logOffset < 0) _logOffset = fs.Length;
+
+            // Log rotated/truncated (server restarted) — start over rather than seek past the end.
+            if (_logOffset > fs.Length) _logOffset = 0;
+
+            fs.Seek(_logOffset, SeekOrigin.Begin);
+            using var sr = new StreamReader(fs);
+
+            string? line;
+            while ((line = sr.ReadLine()) is not null)
+                ParseLine(line);
+
+            _logOffset = fs.Position;
+        }
+        catch
+        {
+            // Log unreadable this tick (rotation, lock) — just try again on the next one.
+        }
     }
 
     private void ParseLine(string line)
@@ -78,7 +159,8 @@ public sealed class MetricsPoller : IAsyncDisposable
         var fps = FpsRx.Match(line);
         if (fps.Success)
         {
-            var heap  = HeapRx.Match(line);
+            var heap    = HeapRx.Match(line);
+            var heapMax = HeapMaxRx.Match(line);
             var rss   = RssRx.Match(line);
             var chunk = ChunksRx.Match(line);
             var cgo   = CgoRx.Match(line);
@@ -90,8 +172,8 @@ public sealed class MetricsPoller : IAsyncDisposable
             var prev = Latest;
             Latest = new Snapshot(
                 Fps:           float.Parse(fps.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture),
-                HeapUsedMb:   heap.Success  ? (int)float.Parse(heap.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture)  : prev?.HeapUsedMb  ?? 0,
-                HeapMaxMb:    heap.Success  ? (int)float.Parse(heap.Groups[2].Value, System.Globalization.CultureInfo.InvariantCulture)  : prev?.HeapMaxMb   ?? 100,
+                HeapUsedMb:   heap.Success    ? (int)float.Parse(heap.Groups[1].Value,    System.Globalization.CultureInfo.InvariantCulture) : prev?.HeapUsedMb ?? 0,
+                HeapMaxMb:    heapMax.Success ? (int)float.Parse(heapMax.Groups[1].Value, System.Globalization.CultureInfo.InvariantCulture) : prev?.HeapMaxMb  ?? 100,
                 RssMb:        rss.Success   ? (int)float.Parse(rss.Groups[1].Value,  System.Globalization.CultureInfo.InvariantCulture)  : prev?.RssMb       ?? 0,
                 Chunks:       chunk.Success ? int.Parse(chunk.Groups[1].Value) : prev?.Chunks      ?? 0,
                 Cgo:          cgo.Success   ? int.Parse(cgo.Groups[1].Value)   : prev?.Cgo         ?? 0,
