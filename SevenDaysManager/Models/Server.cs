@@ -76,6 +76,31 @@ public class Server : INotifyPropertyChanged
     // Behaviour
     public bool AutoStart { get; set; } = false;
 
+    // ── Performance: how the server process competes for CPU ───────────────────
+    // On a shared machine (you're playing on the same box, browser open, etc.) the
+    // dedicated server fights every other app for cores at equal priority, which shows up
+    // as random, everyone-at-once micro-stutter. These let an admin bias the OS scheduler
+    // toward the server. Applied by ServerProcessService at launch — they are NOT
+    // serverconfig.xml settings; they act on the OS process, so they take effect on the
+    // next start, not a live-reload.
+
+    // Windows process priority class. Stored as the ProcessPriorityClass enum's string name
+    // ("Normal", "AboveNormal", "High") so the DB stays readable and a bad value is easy to
+    // spot. Empty/unknown = leave the OS default (Normal). "High" is deliberately offered but
+    // should be used with care — above the client it can starve the very game you're playing.
+    public string ProcessPriority { get; set; } = "";
+
+    // CPU affinity is opt-in: off by default, because leaving the process free to use every
+    // core is what Windows does normally and is the right default for most people. The toggle
+    // and the core count are separate so turning affinity off doesn't lose the count the admin
+    // picked — flip it back on and their choice is still there.
+    public bool CpuAffinityEnabled { get; set; } = false;
+
+    // How many cores to allow, from core 0 upward, when CpuAffinityEnabled is true. The service
+    // clamps this to the machine's actual core count. Pinning too FEW cores can hurt more than
+    // it helps, so the UI warns and never lets this drop below a safe floor.
+    public int CpuAffinityCores { get; set; } = 0;
+
     // ── Gameplay: the V3.0 sandbox code ───────────────────────────────────────
     //
     // V3.0 ("Dead Hot Summer") removed the individual gameplay properties from

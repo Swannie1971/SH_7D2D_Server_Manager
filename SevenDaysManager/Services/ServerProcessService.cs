@@ -60,6 +60,11 @@ public class ServerProcessService
             ConfigService.WriteConfig(server);
 
             var process = Process.Start(psi) ?? throw new Exception("Process.Start returned null.");
+
+            // Bias the OS scheduler toward the server if the admin asked us to. Never fatal:
+            // a bad value or an access-denied must not stop a server that already launched.
+            ApplyPerformanceOptions(process, server);
+
             server.LastPid         = process.Id;
             server.Status          = ServerStatus.Starting;
             server.ExitCode        = null;
@@ -77,6 +82,44 @@ public class ServerProcessService
         {
             error = ex.Message;
             return false;
+        }
+    }
+
+    // ── Performance (priority + CPU affinity) ─────────────────────────────────
+
+    /// <summary>
+    /// Apply the server's stored priority and CPU-affinity choices to the just-started process.
+    ///
+    /// These act on the OS process, not serverconfig.xml, so they only take effect on start.
+    /// Each is wrapped in its own try/catch: the process is already running by the time we get
+    /// here, and neither of these is worth killing a live server over if it fails (e.g. the
+    /// process exited a moment after launch, or we lack rights to raise priority).
+    /// </summary>
+    private static void ApplyPerformanceOptions(Process process, Server server)
+    {
+        // Priority
+        if (!string.IsNullOrWhiteSpace(server.ProcessPriority) &&
+            Enum.TryParse<ProcessPriorityClass>(server.ProcessPriority, ignoreCase: true, out var priority))
+        {
+            try { process.PriorityClass = priority; }
+            catch { /* process may have exited, or access denied — leave OS default */ }
+        }
+
+        // Affinity — opt-in, and clamped so we can never pin to zero cores or to more cores
+        // than the machine has (either would throw, and zero would be meaningless).
+        if (server.CpuAffinityEnabled && server.CpuAffinityCores > 0)
+        {
+            try
+            {
+                var total = Environment.ProcessorCount;
+                var cores = Math.Clamp(server.CpuAffinityCores, 1, total);
+
+                // Mask with the low `cores` bits set: cores 0..cores-1. IntPtr, because that's
+                // what ProcessorAffinity is. On a 64-core-max system this stays within a long.
+                long mask = cores >= 64 ? -1L : (1L << cores) - 1;
+                process.ProcessorAffinity = (IntPtr)mask;
+            }
+            catch { /* exited, or affinity unsupported — leave the process on all cores */ }
         }
     }
 
