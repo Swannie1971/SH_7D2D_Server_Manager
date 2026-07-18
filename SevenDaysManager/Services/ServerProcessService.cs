@@ -47,13 +47,24 @@ public class ServerProcessService
             UseShellExecute  = false,
             CreateNoWindow   = true
         };
-        psi.ArgumentList.Add("-batchmode");
-        psi.ArgumentList.Add("-nographics");
-        psi.ArgumentList.Add("-dedicated");
-        psi.ArgumentList.Add("-nosteam");
-        psi.ArgumentList.Add("-configfile=serverconfig.xml");
+        // Mirrors the game's own startdedicated.bat:
+        //     -logfile "…" -quit -batchmode -nographics -configfile=serverconfig.xml -dedicated
+        //
+        // ⚠ -dedicated MUST be last. The shipped script says so outright ("Has to be the last
+        //   option to start the dedicated server") and inserts user args BEFORE it, so anything
+        //   after it is at best undefined. We used to pass it third.
+        //
+        // -nosteam is ours, not from that script, and is deliberately kept — it predates this
+        // comparison and the servers we run depend on the behaviour. It goes before -dedicated
+        // along with everything else.
         psi.ArgumentList.Add("-logfile");
         psi.ArgumentList.Add(logPath);
+        psi.ArgumentList.Add("-quit");        // Unity: exit cleanly instead of lingering in batchmode
+        psi.ArgumentList.Add("-batchmode");
+        psi.ArgumentList.Add("-nographics");  // headless: no rendering, no GPU work
+        psi.ArgumentList.Add("-nosteam");
+        psi.ArgumentList.Add("-configfile=serverconfig.xml");
+        psi.ArgumentList.Add("-dedicated");   // keep last
 
         try
         {

@@ -100,10 +100,22 @@ public sealed class MetricsPoller : IAsyncDisposable
         // That WAS the "random lag spikes" players reported. The stats it returned are printed
         // by the server to its own log for free — see ReadLogStats. Never reintroduce it.
         await _telnet.SendAsync("gettime");
-        await _telnet.SendAsync("version");
+
+        // The game version cannot change while the server is up, so ask once and stop. We used
+        // to re-request it every tick, which did nothing but double this poller's footprint in
+        // the server log (a tester noticed the noise).
+        if (!_askedVersion)
+        {
+            _askedVersion = true;
+            await _telnet.SendAsync("version");
+        }
 
         ReadLogStats();
     }
+
+    // Version is fetched once per connection — see RequestAsync. Reset on disconnect so a
+    // reconnect (or a server restart on a new build) picks the new one up.
+    private bool _askedVersion;
 
     // ── Stats from the log (free) ─────────────────────────────────────────────
 
@@ -202,6 +214,8 @@ public sealed class MetricsPoller : IAsyncDisposable
     private void OnDisconnected()
     {
         _timer.Stop();
+        // Re-ask for the version on the next connection: the server may come back on a new build.
+        _askedVersion = false;
         Disconnected?.Invoke();
     }
 
